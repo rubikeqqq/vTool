@@ -2,7 +2,6 @@
 using System.ComponentModel;
 using System.Threading;
 using System.Windows.Forms;
-using System.Windows.Media.Imaging;
 using Vision.Core;
 using Vision.Projects;
 using Vision.Stations;
@@ -15,37 +14,25 @@ namespace Vision.Tools.ToolImpls
     [Description("PLC触发相机拍照信号")]
     public class TriggerTool : ToolBase
     {
-        public TriggerTool()
-        {
-        }
-
         /// <summary>
         /// 触发信号地址
         /// </summary>
         public string TriggerAddress { get; set; }
 
         [field: NonSerialized]
-        public UcTriggerTool UI { get; set; }
+        public UserControl UI { get; set; }
 
         public override UserControl GetToolControl(Station station)
         {
-            if (UI == null)
-            {
-                UI = new UcTriggerTool(this);
-            }
-            return UI;
+            return UI ?? (UI = new UcTriggerTool(this));
         }
 
-        /// <summary>
-        /// 运行工具
-        /// </summary>
-        /// <exception cref="ToolException"></exception>
         public override void Run()
         {
             var plc = ProjectManager.Instance.ProjectData.MxPlc;
             if (plc != null && plc.IsConnected)
             {
-                if (TriggerAddress != null)
+                if (!string.IsNullOrEmpty(TriggerAddress))
                 {
                     while (true)
                     {
@@ -69,6 +56,11 @@ namespace Vision.Tools.ToolImpls
                     ImageInNull = true
                 };
             }
+        }
+
+        public override void RunDebug()
+        {
+            //调试模式时不运行
         }
     }
 }

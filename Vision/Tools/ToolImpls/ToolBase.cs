@@ -14,10 +14,6 @@ namespace Vision.Tools.ToolImpls
     {
         private bool _enable = true;
 
-        protected ToolBase()
-        {
-        }
-
         /// <summary>
         /// 外部显示的名称
         /// </summary>
@@ -38,17 +34,36 @@ namespace Vision.Tools.ToolImpls
             }
         }
 
+        /// <summary>
+        /// 运行工具
+        /// </summary>
         public abstract void Run();
 
+        /// <summary>
+        /// 调试运行工具
+        /// </summary>
+        public abstract void RunDebug();
+        
+        /// <summary>
+        /// 保存工具
+        /// </summary>
         public virtual void Save()
         {
             LogUI.AddLog(ProjectManager.Instance.SaveProject() ? "保存成功！" : "保存失败！");
         }
 
+        /// <summary>
+        /// 关闭工具
+        /// </summary>
         public virtual void Close()
         {
         }
 
+        /// <summary>
+        /// 获取工具的界面
+        /// </summary>
+        /// <param name="station"></param>
+        /// <returns></returns>
         public abstract UserControl GetToolControl(Station station);
     }
 
@@ -75,7 +90,6 @@ namespace Vision.Tools.ToolImpls
         public ToolException(string message) : base(message) 
         {
         }
-
     }
 
 }

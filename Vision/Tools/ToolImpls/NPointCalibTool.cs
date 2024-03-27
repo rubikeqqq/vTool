@@ -1,12 +1,12 @@
-﻿using System;
-using System.ComponentModel;
-using System.IO;
-using System.Windows.Forms;
-using Cognex.VisionPro;
+﻿using Cognex.VisionPro;
 using Cognex.VisionPro.CalibFix;
 using Cognex.VisionPro.Caliper;
 using Cognex.VisionPro.PMAlign;
 using Cognex.VisionPro.ToolBlock;
+using System;
+using System.ComponentModel;
+using System.IO;
+using System.Windows.Forms;
 using Vision.Core;
 using Vision.Projects;
 using Vision.Stations;
@@ -22,10 +22,6 @@ namespace Vision.Tools.ToolImpls
     {
         //vp的9点标定会直接在图像中转换为实际坐标
         //所以输出的坐标为实际机械手标定时的对应的机械坐标
-
-        public NPointCalibTool()
-        {
-        }
 
         [NonSerialized]
         private Station _station;
@@ -64,10 +60,7 @@ namespace Vision.Tools.ToolImpls
         }
 
         #region 【vpp相关】
-        /// <summary>
-        /// 创建vpp
-        /// </summary>
-        /// <exception cref="Exception"></exception>
+        
         public void CreateVpp()
         {
             if (!IsLoaded)
@@ -87,10 +80,6 @@ namespace Vision.Tools.ToolImpls
             }
         }
 
-        /// <summary>
-        /// 加载vpp
-        /// </summary>
-        /// <exception cref="Exception"></exception>
         public void LoadVpp()
         {
             if (!IsLoaded)
@@ -108,9 +97,6 @@ namespace Vision.Tools.ToolImpls
             }
         }
 
-        /// <summary>
-        /// 保存vpp
-        /// </summary>
         public void SaveVpp()
         {
             if (IsLoaded)
@@ -120,10 +106,6 @@ namespace Vision.Tools.ToolImpls
             }
         }
 
-        /// <summary>
-        /// 删除Vpp
-        /// </summary>
-        /// <exception cref="Exception"></exception>
         public void RemoveVpp()
         {
             if (!IsLoaded)
@@ -147,10 +129,6 @@ namespace Vision.Tools.ToolImpls
 
         #region 【工具相关】
 
-        /// <summary>
-        /// 运行工具
-        /// </summary>
-        /// <exception cref="ToolException"></exception>
         public override void Run()
         {
             if (!Enable) return;
@@ -174,6 +152,11 @@ namespace Vision.Tools.ToolImpls
             }
         }
 
+        public override void RunDebug()
+        {
+            Run();
+        }
+
         /// <summary>
         /// 获取输入图像
         /// </summary>
@@ -189,24 +172,9 @@ namespace Vision.Tools.ToolImpls
             return true;
         }
 
-        /// <summary>
-        /// 注册station
-        /// </summary>
-        /// <param name="station"></param>
         public void RegisterStation(Station station)
         {
-            station.StationNameChangedEvent += Station_StationNameChanged;
             _station = station;
-        }
-
-        /// <summary>
-        /// 工具名称改变事件
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void Station_StationNameChanged(object sender, StationEventArgs e)
-        {
-            //ToolPath = Path.Combine(e.Station.StationPath, $"{Name}.vpp");
         }
 
         /// <summary>

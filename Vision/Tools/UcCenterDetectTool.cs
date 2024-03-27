@@ -1,7 +1,6 @@
 ﻿using System;
 using System.ComponentModel;
 using System.Windows.Forms;
-using Vision.Core;
 using Vision.Projects;
 using Vision.Stations;
 using Vision.Tools.ToolImpls;
@@ -33,10 +32,6 @@ namespace Vision.Tools
 
         private void InitUI()
         {
-            if (_tool.ModelOriginPoint == null)
-            {
-                _tool.ModelOriginPoint = new PointA();
-            }
             numModelX.Value = (decimal)_tool.ModelOriginPoint.X;
             numModelY.Value = (decimal)_tool.ModelOriginPoint.Y;
             numModelA.Value = (decimal)_tool.ModelOriginPoint.Angle;

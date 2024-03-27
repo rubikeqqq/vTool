@@ -1,9 +1,9 @@
-﻿using System;
+﻿using Cognex.VisionPro;
+using Cognex.VisionPro.ToolBlock;
+using System;
 using System.ComponentModel;
 using System.IO;
 using System.Windows.Forms;
-using Cognex.VisionPro;
-using Cognex.VisionPro.ToolBlock;
 using Vision.Core;
 using Vision.Projects;
 using Vision.Stations;
@@ -17,34 +17,17 @@ namespace Vision.Tools.ToolImpls
     [Description("主检测流程")]
     public class DetectTool : ToolBase, IVpp, IImageIn
     {
-
-        public DetectTool()
-        {
-        }
-
         [NonSerialized]
         private Station _station;
 
-        /// <summary>
-        /// 输入图像名称
-        /// </summary>
         public string ImageInName { get; set; }
 
-        /// <summary>
-        /// toolblock
-        /// </summary>
         [field: NonSerialized]
         public CogToolBlock ToolBlock { get; set; }
 
-        /// <summary>
-        /// 输入图像
-        /// </summary>
         [field: NonSerialized]
         public ICogImage ImageIn { get; set; }
 
-        /// <summary>
-        /// vpp加载
-        /// </summary>
         [field: NonSerialized]
         public bool IsLoaded { get; set; }
 
@@ -68,10 +51,6 @@ namespace Vision.Tools.ToolImpls
         }
 
         #region 【Vpp相关】
-        /// <summary>
-        /// 创建vpp
-        /// </summary>
-        /// <exception cref="Exception"></exception>
         public void CreateVpp()
         {
             if (!IsLoaded)
@@ -88,10 +67,6 @@ namespace Vision.Tools.ToolImpls
             }
         }
 
-        /// <summary>
-        /// 加载vpp
-        /// </summary>
-        /// <exception cref="Exception"></exception>
         public void LoadVpp()
         {
             if (!IsLoaded)
@@ -109,9 +84,6 @@ namespace Vision.Tools.ToolImpls
             }
         }
 
-        /// <summary>
-        /// 保存vpp
-        /// </summary>
         public void SaveVpp()
         {
             if (IsLoaded)
@@ -121,10 +93,6 @@ namespace Vision.Tools.ToolImpls
             }
         }
 
-        /// <summary>
-        /// 删除Vpp
-        /// </summary>
-        /// <exception cref="Exception"></exception>
         public void RemoveVpp()
         {
             if (!IsLoaded)
@@ -147,10 +115,7 @@ namespace Vision.Tools.ToolImpls
         #endregion
 
         #region 【工具相关】
-        /// <summary>
-        /// 运行工具
-        /// </summary>
-        /// <exception cref="Exception"></exception>
+        
         public override void Run()
         {
             if (!Enable) return;
@@ -167,7 +132,7 @@ namespace Vision.Tools.ToolImpls
                     ToolBlock.Run();
                     if (ToolBlock.RunStatus.Result != CogToolResultConstants.Accept)
                     {
-                        throw new ToolException($"[{ToolName}]");
+                        throw new ToolException($"[{ToolName}] NG!");
                     }
                 }
             }
@@ -180,13 +145,9 @@ namespace Vision.Tools.ToolImpls
             }
         }
 
-        /// <summary>
-        /// 关闭工具
-        /// </summary>
-        public override void Close()
+        public override void RunDebug()
         {
-            base.Close();
-            _station.StationNameChangedEvent -= Station_StationNameChanged;
+            Run();
         }
 
         /// <summary>
@@ -200,24 +161,9 @@ namespace Vision.Tools.ToolImpls
             return ToolBlock.Outputs[sourceName].Value;
         }
 
-        /// <summary>
-        /// 注册station
-        /// </summary>
-        /// <param name="station"></param>
         public void RegisterStation(Station station)
         {
             _station = station;
-            station.StationNameChangedEvent += Station_StationNameChanged;
-        }
-
-        /// <summary>
-        /// station名称改变事件
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void Station_StationNameChanged(object sender, StationEventArgs e)
-        {
-            //ToolPath = Path.Combine(e.Station.StationPath, $"{Name}.vpp");
         }
 
         /// <summary>

@@ -31,19 +31,10 @@ namespace Vision.Tools.ToolImpls
         [NonSerialized]
         private KkRobotCalibTool _robotTool;
 
-        /// <summary>
-        /// 是否标定
-        /// </summary>
         public bool IsCalibed { get; set; }
 
-        /// <summary>
-        /// 旋转中心点
-        /// </summary>
         public PointD CenterPoint { get; set; }
 
-        /// <summary>
-        /// vpp是否加载成功
-        /// </summary>
         [field: NonSerialized]
         public bool IsLoaded { get; set; }
 
@@ -53,9 +44,6 @@ namespace Vision.Tools.ToolImpls
         [field: NonSerialized]
         public CogToolBlock ToolBlock { get; set; }
 
-        /// <summary>
-        /// 需要进行旋转计算的点
-        /// </summary>
         [field: NonSerialized]
         public PointA PointIn { get; set; }
 
@@ -71,29 +59,21 @@ namespace Vision.Tools.ToolImpls
         [field: NonSerialized]
         public PointD CenterRobotDelta { get; set; }
 
-        /// <summary>
-        /// 输出结果
-        /// </summary>
         [field: NonSerialized]
         public PointA PointOut { get; set; }
 
         /// <summary>
         /// 旋转标定时机械手点位
         /// </summary>
-        public PointD CenterCalibRobotPoint { get; set; }
+        public PointD CenterCalibRobotPoint { get; set; } = new PointD();
 
         /// <summary>
         /// 机械手的示教位
         /// </summary>
-        public PointA RobotOriginPosition { get; set; }
+        public PointA RobotOriginPosition { get; set; } = new PointA();
 
         [field: NonSerialized]
         public UserControl UI { get; set; }
-
-        public CenterCalibTool()
-        {
-
-        }
 
         public override UserControl GetToolControl(Station station)
         {
@@ -107,9 +87,7 @@ namespace Vision.Tools.ToolImpls
         }
 
         #region 工具运行相关
-        /// <summary>
-        /// 旋转中心计算
-        /// </summary>
+
         public override void Run()
         {
             if (!Enable) return;
@@ -129,23 +107,19 @@ namespace Vision.Tools.ToolImpls
             PointOut = GetCenterCalibPoint();
         }
 
-        /// <summary>
-        /// 关闭
-        /// </summary>
+        public override void RunDebug()
+        {
+            Run();
+        }
+
         public override void Close()
         {
             base.Close();
             CloseCam();
-            _station.StationNameChangedEvent -= Station_StationNameChanged;
         }
 
-        /// <summary>
-        /// 注册station到此工具
-        /// </summary>
-        /// <param name="station"></param>
         public void RegisterStation(Station station)
         {
-            station.StationNameChangedEvent += Station_StationNameChanged;
             _station = station;
         }
 
@@ -158,7 +132,10 @@ namespace Vision.Tools.ToolImpls
             try
             {
                 if (!IsCalibed)
-                    throw new Exception("旋转中心未标定！");
+                {
+                    LogNet.Log($"[{_station.StationName}]旋转中心未标定！");
+                    return null;
+                }
 
                 #region 带旋转标定
 
@@ -234,10 +211,13 @@ namespace Vision.Tools.ToolImpls
             CenterRobotDelta.Y = RobotOriginPosition.Y - CenterCalibRobotPoint.Y;
         }
 
+        /// <summary>
+        /// 系统补偿
+        /// </summary>
+        /// <returns></returns>
         private PointD GetOffset()
         {
-            var point = new PointD();
-            point = ProjectManager.Instance.ProjectData.Offset;
+            var point = ProjectManager.Instance.ProjectData.Offset;
             return point;
         }
 
@@ -245,10 +225,6 @@ namespace Vision.Tools.ToolImpls
 
         #region vpp相关
 
-        /// <summary>
-        /// 创建vpp
-        /// </summary>
-        /// <exception cref="Exception"></exception>
         public void CreateVpp()
         {
             if (!IsLoaded)
@@ -264,10 +240,6 @@ namespace Vision.Tools.ToolImpls
             }
         }
 
-        /// <summary>
-        /// 加载vpp
-        /// </summary>
-        /// <exception cref="Exception"></exception>
         public void LoadVpp()
         {
             if (!IsLoaded)
@@ -285,10 +257,6 @@ namespace Vision.Tools.ToolImpls
             }
         }
 
-        /// <summary>
-        /// 删除Vpp
-        /// </summary>
-        /// <exception cref="Exception"></exception>
         public void RemoveVpp()
         {
             if (!IsLoaded)
@@ -306,6 +274,15 @@ namespace Vision.Tools.ToolImpls
                 {
                     throw new Exception($"工具vpp删除失败.\r\n{ex.Message}");
                 }
+            }
+        }
+
+        public void SaveVpp()
+        {
+            if (IsLoaded)
+            {
+                var toolPath = Path.Combine(ProjectManager.ProjectDir, _station.StationName, $"{ToolName}.vpp");
+                CogSerializer.SaveObjectToFile(ToolBlock, toolPath);
             }
         }
 
@@ -331,16 +308,6 @@ namespace Vision.Tools.ToolImpls
                     acqTool.Dispose();
                 }
             }
-        }
-
-        /// <summary>
-        /// station名称改变事件
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void Station_StationNameChanged(object sender, StationEventArgs e)
-        {
-            //ToolPath = Path.Combine(e.Station.StationPath, $"{Name}.vpp");
         }
 
         /// <summary>
@@ -422,17 +389,6 @@ namespace Vision.Tools.ToolImpls
             }
         }
 
-        /// <summary>
-        /// 保存vpp
-        /// </summary>
-        public void SaveVpp()
-        {
-            if (IsLoaded)
-            {
-                var toolPath = Path.Combine(ProjectManager.ProjectDir, _station.StationName, $"{ToolName}.vpp");
-                CogSerializer.SaveObjectToFile(ToolBlock, toolPath);
-            }
-        }
         #endregion
 
     }

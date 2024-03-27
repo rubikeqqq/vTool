@@ -17,46 +17,24 @@ namespace Vision.Tools.ToolImpls
     [Description("主检测流程,旋转中心使用")]
     public class CenterDetectTool : ToolBase, IVpp, IImageIn, IModelPoint
     {
-        public CenterDetectTool()
-        {
-        }
-
         [NonSerialized]
         private Station _station;
 
-        /// <summary>
-        /// 输入图像名称
-        /// </summary>
         public string ImageInName { get; set; }
 
-        /// <summary>
-        /// toolblock
-        /// </summary>
         [field: NonSerialized]
         public CogToolBlock ToolBlock { get; set; }
 
-        /// <summary>
-        /// 输入图像
-        /// </summary>
         [field: NonSerialized]
         public ICogImage ImageIn { get; set; }
 
-        /// <summary>
-        /// vpp加载
-        /// </summary>
         [field: NonSerialized]
         public bool IsLoaded { get; set; }
 
-        /// <summary>
-        /// 模版点 给下面的旋转标定计算
-        /// </summary>
         [field: NonSerialized]
-        public PointA ModelPoint { get; set; }
+        public PointA ModelPoint { get; set; } = new PointA();
 
-        /// <summary>
-        /// 示教时模板的点位
-        /// </summary>
-        public PointA ModelOriginPoint { get; set; }
+        public PointA ModelOriginPoint { get; set; } = new PointA();
 
         [field: NonSerialized]
         public UcCenterDetectTool UI { get; set; }
@@ -79,10 +57,7 @@ namespace Vision.Tools.ToolImpls
         }
 
         #region 【Vpp相关】
-        /// <summary>
-        /// 创建vpp
-        /// </summary>
-        /// <exception cref="Exception"></exception>
+        
         public void CreateVpp()
         {
             if (!IsLoaded)
@@ -102,10 +77,6 @@ namespace Vision.Tools.ToolImpls
             }
         }
 
-        /// <summary>
-        /// 加载vpp
-        /// </summary>
-        /// <exception cref="Exception"></exception>
         public void LoadVpp()
         {
             if (!IsLoaded)
@@ -123,9 +94,6 @@ namespace Vision.Tools.ToolImpls
             }
         }
 
-        /// <summary>
-        /// 保存vpp
-        /// </summary>
         public void SaveVpp()
         {
             if (IsLoaded)
@@ -136,10 +104,6 @@ namespace Vision.Tools.ToolImpls
             }
         }
 
-        /// <summary>
-        /// 删除Vpp
-        /// </summary>
-        /// <exception cref="Exception"></exception>
         public void RemoveVpp()
         {
             if (!IsLoaded)
@@ -159,13 +123,11 @@ namespace Vision.Tools.ToolImpls
                 }
             }
         }
+
         #endregion
 
         #region 【工具相关】
-        /// <summary>
-        /// 运行工具
-        /// </summary>
-        /// <exception cref="Exception"></exception>
+        
         public override void Run()
         {
             if (!Enable) return;
@@ -182,12 +144,7 @@ namespace Vision.Tools.ToolImpls
                     ToolBlock.Run();
                     if (ToolBlock.RunStatus.Result != CogToolResultConstants.Accept)
                     {
-                        throw new ToolException($"[{ToolName}]");
-                    }
-
-                    if (ModelPoint == null)
-                    {
-                        ModelPoint = new PointA();
+                        throw new ToolException($"[{ToolName}] NG!");
                     }
 
                     if (ToolBlock.Outputs["ModelX"].Value != null)
@@ -208,12 +165,9 @@ namespace Vision.Tools.ToolImpls
             }
         }
 
-        /// <summary>
-        /// 关闭工具
-        /// </summary>
-        public override void Close()
+        public override void RunDebug()
         {
-            base.Close();
+            Run();
         }
 
         /// <summary>
@@ -227,10 +181,6 @@ namespace Vision.Tools.ToolImpls
             return ToolBlock.Outputs[sourceName].Value;
         }
 
-        /// <summary>
-        /// 注册station
-        /// </summary>
-        /// <param name="station"></param>
         public void RegisterStation(Station station)
         {
             _station = station;

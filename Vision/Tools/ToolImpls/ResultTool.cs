@@ -18,17 +18,10 @@ namespace Vision.Tools.ToolImpls
         [NonSerialized]
         private Station _station;
 
-        /// <summary>
-        /// 所有保存的结果信息
-        /// </summary>
         public List<ResultInfo> ResultData { get; set; } = new List<ResultInfo>();
 
         [field: NonSerialized]
         public UcResult UI { get; set; }
-
-        public ResultTool()
-        {
-        }
 
         public override UserControl GetToolControl(Station station)
         {
@@ -40,23 +33,21 @@ namespace Vision.Tools.ToolImpls
             return UI;
         }
 
-        /// <summary>
-        /// 注册station
-        /// </summary>
-        /// <param name="station"></param>
         public void RegisterStation(Station station)
         {
             _station = station;
         }
 
-        /// <summary>
-        /// 运行工具
-        /// </summary>
         public override void Run()
         {
             if (!Enable) return;
             GetResult();
             SendData();
+        }
+
+        public override void RunDebug()
+        {
+            //调试模式时不运行
         }
 
         /// <summary>
@@ -67,7 +58,7 @@ namespace Vision.Tools.ToolImpls
         {
             if (ResultData.Count == 0)
             {
-                LogUI.AddLog("没有分配输出结果");
+                LogNet.Log($"[{_station.StationName}]没有分配输出结果");
                 return;
             }
             foreach (ResultInfo result in ResultData)
@@ -125,7 +116,7 @@ namespace Vision.Tools.ToolImpls
                 return;
             }
             var plc = ProjectManager.Instance.ProjectData.MxPlc;
-            if (plc == null)
+            if (plc == null || !plc.IsConnected)
             {
                 LogUI.AddLog("plc未连接！");
                 return;

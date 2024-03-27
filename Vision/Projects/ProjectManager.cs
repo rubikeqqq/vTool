@@ -166,7 +166,6 @@ namespace Vision.Projects
                         station.RegisterViewDisplay();
                         station.ShowDisplayChangedEvent += Station_ShowDisplayChangedEvent;
                     }
-                    _project.RunThread();
                     IsLoaded = true;
                     LogNet.Log("项目载入成功！");
                     LogUI.AddLog("项目载入成功！");

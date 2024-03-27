@@ -130,6 +130,7 @@ namespace Vision.Stations
                     if (!e.IsNullImage)
                     {
                         SetResultGraphicOnRecordDisplay(cdTool.ToolBlock, _station.LastRecordName);
+                        GraphicCreateLabel(e.Result);
                     }
                     SetTitle(e.Result ? "运行成功" : $"{e.ErrorMsg}", e.Result ? Color.Green : Color.Red);
                     SetTime(e.Time);
@@ -139,6 +140,7 @@ namespace Vision.Stations
                     if (!e.IsNullImage)
                     {
                         SetResultGraphicOnRecordDisplay(dTool.ToolBlock, _station.LastRecordName);
+                        GraphicCreateLabel(e.Result);
                     }
                     SetTitle(e.Result ? "运行成功" : $"{e.ErrorMsg}", e.Result ? Color.Green : Color.Red);
                     SetTime(e.Time);
@@ -175,6 +177,67 @@ namespace Vision.Stations
             }
         }
 
+        /// <summary>
+        /// 显示文字
+        /// </summary>
+        /// <param name="label"></param>
+        /// <param name="x"></param>
+        /// <param name="y"></param>
+        /// <param name="size"></param>
+        /// <param name="color"></param>
+        /// <param name="alignment"></param>
+        /// <param name="selectedNameSpace"></param>
+        private void GraphicCreateLabel(string label, double x, double y, int size,
+            CogColorConstants color, CogGraphicLabelAlignmentConstants alignment, string selectedNameSpace)
+        {
+            if (InvokeRequired)
+            {
+                cogRecordDisplay1.Invoke(new Action<string, double, double, int,CogColorConstants, CogGraphicLabelAlignmentConstants, string>(GraphicCreateLabel), 
+                    label, x, y, size, color, alignment, selectedNameSpace);
+                return;
+            }
+            var myLabel = new CogGraphicLabel();
+            var font = new Font("微软雅黑", size, FontStyle.Bold);
+            myLabel.GraphicDOFEnable = CogGraphicLabelDOFConstants.None;
+            myLabel.Interactive = false;
+            myLabel.Font = font;
+            myLabel.Alignment = alignment;
+            myLabel.Color = color;
+            myLabel.SetXYText(x, y, label);
+            myLabel.SelectedSpaceName = selectedNameSpace;
+
+            cogRecordDisplay1.StaticGraphics.Add(myLabel, "");
+        }
+
+        /// <summary>
+        /// 显示文字简易版
+        /// </summary>
+        /// <param name="ok"></param>
+        private void GraphicCreateLabel(bool ok)
+        {
+            if (InvokeRequired)
+            {
+                cogRecordDisplay1.Invoke(new Action<bool>(GraphicCreateLabel), ok);
+                return;
+            }
+            double x = 20;
+            double y = 20;
+
+            var size = cogRecordDisplay1.Width / 30;
+
+            var myLabel = new CogGraphicLabel();
+            var font = new Font("微软雅黑", size, FontStyle.Bold);
+            myLabel.GraphicDOFEnable = CogGraphicLabelDOFConstants.None;
+            myLabel.Interactive = false;
+            myLabel.Font = font;
+            myLabel.Alignment = CogGraphicLabelAlignmentConstants.TopLeft;
+            myLabel.Color = ok ? CogColorConstants.Green : CogColorConstants.Red;
+            myLabel.SetXYText(x, y, ok ? "OK" : "NG");
+            myLabel.SelectedSpaceName = "@";
+
+            cogRecordDisplay1.StaticGraphics.Add(myLabel, "");
+        }
+
 
         /// <summary>
         /// 清除显示界面
@@ -192,9 +255,6 @@ namespace Vision.Stations
             cogRecordDisplay1.Image = null;
         }
 
-
-        private delegate void SetTitleDelegate(string title, Color color);
-
         /// <summary>
         /// 显示标题提示
         /// </summary>
@@ -204,15 +264,13 @@ namespace Vision.Stations
         {
             if (InvokeRequired)
             {
-                Invoke(new SetTitleDelegate(SetTitle), title, color);
+                Invoke(new Action<string,Color>(SetTitle), title, color);
                 return;
             }
 
             labelStatu.Text = title;
             labelStatu.ForeColor = color;
         }
-
-        private delegate void SetTimeDelegate(TimeSpan time);
 
         /// <summary>
         /// 显示时间
@@ -222,11 +280,11 @@ namespace Vision.Stations
         {
             if (InvokeRequired)
             {
-                Invoke(new SetTimeDelegate(SetTime), time);
+                Invoke(new Action<TimeSpan>(SetTime), time);
                 return;
             }
 
-            labelTime.Text = $"运行时间:{time.TotalMilliseconds:f2} ms";
+            labelTime.Text = $@"运行时间:{time.TotalMilliseconds:f2} ms";
         }
 
         private void UcStationShow_Load(object sender, System.EventArgs e)

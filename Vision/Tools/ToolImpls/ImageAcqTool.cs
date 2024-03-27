@@ -1,8 +1,9 @@
-﻿using System;
+﻿using Cognex.VisionPro;
+using System;
 using System.ComponentModel;
+using System.Drawing;
 using System.IO;
 using System.Windows.Forms;
-using Cognex.VisionPro;
 using Vision.Core;
 using Vision.Projects;
 using Vision.Stations;
@@ -34,17 +35,9 @@ namespace Vision.Tools.ToolImpls
         [field: NonSerialized]
         public UcAcqTool UI { get; set; }
 
-        public ImageAcqTool()
-        {
-        }
-
         public override UserControl GetToolControl(Station station)
         {
-            if(UI == null)
-            {
-                UI = new UcAcqTool(this);
-            }
-            return UI;
+            return UI ?? (UI = new UcAcqTool(this));
         }
 
         public override void Save()
@@ -54,10 +47,7 @@ namespace Vision.Tools.ToolImpls
         }
 
         #region 【vpp相关】
-        /// <summary>
-        /// 加载vpp
-        /// </summary>
-        /// <exception cref="Exception"></exception>
+        
         public void LoadVpp()
         {
             if(!IsLoaded)
@@ -75,10 +65,6 @@ namespace Vision.Tools.ToolImpls
             }
         }
 
-        /// <summary>
-        /// 保存vpp
-        /// </summary>
-        /// <exception cref="Exception"></exception>
         public void SaveVpp()
         {
             if(IsLoaded)
@@ -95,10 +81,6 @@ namespace Vision.Tools.ToolImpls
             }
         }
 
-        /// <summary>
-        /// 创建vpp
-        /// </summary>
-        /// <exception cref="Exception"></exception>
         public void CreateVpp()
         {
             if(!IsLoaded)
@@ -113,10 +95,6 @@ namespace Vision.Tools.ToolImpls
             }
         }
 
-        /// <summary>
-        /// 删除Vpp
-        /// </summary>
-        /// <exception cref="Exception"></exception>
         public void RemoveVpp()
         {
             if (!IsLoaded)
@@ -140,25 +118,27 @@ namespace Vision.Tools.ToolImpls
 
         #region 【工具相关】
 
-        /// <summary>
-        /// 运行工具
-        /// </summary>
         public override void Run()
         {
-            if(!Enable) return;
-            if(AcqFifoTool == null)
-                throw new ToolException("AcqFifoTool为null");
+            if (!Enable) return;
+            if (AcqFifoTool == null)
+                throw new ToolException("AcqFifoTool为null")
+                {
+                    ImageInNull = true,
+                };
             AcqFifoTool.Run();
-            if(AcqFifoTool.RunStatus.Result != CogToolResultConstants.Accept)
+            if (AcqFifoTool.RunStatus.Result != CogToolResultConstants.Accept)
             {
                 throw new ToolException("相机取像失败！");
             }
             ImageOut = AcqFifoTool.OutputImage;
         }
 
-        /// <summary>
-        /// 关闭工具
-        /// </summary>
+        public override void RunDebug()
+        {
+            Run();
+        }
+
         public override void Close()
         {
             base.Close();
@@ -169,27 +149,11 @@ namespace Vision.Tools.ToolImpls
                 AcqFifoTool.Dispose();
                 AcqFifoTool = null;
             }
-            _station.StationNameChangedEvent -= Station_StationNameChanged;
         }
 
-        /// <summary>
-        /// 注册station
-        /// </summary>
-        /// <param name="station"></param>
         public void RegisterStation(Station station)
         {
-            station.StationNameChangedEvent += Station_StationNameChanged;
             _station = station;
-        }
-
-        /// <summary>
-        /// station名称改变事件
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void Station_StationNameChanged(object sender,StationEventArgs e)
-        {
-            //ToolPath = Path.Combine(e.Station.StationPath,$"{Name}.vpp");
         }
 
         #endregion

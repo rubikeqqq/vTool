@@ -17,27 +17,12 @@ namespace Vision.Tools.ToolImpls
     [Description("kk轴和机械手的标定工具")]
     public class KkRobotCalibTool : ToolBase, IVpp, IRobotDeltaPoint
     {
-        public KkRobotCalibTool()
-        {
-        }
-
         [NonSerialized]
         private Station _station;
 
-        /// <summary>
-        /// vpp是否加载
-        /// </summary>
         [field: NonSerialized]
         public bool IsLoaded { get; private set; }
 
-        /// <summary>
-        /// vpp路径
-        /// </summary>
-        //public string ToolPath { get; set; }
-
-        /// <summary>
-        /// 机械手的偏移值
-        /// </summary>
         [field: NonSerialized]
         public PointD RobotDelta { get; set; }
 
@@ -67,11 +52,7 @@ namespace Vision.Tools.ToolImpls
 
         public override UserControl GetToolControl(Station station)
         {
-            if(UI == null)
-            {
-                UI = new UcKkRobotTool(this);
-            }
-            return UI;
+            return UI ?? (UI = new UcKkRobotTool(this));
         }
 
         public override void Save()
@@ -82,10 +63,6 @@ namespace Vision.Tools.ToolImpls
 
         #region 【工具相关】
 
-        /// <summary>
-        /// 工具运行 -- 计算机械手的偏移值
-        /// </summary>
-        /// <exception cref="ToolException"></exception>
         public override void Run()
         {
             if(!Enable) return;
@@ -133,43 +110,20 @@ namespace Vision.Tools.ToolImpls
             RobotDelta = new PointD(deltaRx,deltaRy);
         }
 
-        /// <summary>
-        /// 关闭工具
-        /// </summary>
-        public override void Close()
+        public override void RunDebug()
         {
-            base.Close();
-            _station.StationNameChangedEvent -= Station_StationNameChanged;
+            Run();
         }
 
-        /// <summary>
-        /// 注册station
-        /// </summary>
-        /// <param name="station"></param>
         public void RegisterStation(Station station)
         {
-            station.StationNameChangedEvent += Station_StationNameChanged;
             _station = station;
-        }
-
-        /// <summary>
-        /// station名称改变事件
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void Station_StationNameChanged(object sender,StationEventArgs e)
-        {
-            //ToolPath = Path.Combine(e.Station.StationPath,$"{Name}.vpp");
         }
 
         #endregion
 
         #region 【vpp相关】
 
-        /// <summary>
-        /// 加载vpp
-        /// </summary>
-        /// <exception cref="Exception"></exception>
         public void LoadVpp()
         {
             if(!IsLoaded)
@@ -187,9 +141,6 @@ namespace Vision.Tools.ToolImpls
             }
         }
 
-        /// <summary>
-        /// 保存vpp
-        /// </summary>
         public void SaveVpp()
         {
             if(IsLoaded)
@@ -199,10 +150,6 @@ namespace Vision.Tools.ToolImpls
             }
         }
 
-        /// <summary>
-        /// 创建vpp
-        /// </summary>
-        /// <exception cref="Exception">标定文件不存在</exception>
         public void CreateVpp()
         {
             if(!IsLoaded)
@@ -217,10 +164,6 @@ namespace Vision.Tools.ToolImpls
             }
         }
 
-        /// <summary>
-        /// 删除Vpp
-        /// </summary>
-        /// <exception cref="Exception"></exception>
         public void RemoveVpp()
         {
             if (!IsLoaded)

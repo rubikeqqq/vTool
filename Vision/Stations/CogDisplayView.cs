@@ -114,22 +114,26 @@ namespace Vision.Stations
                 cogRecordDisplay1.Invoke(new GraphicCreateLabelSimpleDelegate(GraphicCreateLabel), ok);
                 return;
             }
-            double x = cogRecordDisplay1.Width / 20;
-            double y = cogRecordDisplay1.Height / 20;
 
-            var size = cogRecordDisplay1.Width / 30;
+            if (cogRecordDisplay1 != null)
+            {
+                double x = 20;
+                double y = 20;
 
-            var myLabel = new CogGraphicLabel();
-            var font = new Font("微软雅黑", size, FontStyle.Bold);
-            myLabel.GraphicDOFEnable = CogGraphicLabelDOFConstants.None;
-            myLabel.Interactive = false;
-            myLabel.Font = font;
-            myLabel.Alignment = CogGraphicLabelAlignmentConstants.TopLeft;
-            myLabel.Color = ok ? CogColorConstants.Green : CogColorConstants.Red;
-            myLabel.SetXYText(x, y, ok ? "OK" : "NG");
-            myLabel.SelectedSpaceName = "@";
+                var size = cogRecordDisplay1.Width / 30;
 
-            cogRecordDisplay1.StaticGraphics.Add(myLabel, "");
+                var myLabel = new CogGraphicLabel();
+                var font = new Font("微软雅黑", size, FontStyle.Bold);
+                myLabel.GraphicDOFEnable = CogGraphicLabelDOFConstants.None;
+                myLabel.Interactive = false;
+                myLabel.Font = font;
+                myLabel.Alignment = CogGraphicLabelAlignmentConstants.TopLeft;
+                myLabel.Color = ok ? CogColorConstants.Green : CogColorConstants.Red;
+                myLabel.SetXYText(x, y, ok ? "OK" : "NG");
+                myLabel.SelectedSpaceName = "@";
+
+                cogRecordDisplay1.StaticGraphics.Add(myLabel, "");
+            }
         }
 
         /// <summary>
@@ -246,13 +250,15 @@ namespace Vision.Stations
                 toolBlock.LastRunRecordEnable = CogUserToolLastRunRecordConstants.CompositeSubToolRecords;
                 var lastRecord = toolBlock.CreateLastRunRecord();
                 if (cogRecordDisplay1 == null) return;
+                //如果设置了输出的record图像 显示此图像
                 if (lastRecord != null && lastRecord.SubRecords.ContainsKey(recordName))
                 {
                     cogRecordDisplay1.Record = lastRecord.SubRecords[recordName];
                     cogRecordDisplay1.AutoFit = true;
                 }
-                else
+                else 
                 {
+                    //如果没有设置输出的图像 则显示原图
                     cogRecordDisplay1.Image = (ICogImage)toolBlock.Inputs["InputImage"].Value;
                     cogRecordDisplay1.AutoFit = true;
                 }

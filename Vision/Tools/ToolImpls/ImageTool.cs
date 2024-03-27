@@ -1,10 +1,10 @@
-﻿using System;
+﻿using Cognex.VisionPro;
+using System;
 using System.ComponentModel;
 using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Windows.Forms;
-using Cognex.VisionPro;
 using Vision.Core;
 using Vision.Stations;
 using Vision.Tools.Interfaces;
@@ -12,8 +12,8 @@ using Vision.Tools.Interfaces;
 namespace Vision.Tools.ToolImpls
 {
     [Serializable]
-    [GroupInfo("图像工具",0)]
-    [ToolName("图像仿真",1)]
+    [GroupInfo("图像工具", 0)]
+    [ToolName("图像仿真", 1)]
     [Description("通过读取本地图像进行仿真测试")]
     public class ImageTool : ToolBase, IImageOut
     {
@@ -45,31 +45,33 @@ namespace Vision.Tools.ToolImpls
         [field: NonSerialized]
         public event EventHandler<ICogImage> ImageShowEvent;
 
-        public ImageTool()
-        {
-        }
-
         public override UserControl GetToolControl(Station station)
         {
-            if(UI == null)
+            if (UI == null)
             {
                 UI = new UcImageTool(this);
             }
             return UI;
         }
 
-        /// <summary>
-        /// 运行工具
-        /// </summary>
         public override void Run()
         {
-            if(!Enable) return;
+            if (!Enable) return;
             ImageOut = GetImage();
             if (ImageOut == null)
             {
-                throw new ToolException($"[{ToolName}] 输出图像失败，请检查设置！");
+                throw new ToolException($"[{ToolName}] 输出图像失败，请检查设置！")
+                {
+                    ImageInNull = true
+                };
             }
+
             OnImageShowEvent(ImageOut);
+        }
+
+        public override void RunDebug()
+        {
+            Run();
         }
 
         /// <summary>
@@ -78,11 +80,7 @@ namespace Vision.Tools.ToolImpls
         /// <param name="image"></param>
         private void OnImageShowEvent(ICogImage image)
         {
-            if(ImageShowEvent != null)
-            {
-                var e = ImageShowEvent;
-                e.Invoke(this,image);
-            }
+            ImageShowEvent?.Invoke(this, image);
         }
 
         /// <summary>
@@ -93,15 +91,15 @@ namespace Vision.Tools.ToolImpls
         {
             CogImage8Grey image = null;
             //如果是文件夹
-            if(EmulationType == EmulationType.Dir)
+            if (EmulationType == EmulationType.Dir)
             {
-                if(string.IsNullOrEmpty(Path))
+                if (string.IsNullOrEmpty(Path))
                 {
                     return null;
                 }
                 string dir = Path;
                 DirectoryInfo dirInfo = new DirectoryInfo(dir);
-                if(dirInfo.Exists)
+                if (dirInfo.Exists)
                 {
                     var fileInfo = dirInfo.GetFiles();
 
@@ -112,12 +110,12 @@ namespace Vision.Tools.ToolImpls
                         .ToList();
 
                     //没有图像
-                    if(imageList.Count == 0)
+                    if (imageList.Count == 0)
                     {
                         return null;
                     }
 
-                    if(_imageIndex >= imageList.Count)
+                    if (_imageIndex >= imageList.Count)
                     {
                         _imageIndex = 0;
                     }

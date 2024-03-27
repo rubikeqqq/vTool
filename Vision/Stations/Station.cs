@@ -7,7 +7,6 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Threading;
-using System.Threading.Tasks;
 using Vision.Core;
 using Vision.Projects;
 using Vision.Tools.Interfaces;
@@ -27,7 +26,6 @@ namespace Vision.Stations
         [NonSerialized]
         private ManualResetEvent _manualResetEvent;
 
-
         [NonSerialized]
         private Thread _cycleThread;
 
@@ -45,7 +43,6 @@ namespace Vision.Stations
                 if (_name == value) return;
                 _name = value;
                 DisplayView?.SetTitle(value);
-                OnStationNameChanged(new StationEventArgs(this));
             }
         }
 
@@ -57,13 +54,10 @@ namespace Vision.Stations
         /// <summary>
         /// 工具集合
         /// </summary>
-        public List<ToolBase> ToolList { get; set; }
+        public List<ToolBase> ToolList { get; set; } = new List<ToolBase>();
 
         [field: NonSerialized]
         public UcDebug UcDebug { get; private set; }
-
-        [field: NonSerialized]
-        public event EventHandler<StationEventArgs> StationNameChangedEvent;
 
         [field: NonSerialized]
         public event EventHandler<ShowWindowEventArgs> StationRanEvent;
@@ -76,12 +70,6 @@ namespace Vision.Stations
 
         [field: NonSerialized]
         public CogDisplayView DisplayView { get; set; }
-
-        [field: NonSerialized]
-        public bool OK { get; set; }
-
-        [field: NonSerialized]
-        public StationConfig StationData { get; set; }
 
         public ToolBase this[string name]
         {
@@ -100,7 +88,6 @@ namespace Vision.Stations
 
         public Station()
         {
-            ToolList = new List<ToolBase>();
         }
 
         #region 运行相关
@@ -115,40 +102,31 @@ namespace Vision.Stations
                 bool nullImage = false;
                 string errMsg = string.Empty;
                 Stopwatch stopwatch = new Stopwatch();
-
+                stopwatch.Start();
                 foreach (ToolBase tool in ToolList)
                 {
                     try
                     {
-                        //等待触发信号之后再进行 计时的开始
-                        if (tool is TriggerTool)
-                        {
-                            tool.Run();
-                            stopwatch.Start();
-                        }
-                        else if (tool is DetectTool || tool is CenterDetectTool)
-                        {
-                            tool.Run();
-                            OK = true;
-                        }
-                        else
-                        {
-                            tool.Run();
-                        }
+                        tool.Run();
                     }
-                    catch (ToolException ex)
+                    catch (ToolException e)
                     {
+                        nullImage = e.ImageInNull;
                         result = false;
-                        nullImage = ex.ImageInNull;
-                        errMsg = $"[{StationName}] 运行失败！";
-                        LogUI.AddLog($"{errMsg}");
-                        OK = false;
-                        continue;
+
+                        //一个工具NG后还是要发送NG的结果的
+                        ToolList.Find(x => x is ResultTool)?.Run();
+                        ToolList.Find(x => x is EndTool)?.Run();
+                        //打印工具失败
+                        LogUI.AddLog($"[{StationName}] => {e.Message}");
+
+                        break;
                     }
                 }
                 stopwatch.Stop();
                 var time = stopwatch.Elapsed;
                 ShowWindow(new ShowWindowEventArgs(result, time, nullImage, errMsg));
+                SaveImage(result);
             }
         }
 
@@ -168,18 +146,13 @@ namespace Vision.Stations
                 {
                     try
                     {
-                        if (tool is TriggerTool || tool is EndTool || tool is ResultTool || tool is KkRobotCalibTool)
-                        {
-                            continue;
-                        }
-                        tool.Run();
+                        tool.RunDebug();
                     }
                     catch (ToolException ex)
                     {
                         result = false;
                         nullImage = ex.ImageInNull;
-                        errMsg = $"[{StationName}] 运行失败！";
-                        LogUI.AddToolLog($"{errMsg} => {ex.Message}");
+                        LogUI.AddToolLog($"[{StationName}] => {ex.Message}");
                         break;
                     }
                 }
@@ -225,7 +198,6 @@ namespace Vision.Stations
             {
                 _manualResetEvent?.WaitOne();
                 Run();
-                Task.Run(SaveImage);
                 Thread.Sleep(1000);
             }
         }
@@ -273,7 +245,7 @@ namespace Vision.Stations
                     {
                         DisplayView.SetResultGraphicOnRecordDisplay(tb, LastRecordName);
                         DisplayView.SetTime(args.Time);
-                        DisplayView.GraphicCreateLabel(OK);
+                        DisplayView.GraphicCreateLabel(args.Result);
                     }
                 }
             }
@@ -293,7 +265,7 @@ namespace Vision.Stations
         /// 保存图像
         /// </summary>
         /// <exception cref="System.Exception">当图像保存的路径未设置时 抛出路径未设置异常</exception>
-        private void SaveImage()
+        private void SaveImage(bool result)
         {
             try
             {
@@ -308,11 +280,11 @@ namespace Vision.Stations
                 string fileName = DateTime.Now.ToString("HH_mm_ss_fff");
 
                 //按配置进行OK,NG存储
-                if (config.IsSaveOKImage && OK)    //OK
+                if (config.IsSaveOKImage && result)    //OK
                 {
                     DisplayView?.SaveOriginImage(config.SaveImageDir + $"\\{StationName}\\OK\\", fileName);
                 }
-                if (config.IsSaveNGImage && !OK)   //NG
+                if (config.IsSaveNGImage && !result)   //NG
                 {
                     //保存原图
                     DisplayView?.SaveOriginImage(config.SaveImageDir + $"\\{StationName}\\NG\\", fileName);
@@ -539,43 +511,6 @@ namespace Vision.Stations
             return this[GetRobotDeltaPoint()[index]];
         }
 
-        /// <summary>
-        /// 获取所有继承INpointDelta的Tool名称
-        /// </summary>
-        /// <returns></returns>
-        public List<string> GetNPointDeltaPoint()
-        {
-            List<string> inputs = new List<string>();
-            foreach (var tool in ToolList)
-            {
-                if (tool is INPoint)
-                {
-                    //只添加之前的工具
-                    if (tool.ToolName == StationName)
-                        break;
-                    inputs.Add(tool.ToolName);
-                }
-            }
-            return inputs;
-        }
-
-        /// <summary>
-        /// 获取所有9点标定工具名称
-        /// </summary>
-        /// <returns></returns>
-        public List<string> GetNPointToolName()
-        {
-            List<string> inputs = new List<string>();
-            foreach (var item in ToolList)
-            {
-                if (item is NPointCalibTool nTool)
-                {
-                    inputs.Add(nTool.ToolName);
-                }
-            }
-            return inputs;
-        }
-
         public NPointCalibTool GetNPointTool()
         {
             foreach (var tool in ToolList)
@@ -674,15 +609,6 @@ namespace Vision.Stations
         private bool ToolExsit(string name)
         {
             return ToolList.Exists(x => x.ToolName == name);
-        }
-
-        /// <summary>
-        /// 工位名称改变事件触发器
-        /// </summary>
-        /// <param name="e"></param>
-        private void OnStationNameChanged(StationEventArgs e)
-        {
-            StationNameChangedEvent?.Invoke(this, e);
         }
 
         /// <summary>

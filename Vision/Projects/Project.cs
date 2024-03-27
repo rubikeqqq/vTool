@@ -26,7 +26,7 @@ namespace Vision.Projects
 
         public Project()
         {
-            RunThread();
+            
         }
 
         [field: NonSerialized]
@@ -89,6 +89,7 @@ namespace Vision.Projects
                 throw new Exception("plc加载失败！");
             }
             MxPlc = new MxPlc(plc);
+            RunThread();
         }
 
         /// <summary>

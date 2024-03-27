@@ -1,7 +1,5 @@
 ﻿using System;
 using System.ComponentModel;
-using System.Drawing;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 using Vision.Core;
 using Vision.Properties;
@@ -103,16 +101,6 @@ namespace Vision.Tools
             {
                 LogUI.AddToolLog(ex.Message);
             }
-        }
-
-        /// <summary>
-        /// 界面Load事件 添加一个实时log显示线程
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void UcToolBase_Load(object sender, EventArgs e)
-        {
-            
         }
 
     }

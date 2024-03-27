@@ -50,7 +50,7 @@
             this.toolStripButton2});
             this.toolStrip1.Location = new System.Drawing.Point(0, 0);
             this.toolStrip1.Name = "toolStrip1";
-            this.toolStrip1.Size = new System.Drawing.Size(901, 57);
+            this.toolStrip1.Size = new System.Drawing.Size(676, 54);
             this.toolStrip1.TabIndex = 0;
             this.toolStrip1.Text = "toolStrip1";
             this.toolStrip1.ItemClicked += new System.Windows.Forms.ToolStripItemClickedEventHandler(this.toolStrip1_ItemClicked);
@@ -61,7 +61,7 @@
             this.toolStripButton1.Image = global::Vision.Properties.Resources.run_1_;
             this.toolStripButton1.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripButton1.Name = "toolStripButton1";
-            this.toolStripButton1.Size = new System.Drawing.Size(73, 54);
+            this.toolStripButton1.Size = new System.Drawing.Size(60, 51);
             this.toolStripButton1.Text = "运行工具";
             this.toolStripButton1.TextAlign = System.Drawing.ContentAlignment.BottomCenter;
             this.toolStripButton1.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageAboveText;
@@ -71,7 +71,7 @@
             this.tsTool.Image = global::Vision.Properties.Resources.启用;
             this.tsTool.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.tsTool.Name = "tsTool";
-            this.tsTool.Size = new System.Drawing.Size(73, 54);
+            this.tsTool.Size = new System.Drawing.Size(60, 51);
             this.tsTool.Text = "工具状态";
             this.tsTool.TextAlign = System.Drawing.ContentAlignment.BottomCenter;
             this.tsTool.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageAboveText;
@@ -81,7 +81,7 @@
             this.toolStripButton2.Image = global::Vision.Properties.Resources.保存1;
             this.toolStripButton2.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripButton2.Name = "toolStripButton2";
-            this.toolStripButton2.Size = new System.Drawing.Size(73, 54);
+            this.toolStripButton2.Size = new System.Drawing.Size(60, 51);
             this.toolStripButton2.Text = "保存工具";
             this.toolStripButton2.TextAlign = System.Drawing.ContentAlignment.BottomCenter;
             this.toolStripButton2.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageAboveText;
@@ -90,10 +90,10 @@
             // 
             this.panel1.Controls.Add(this.tableLayoutPanel1);
             this.panel1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.panel1.Location = new System.Drawing.Point(0, 57);
-            this.panel1.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.panel1.Location = new System.Drawing.Point(0, 54);
+            this.panel1.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
             this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(901, 588);
+            this.panel1.Size = new System.Drawing.Size(676, 462);
             this.panel1.TabIndex = 1;
             // 
             // tableLayoutPanel1
@@ -103,12 +103,12 @@
             this.tableLayoutPanel1.Controls.Add(this.panelMain, 0, 0);
             this.tableLayoutPanel1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tableLayoutPanel1.Location = new System.Drawing.Point(0, 0);
-            this.tableLayoutPanel1.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.tableLayoutPanel1.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
             this.tableLayoutPanel1.Name = "tableLayoutPanel1";
             this.tableLayoutPanel1.RowCount = 1;
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 20F));
-            this.tableLayoutPanel1.Size = new System.Drawing.Size(901, 588);
+            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 16F));
+            this.tableLayoutPanel1.Size = new System.Drawing.Size(676, 462);
             this.tableLayoutPanel1.TabIndex = 0;
             // 
             // panelMain
@@ -116,22 +116,21 @@
             this.panelMain.BackColor = System.Drawing.SystemColors.HighlightText;
             this.panelMain.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.panelMain.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.panelMain.Location = new System.Drawing.Point(3, 2);
-            this.panelMain.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.panelMain.Location = new System.Drawing.Point(2, 2);
+            this.panelMain.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
             this.panelMain.Name = "panelMain";
-            this.panelMain.Size = new System.Drawing.Size(895, 584);
+            this.panelMain.Size = new System.Drawing.Size(672, 458);
             this.panelMain.TabIndex = 0;
             // 
             // UcToolBase
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 15F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.Controls.Add(this.panel1);
             this.Controls.Add(this.toolStrip1);
-            this.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
             this.Name = "UcToolBase";
-            this.Size = new System.Drawing.Size(901, 645);
-            this.Load += new System.EventHandler(this.UcToolBase_Load);
+            this.Size = new System.Drawing.Size(676, 516);
             this.toolStrip1.ResumeLayout(false);
             this.toolStrip1.PerformLayout();
             this.panel1.ResumeLayout(false);
