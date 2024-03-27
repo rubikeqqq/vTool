@@ -18,13 +18,13 @@ namespace Vision
             //加载plc
             if (ProjectManager.Instance.IsLoaded)
             {
-                ProjectManager.Instance.ProjectData.RegisterPlc(plc);
+                ProjectManager.Instance.Project.RegisterPlc(plc);
             }
-            _ucWindow = new UcWindowShow(ProjectManager.Instance.ProjectData);
+            _ucWindow = new UcWindowShow(ProjectManager.Instance.Project);
             _ucProject = new UcProject();
             _ucSet = new UcSet();
 
-            if (ProjectManager.Instance.ProjectData.SystemConfig.AutoRun)
+            if (Config.SystemConfig.AutoRun)
             {
                 Run();
             }
@@ -109,7 +109,7 @@ namespace Vision
         /// </summary>
         private void Run()
         {
-            foreach (Station station in ProjectManager.Instance.ProjectData.StationList)
+            foreach (Station station in ProjectManager.Instance.Project.StationList)
             {
                 station.StartCycle();
                 _cycle = true;
@@ -123,7 +123,7 @@ namespace Vision
         /// </summary>
         private void Stop()
         {
-            foreach (Station station in ProjectManager.Instance.ProjectData.StationList)
+            foreach (Station station in ProjectManager.Instance.Project.StationList)
             {
                 station.StopCycle();
                 _cycle = false;

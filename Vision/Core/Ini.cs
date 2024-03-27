@@ -309,10 +309,18 @@ namespace Vision.Core
         /// <returns></returns>
         public static string ReadString(string sectionName, string keyName, string defaultValue, string path)
         {
-            const int MAXSIZE = 255;
-            StringBuilder temp = new StringBuilder(MAXSIZE);
-            GetPrivateProfileString(sectionName, keyName, defaultValue, temp, 255, path);
-            return temp.ToString();
+            try
+            {
+                const int MAXSIZE = 255;
+                StringBuilder temp = new StringBuilder(MAXSIZE);
+                GetPrivateProfileString(sectionName, keyName, defaultValue, temp, 255, path);
+                return temp.ToString();
+            }
+            catch (Exception e)
+            {
+                return default;
+            }
+
         }
 
         /// <summary>
@@ -333,9 +341,10 @@ namespace Vision.Core
 
         public static PointD ReadPointD(string sectionName, string keyName, PointD defaultValue, string path)
         {
-            ReadString(sectionName, $"{keyName}.X", defaultValue.X.ToString(), path);
-            ReadString(sectionName, $"{keyName}.Y", defaultValue.Y.ToString(), path);
-            return defaultValue;
+            var x = Convert.ToDouble(ReadString(sectionName, $"{keyName}.X", "0", path));
+            var y = Convert.ToDouble(ReadString(sectionName, $"{keyName}.Y", "0", path));
+
+            return new PointD(x,y);
         }
 
         public static void WritePointD(string sectionName, string keyName, PointD value, string path)
@@ -351,10 +360,10 @@ namespace Vision.Core
 
         public static PointA ReadPointA(string sectionName, string keyName, PointA defaultValue, string path)
         {
-            ReadString(sectionName, $"{keyName}.X", defaultValue.X.ToString(), path);
-            ReadString(sectionName, $"{keyName}.Y", defaultValue.Y.ToString(), path);
-            ReadString(sectionName, $"{keyName}.Angle", defaultValue.Angle.ToString(), path);
-            return defaultValue;
+            var x = Convert.ToDouble( ReadString(sectionName, $"{keyName}.X", "0", path));
+            var y = Convert.ToDouble(ReadString(sectionName, $"{keyName}.Y", "0", path));
+            var angle = Convert.ToDouble(ReadString(sectionName, $"{keyName}.Angle", "0", path));
+            return new PointA(x,y,angle);
         }
 
         public static void WritePointA(string sectionName, string keyName, PointA value, string path)

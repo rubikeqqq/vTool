@@ -30,13 +30,6 @@ namespace Vision.Tools
             ProjectManager.Instance.BeforeSaveProjectEvent -= Instance_BeforeSaveProjectEvent;
         }
 
-        private void InitUI()
-        {
-            numModelX.Value = (decimal)_tool.ModelOriginPoint.X;
-            numModelY.Value = (decimal)_tool.ModelOriginPoint.Y;
-            numModelA.Value = (decimal)_tool.ModelOriginPoint.Angle;
-        }
-
         /// <summary>
         /// 图像源
         /// </summary>
@@ -75,7 +68,6 @@ namespace Vision.Tools
         private void UcDetectTool_Load(object sender, System.EventArgs e)
         {
             GetImageIn();
-            InitUI();
             _init = true;
         }
 
@@ -95,24 +87,6 @@ namespace Vision.Tools
             {
                 cogToolBlockEditV21.Subject = _tool.ToolBlock;
             }
-        }
-
-        private void numModelX_ValueChanged(object sender, EventArgs e)
-        {
-            if (_init)
-                _tool.ModelOriginPoint.X = (double)numModelX.Value;
-        }
-
-        private void numModelY_ValueChanged(object sender, EventArgs e)
-        {
-            if (_init)
-                _tool.ModelOriginPoint.Y = (double)numModelY.Value;
-        }
-
-        private void numModelA_ValueChanged(object sender, EventArgs e)
-        {
-            if (_init)
-                _tool.ModelOriginPoint.Angle = (double)numModelA.Value;
         }
 
     }

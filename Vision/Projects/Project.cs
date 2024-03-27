@@ -14,9 +14,6 @@ namespace Vision.Projects
     public class Project
     {
         private List<Station> _stations;    //工位集合
-        private ImageConfig _imageConfig;   //图像保存配置
-        private SystemConfig _systemConfig;  //系统配置
-        private PointD _offset;
 
         [NonSerialized]
         private bool _imageThreadFlag;
@@ -39,33 +36,6 @@ namespace Vision.Projects
         {
             get => _stations ?? (_stations = new List<Station>());
             private set => _stations = value;
-        }
-
-        /// <summary>
-        /// 图像配置
-        /// </summary>
-        public ImageConfig ImageConfig
-        {
-            get => _imageConfig ?? (_imageConfig = new ImageConfig());
-            set => _imageConfig = value;
-        }
-
-        /// <summary>
-        /// 系统配置
-        /// </summary>
-        public SystemConfig SystemConfig
-        {
-            get => _systemConfig ?? (_systemConfig = new SystemConfig());
-            set => _systemConfig = value;
-        }
-
-        /// <summary>
-        /// 系统补偿
-        /// </summary>
-        public PointD Offset
-        {
-            get => _offset ?? (_offset = new PointD());
-            set => _offset = value;
         }
 
         public Station this[string name]
@@ -106,7 +76,6 @@ namespace Vision.Projects
         /// <summary>
         /// 添加工位
         /// </summary>
-        /// <param name="station"></param>
         /// <returns></returns>
         public bool AddStation()
         {
@@ -255,14 +224,13 @@ namespace Vision.Projects
         /// </summary>
         private void ImageDelete()
         {
-            var config = ImageConfig;
             while (_imageThreadFlag)
             {
                 //按图像保存的时间进行删除
-                if (config.IsDeleteByTime)
+                if (Config.ImageConfig.IsDeleteByTime)
                 {
                     DateTime now = DateTime.Now;
-                    string rootDir = config.SaveImageDir;
+                    string rootDir = Config.ImageConfig.SaveImageDir;
                     //工位 文件夹
                     var dirs = Directory.GetDirectories(rootDir);
                     foreach (var x in dirs)
@@ -276,7 +244,7 @@ namespace Vision.Projects
                             foreach (var date in dates)
                             {
                                 //每天文件夹路径 -- 最终判断路径
-                                if ((now - Directory.GetCreationTime(date)).TotalDays >= config.DeleteDayTime)
+                                if ((now - Directory.GetCreationTime(date)).TotalDays >= Config.ImageConfig.DeleteDayTime)
                                 {
                                     Directory.Delete(date, true);
                                 }
@@ -286,13 +254,13 @@ namespace Vision.Projects
                 }
 
                 //按图像文件夹的大小进行删除
-                if (config.IsDeleteBySize)
+                if (Config.ImageConfig.IsDeleteBySize)
                 {
-                    string rootDir = config.SaveImageDir;
+                    string rootDir = Config.ImageConfig.SaveImageDir;
                     //获取图像文件夹的大小
                     var size = Local.GetFolderSize(rootDir);
                     int msize = (int)(size / 1024 / 1024);
-                    if (msize >= config.DeleteSize)
+                    if (msize >= Config.ImageConfig.DeleteSize)
                     {
                         //工位文件夹
                         var dirs = Directory.GetDirectories(rootDir);
@@ -321,10 +289,9 @@ namespace Vision.Projects
         /// <summary>
         /// 心跳
         /// </summary>
-        /// <exception cref="NotImplementedException"></exception>
         private void HeartBeat()
         {
-            var config = SystemConfig;
+            var config = ProjectManager.Instance.Config;
             short num = 0;
             //判断是否连接
             if (MxPlc != null && MxPlc.IsConnected)
@@ -332,7 +299,7 @@ namespace Vision.Projects
                 while (_systemThreadFlag)
                 {
                     //心跳 
-                    MxPlc.WriteShort(config.HeartAddress, num);
+                    MxPlc.WriteShort(Config.SystemConfig.HeartAddress, num);
                     if (num == 0)
                     {
                         num = 1;
@@ -343,7 +310,7 @@ namespace Vision.Projects
                     }
 
                     //联机状态
-                    MxPlc.WriteShort(config.OnlineAddress, 1);
+                    MxPlc.WriteShort(Config.SystemConfig.OnlineAddress, 1);
 
                     Thread.Sleep(1000);
                 }

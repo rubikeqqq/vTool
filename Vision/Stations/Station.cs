@@ -6,6 +6,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.Serialization;
 using System.Threading;
 using Vision.Core;
 using Vision.Projects;
@@ -19,7 +20,7 @@ namespace Vision.Stations
     /// 每一个工位对应一个工位类
     /// </summary>
     [Serializable]
-    public class Station
+    public class Station:ISerializable
     {
         private string _name;
 
@@ -269,8 +270,8 @@ namespace Vision.Stations
         {
             try
             {
-                var config = ProjectManager.Instance.ProjectData.ImageConfig;
-                if (string.IsNullOrEmpty(config.SaveImageDir))
+                
+                if (string.IsNullOrEmpty(Config.ImageConfig.SaveImageDir))
                 {
                     string err = "未设置图像的保存路径！";
                     LogNet.Log(err);
@@ -280,16 +281,16 @@ namespace Vision.Stations
                 string fileName = DateTime.Now.ToString("HH_mm_ss_fff");
 
                 //按配置进行OK,NG存储
-                if (config.IsSaveOKImage && result)    //OK
+                if (Config.ImageConfig.IsSaveOKImage && result)    //OK
                 {
-                    DisplayView?.SaveOriginImage(config.SaveImageDir + $"\\{StationName}\\OK\\", fileName);
+                    DisplayView?.SaveOriginImage(Config.ImageConfig.SaveImageDir + $"\\{StationName}\\OK\\", fileName);
                 }
-                if (config.IsSaveNGImage && !result)   //NG
+                if (Config.ImageConfig.IsSaveNGImage && !result)   //NG
                 {
                     //保存原图
-                    DisplayView?.SaveOriginImage(config.SaveImageDir + $"\\{StationName}\\NG\\", fileName);
+                    DisplayView?.SaveOriginImage(Config.ImageConfig.SaveImageDir + $"\\{StationName}\\NG\\", fileName);
                     //保存截屏
-                    DisplayView?.SaveScreenImage(config.SaveImageDir + $"\\{StationName}\\NG\\", fileName + "_");
+                    DisplayView?.SaveScreenImage(Config.ImageConfig.SaveImageDir + $"\\{StationName}\\NG\\", fileName + "_");
                 }
             }
             catch (Exception ex)

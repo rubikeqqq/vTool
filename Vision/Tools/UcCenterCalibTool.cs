@@ -1,7 +1,6 @@
 ﻿using System;
 using System.ComponentModel;
 using System.Windows.Forms;
-using Vision.Core;
 using Vision.Frm;
 using Vision.Stations;
 using Vision.Tools.ToolImpls;
@@ -30,30 +29,6 @@ namespace Vision.Tools
             //自动加载9点标定结果
 
             _cTool.AddToolBlock();
-
-            if (_cTool.CenterCalibRobotPoint == null)
-            {
-                _cTool.CenterCalibRobotPoint = new PointD();
-            }
-            if (_cTool.CenterPoint == null)
-            {
-                _cTool.CenterPoint = new PointD();
-            }
-
-            if (_cTool.RobotOriginPosition == null)
-            {
-                _cTool.RobotOriginPosition = new PointA();
-            }
-
-            //点位
-            numCX.Value = (decimal)_cTool.CenterPoint.X;
-            numCY.Value = (decimal)_cTool.CenterPoint.Y;
-            numRX.Value = (decimal)_cTool.CenterCalibRobotPoint.X;
-            numRY.Value = (decimal)_cTool.CenterCalibRobotPoint.Y;
-
-            numRobotX.Value = (decimal)_cTool.RobotOriginPosition.X;
-            numRobotY.Value = (decimal)_cTool.RobotOriginPosition.Y;
-            numRobotA.Value = (decimal)_cTool.RobotOriginPosition.Angle;
         }
 
         /// <summary>
@@ -83,48 +58,11 @@ namespace Vision.Tools
             }
         }
 
-        private void numCX_ValueChanged(object sender, EventArgs e)
-        {
-            _cTool.CenterPoint.X = (double)numCX.Value;
-        }
-
-        private void numCY_ValueChanged(object sender, EventArgs e)
-        {
-            _cTool.CenterPoint.Y = (double)numCY.Value;
-        }
-
-        private void numRX_ValueChanged(object sender, EventArgs e)
-        {
-            _cTool.CenterCalibRobotPoint.X = (double)numRX.Value;
-        }
-
-        private void numRY_ValueChanged(object sender, EventArgs e)
-        {
-            _cTool.CenterCalibRobotPoint.Y = (double)numRY.Value;
-        }
-
         private void button1_Click_1(object sender, EventArgs e)
         {
             FrmCenterCalib frmCenterCalib = new FrmCenterCalib(_cTool);
             frmCenterCalib.ShowDialog();
         }
 
-        private void numRobotX_ValueChanged(object sender, EventArgs e)
-        {
-            if (_init)
-                _cTool.RobotOriginPosition.X = (double)numRobotX.Value;
-        }
-
-        private void numRobotY_ValueChanged(object sender, EventArgs e)
-        {
-            if (_init)
-                _cTool.RobotOriginPosition.Y = (double)numRobotY.Value;
-        }
-
-        private void numRobotA_ValueChanged(object sender, EventArgs e)
-        {
-            if (_init)
-                _cTool.RobotOriginPosition.Angle = (double)numRobotA.Value;
-        }
     }
 }

@@ -27,21 +27,6 @@ namespace Vision.Tools.ToolImpls
         public PointD RobotDelta { get; set; }
 
         /// <summary>
-        /// plc中存储kk x的地址
-        /// </summary>
-        public string AddressX { get; set; }
-
-        /// <summary>
-        /// plc中存储kk y的地址
-        /// </summary>
-        public string AddressY { get; set; }
-
-        /// <summary>
-        /// kk初始坐标
-        /// </summary>
-        public PointD KKOriginPosition { get; set; }
-
-        /// <summary>
         /// 9点标定vpp
         /// </summary>
         [field: NonSerialized]
@@ -72,15 +57,15 @@ namespace Vision.Tools.ToolImpls
             }
 
             //先获取kk的原始坐标
-            var kkOrigin = KKOriginPosition;
+            var kkOrigin = Config.KKConfig.KKOriginPosition;
 
             //读取现在的kk坐标
-            if(string.IsNullOrEmpty(AddressX) || string.IsNullOrEmpty(AddressY))
+            if(string.IsNullOrEmpty(Config.KKConfig.AddressX) || string.IsNullOrEmpty(Config.KKConfig.AddressY))
             {
                 throw new ToolException("kk坐标的地址不存在！");
             }
 
-            var plc = ProjectManager.Instance.ProjectData.MxPlc;
+            var plc = ProjectManager.Instance.Project.MxPlc;
             if (plc == null)
             {
                 throw new ToolException("plc未连接！");
@@ -89,8 +74,8 @@ namespace Vision.Tools.ToolImpls
 
 
 
-            var x = plc.ReadDouble(AddressX,4);
-            var y = plc.ReadDouble(AddressY,4);
+            var x = plc.ReadDouble(Config.KKConfig.AddressX,4);
+            var y = plc.ReadDouble(Config.KKConfig.AddressY,4);
 
             //LogUI.AddLog($"KK当前坐标 x:{x} y:{y}");
 

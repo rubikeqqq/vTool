@@ -32,9 +32,7 @@ namespace Vision.Tools.ToolImpls
         public bool IsLoaded { get; set; }
 
         [field: NonSerialized]
-        public PointA ModelPoint { get; set; } = new PointA();
-
-        public PointA ModelOriginPoint { get; set; } = new PointA();
+        public PointA ModelPoint { get; set; }
 
         [field: NonSerialized]
         public UcCenterDetectTool UI { get; set; }
@@ -57,7 +55,7 @@ namespace Vision.Tools.ToolImpls
         }
 
         #region 【Vpp相关】
-        
+
         public void CreateVpp()
         {
             if (!IsLoaded)
@@ -127,7 +125,7 @@ namespace Vision.Tools.ToolImpls
         #endregion
 
         #region 【工具相关】
-        
+
         public override void Run()
         {
             if (!Enable) return;
@@ -147,13 +145,14 @@ namespace Vision.Tools.ToolImpls
                         throw new ToolException($"[{ToolName}] NG!");
                     }
 
-                    if (ToolBlock.Outputs["ModelX"].Value != null)
-                        ModelPoint.X = (double)ToolBlock.Outputs["ModelX"].Value;
-                    if (ToolBlock.Outputs["ModelY"].Value != null)
-                        ModelPoint.Y = (double)ToolBlock.Outputs["ModelY"].Value;
-                    if (ToolBlock.Outputs["ModelAngle"].Value != null)
-                        ModelPoint.Angle = (double)ToolBlock.Outputs["ModelAngle"].Value;
 
+                    if (ToolBlock.Outputs["ModelX"].Value != null &&
+                        ToolBlock.Outputs["ModelY"].Value != null &&
+                        ToolBlock.Outputs["ModelAngle"].Value != null)
+                    {
+                        ModelPoint = new PointA((double)ToolBlock.Outputs["ModelX"].Value,
+                            (double)ToolBlock.Outputs["ModelY"].Value, (double)ToolBlock.Outputs["ModelAngle"].Value);
+                    }
                 }
             }
             else

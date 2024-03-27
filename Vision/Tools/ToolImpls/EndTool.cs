@@ -32,7 +32,7 @@ namespace Vision.Tools.ToolImpls
 
         public override void Run()
         {
-            var plc = ProjectManager.Instance.ProjectData.MxPlc;
+            var plc = ProjectManager.Instance.Project.MxPlc;
             if (plc != null && plc.IsConnected)
             {
                 if (!string.IsNullOrEmpty(EndAddress))

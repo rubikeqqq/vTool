@@ -84,7 +84,7 @@ namespace Vision.Projects
         /// <param name="stationName"></param>
         private void ShowStation(string stationName)
         {
-            _baseUI.AddStationUI(ProjectManager.Instance.ProjectData[stationName]);
+            _baseUI.AddStationUI(ProjectManager.Instance.Project[stationName]);
             _baseUI.Dock = DockStyle.Fill;
             panelMain.Controls.Clear();
             panelMain.Controls.Add(_baseUI);
@@ -228,7 +228,7 @@ namespace Vision.Projects
         private void cmsStation_ItemClicked(object sender, ToolStripItemClickedEventArgs e)
         {
             var selectNode = tvProject.SelectedNode;
-            var station = ProjectManager.Instance.ProjectData[selectNode.Text];
+            var station = ProjectManager.Instance.Project[selectNode.Text];
 
             var item = e.ClickedItem;
             if (item == null) return;
@@ -236,7 +236,7 @@ namespace Vision.Projects
             {
                 case "新建工具":
                     FrmToolBox frm = new FrmToolBox();
-                    frm.SelectedStation = ProjectManager.Instance.ProjectData[tvProject.SelectedNode.Text];
+                    frm.SelectedStation = ProjectManager.Instance.Project[tvProject.SelectedNode.Text];
                     frm.ShowDialog();
                     break;
 

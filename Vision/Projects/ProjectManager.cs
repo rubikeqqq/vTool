@@ -15,6 +15,7 @@ namespace Vision.Projects
         private static ProjectManager _instance;
         private Project _project;
         private static object _lock = new object();
+        private Config _config;
 
         private ProjectManager()
         {
@@ -25,6 +26,7 @@ namespace Vision.Projects
             try
             {
                 OpenProject();
+                LoadConfig();
             }
             catch (Exception ex)
             {
@@ -73,10 +75,19 @@ namespace Vision.Projects
         /// <summary>
         /// Project数据
         /// </summary>
-        public Project ProjectData
+        public Project Project
         {
             get => _project;
             set => _project = value;
+        }
+
+        /// <summary>
+        /// 配置文件
+        /// </summary>
+        public Config Config
+        {
+            get => _config;
+            set => _config = value;
         }
 
         /// <summary>
@@ -88,6 +99,11 @@ namespace Vision.Projects
         /// 项目文件夹
         /// </summary>
         public static string ProjectDir => Path.Combine(Application.StartupPath, "Project");
+
+        /// <summary>
+        /// 配置文件
+        /// </summary>
+        public static string ConfigPath => Path.Combine(ProjectDir, "config.ini");
 
         #region 【项目加载保存】
 
@@ -194,6 +210,29 @@ namespace Vision.Projects
             _project.Close();
             IsLoaded = false;
         }
+
+        /// <summary>
+        /// 加载配置文件
+        /// </summary>
+        /// <returns></returns>
+        public bool LoadConfig()
+        {
+            return Config.LoadConfig(ConfigPath);
+        }
+
+        /// <summary>
+        /// 保存配置文件
+        /// </summary>
+        /// <returns></returns>
+        public bool SaveConfig()
+        {
+            if (!File.Exists(ConfigPath))
+            {
+                File.Create(ConfigPath).Close();
+            }
+            return Config.SaveConfig(ConfigPath);
+        }
+
         #endregion
 
         #region 【工位工具】
@@ -428,7 +467,7 @@ namespace Vision.Projects
             node.ImageIndex = 0;
             node.SelectedImageIndex = 0;
             node.Name = "项目信息";
-            foreach (var station in ProjectData.StationList)
+            foreach (var station in Project.StationList)
             {
                 TreeNode tnStation = new TreeNode(station.StationName);
                 tnStation.Name = "组" + station.StationName;

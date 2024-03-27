@@ -62,16 +62,6 @@ namespace Vision.Tools.ToolImpls
         [field: NonSerialized]
         public PointA PointOut { get; set; }
 
-        /// <summary>
-        /// 旋转标定时机械手点位
-        /// </summary>
-        public PointD CenterCalibRobotPoint { get; set; } = new PointD();
-
-        /// <summary>
-        /// 机械手的示教位
-        /// </summary>
-        public PointA RobotOriginPosition { get; set; } = new PointA();
-
         [field: NonSerialized]
         public UserControl UI { get; set; }
 
@@ -142,7 +132,7 @@ namespace Vision.Tools.ToolImpls
 
                 //相当于将机械手从原模板位移动到现在的位置
                 var a1 = PointIn.Angle;
-                var a2 = _detectTool.ModelOriginPoint.Angle;
+                var a2 = Config.CalibConfig.ModelOriginPoint.Angle;
                 //if (a2 < -Math.PI / 2)
                 //{
                 //    a2 = a2 + Math.PI;
@@ -161,8 +151,8 @@ namespace Vision.Tools.ToolImpls
                 //var deltaY = rotatedY - _station.ModelPosition.Y ;
 
 
-                RotatedAffine.Math_Transfer(_detectTool.ModelOriginPoint.X, _detectTool.ModelOriginPoint.Y, deltaAngle,
-                   CenterPoint.X + CenterRobotDelta.X, CenterPoint.Y + CenterRobotDelta.Y,
+                RotatedAffine.Math_Transfer(Config.CalibConfig.ModelOriginPoint.X, Config.CalibConfig.ModelOriginPoint.Y, deltaAngle,
+                    Config.CalibConfig.CenterPoint.X + CenterRobotDelta.X, Config.CalibConfig.CenterPoint.Y + CenterRobotDelta.Y,
                    out var rotatedX, out var rotatedY);
 
                 var deltaX = PointIn.X - rotatedX;
@@ -175,10 +165,10 @@ namespace Vision.Tools.ToolImpls
                 PointA point = new PointA();
 
                 //机械手示教位 + 系统补偿 + kk机械手的偏移量+ delta 
-                point.X = (RobotOriginPosition.X + offset.X) + RobotDelta.X + deltaX;
-                point.Y = (RobotOriginPosition.Y + offset.Y) + RobotDelta.Y + deltaY;
+                point.X = (Config.CalibConfig.RobotOriginPosition.X + offset.X) + RobotDelta.X + deltaX;
+                point.Y = (Config.CalibConfig.RobotOriginPosition.Y + offset.Y) + RobotDelta.Y + deltaY;
                 //角度就是当前角度 - 模板角度
-                point.Angle = deltaAngle * 180 / Math.PI + RobotOriginPosition.Angle;
+                point.Angle = deltaAngle * 180 / Math.PI + Config.CalibConfig.RobotOriginPosition.Angle;
 
                 LogUI.AddLog($"=>{point}");
                 return point;
@@ -199,16 +189,8 @@ namespace Vision.Tools.ToolImpls
             PointIn = ((IModelPoint)_detectTool).ModelPoint ?? new PointA();
             RobotDelta = ((IRobotDeltaPoint)_robotTool).RobotDelta ?? new PointD();
 
-            if (CenterRobotDelta == null)
-            {
-                CenterRobotDelta = new PointD();
-            }
-            if (CenterCalibRobotPoint == null)
-            {
-                CenterCalibRobotPoint = new PointD();
-            }
-            CenterRobotDelta.X = RobotOriginPosition.X - CenterCalibRobotPoint.X;
-            CenterRobotDelta.Y = RobotOriginPosition.Y - CenterCalibRobotPoint.Y;
+            CenterRobotDelta.X = Config.CalibConfig.RobotOriginPosition.X - Config.CalibConfig.CenterCalibRobotPoint.X;
+            CenterRobotDelta.Y = Config.CalibConfig.RobotOriginPosition.Y - Config.CalibConfig.CenterCalibRobotPoint.Y;
         }
 
         /// <summary>
@@ -217,8 +199,8 @@ namespace Vision.Tools.ToolImpls
         /// <returns></returns>
         private PointD GetOffset()
         {
-            var point = ProjectManager.Instance.ProjectData.Offset;
-            return point;
+            var point = Config.OffsetConfig;
+            return new PointD(point.OffsetX, point.OffsetY);
         }
 
         #endregion 

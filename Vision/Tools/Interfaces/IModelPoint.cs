@@ -12,9 +12,5 @@ namespace Vision.Tools.Interfaces
         /// </summary>
         PointA ModelPoint { get; set; }
 
-        /// <summary>
-        /// 保存的模板点位
-        /// </summary>
-        PointA ModelOriginPoint { get; set; }
     }
 }

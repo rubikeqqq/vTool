@@ -115,7 +115,7 @@ namespace Vision.Tools.ToolImpls
             {
                 return;
             }
-            var plc = ProjectManager.Instance.ProjectData.MxPlc;
+            var plc = ProjectManager.Instance.Project.MxPlc;
             if (plc == null || !plc.IsConnected)
             {
                 LogUI.AddLog("plc未连接！");
