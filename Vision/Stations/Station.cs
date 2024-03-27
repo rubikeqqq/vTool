@@ -6,7 +6,6 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Runtime.Serialization;
 using System.Threading;
 using Vision.Core;
 using Vision.Projects;
@@ -20,7 +19,7 @@ namespace Vision.Stations
     /// 每一个工位对应一个工位类
     /// </summary>
     [Serializable]
-    public class Station:ISerializable
+    public class Station
     {
         private string _name;
 
