@@ -15,7 +15,7 @@ namespace Vision.Tools.ToolImpls
     [GroupInfo(name: "视觉工具", index: 2)]
     [ToolName("旋转检测工具", 1)]
     [Description("主检测流程,旋转中心使用")]
-    public class CenterDetectTool : ToolBase, IVpp, IImageIn, IModelPoint
+    public class CenterDetectTool : ToolBase, IVpp, IImageIn
     {
         [NonSerialized]
         private Station _station;
@@ -31,6 +31,9 @@ namespace Vision.Tools.ToolImpls
         [field: NonSerialized]
         public bool IsLoaded { get; set; }
 
+        /// <summary>
+        /// 模板输出点位
+        /// </summary>
         [field: NonSerialized]
         public PointA ModelPoint { get; set; }
 

@@ -453,15 +453,15 @@ namespace Vision.Stations
         }
 
         /// <summary>
-        /// 获取所有IModelPoint的Tool名称
+        /// 获取所有CenterDetectTool的Tool名称
         /// </summary>
         /// <returns></returns>
-        private List<string> GetModelPoint()
+        private List<string> GetCenterDetectToolName()
         {
             List<string> inputs = new List<string>();
             foreach (var tool in ToolList)
             {
-                if (tool is IModelPoint)
+                if (tool is CenterDetectTool)
                 {
                     //只添加之前的工具
                     if (tool.ToolName == StationName)
@@ -473,24 +473,24 @@ namespace Vision.Stations
         }
 
         /// <summary>
-        /// 获取第Index个的IModelPoint的Tool名称
+        /// 获取第Index个的CenterDetectTool的Tool名称
         /// </summary>
         /// <returns></returns>
-        public ToolBase GetModelTool(int index)
+        public ToolBase GetCenterDetectTool(int index)
         {
-            return this[GetModelPoint()[index]];
+            return this[GetCenterDetectToolName()[index]];
         }
 
         /// <summary>
         /// 获取所有继承KK机器人接口的工具名称
         /// </summary>
         /// <returns></returns>
-        public List<string> GetRobotDeltaPoint()
+        public List<string> GetKkRobotCalibToolNames()
         {
             List<string> inputs = new List<string>();
             foreach (var tool in ToolList)
             {
-                if (tool is IRobotDeltaPoint)
+                if (tool is KkRobotCalibTool)
                 {
                     //只添加之前的工具
                     if (tool.ToolName == StationName)
@@ -506,18 +506,22 @@ namespace Vision.Stations
         /// </summary>
         /// <param name="index"></param>
         /// <returns></returns>
-        public ToolBase GetRobotTool(int index)
+        public ToolBase GetRobotCalibTool(int index)
         {
-            return this[GetRobotDeltaPoint()[index]];
+            return this[GetKkRobotCalibToolNames()[index]];
         }
 
+        /// <summary>
+        /// 获取9点标定的工具
+        /// </summary>
+        /// <returns></returns>
         public NPointCalibTool GetNPointTool()
         {
             foreach (var tool in ToolList)
             {
-                if (tool is INPoint nTool)
+                if (tool is NPointCalibTool nTool)
                 {
-                    return (NPointCalibTool)nTool;
+                    return nTool;
                 }
             }
             return null;
@@ -543,7 +547,7 @@ namespace Vision.Stations
         /// </summary>
         /// <param name="tool"></param>
         /// <returns></returns>
-        public object[] GetImageInToolNames(ToolBase tool)
+        public string[] GetImageInToolNames(ToolBase tool)
         {
             List<string> list = new List<string>();
             if (ToolList.Count > 0)

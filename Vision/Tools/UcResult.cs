@@ -7,7 +7,6 @@ using System.Windows.Forms;
 using Vision.Core;
 using Vision.Projects;
 using Vision.Stations;
-using Vision.Tools.Interfaces;
 using Vision.Tools.ToolImpls;
 
 namespace Vision.Tools
@@ -91,7 +90,7 @@ namespace Vision.Tools
             {
                 if (item == _rTool) { break; }
 
-                if (item is IPointOut outTool)
+                if (item is CenterCalibTool outTool)
                 {
                     outputs.Add($"{item.ToolName}.X");
                     outputs.Add($"{item.ToolName}.Y");

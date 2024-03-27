@@ -291,7 +291,6 @@ namespace Vision.Projects
         /// </summary>
         private void HeartBeat()
         {
-            var config = ProjectManager.Instance.Config;
             short num = 0;
             //判断是否连接
             if (MxPlc != null && MxPlc.IsConnected)

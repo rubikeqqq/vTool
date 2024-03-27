@@ -18,7 +18,7 @@ namespace Vision.Tools.ToolImpls
     [GroupInfo("标定工具", 1)]
     [ToolName("9点标定", 0)]
     [Description("标准9点标定工具")]
-    public class NPointCalibTool : ToolBase, IImageIn, IVpp, IImageOut, INPoint
+    public class NPointCalibTool : ToolBase, IImageIn, IVpp, IImageOut
     {
         //vp的9点标定会直接在图像中转换为实际坐标
         //所以输出的坐标为实际机械手标定时的对应的机械坐标
@@ -144,7 +144,6 @@ namespace Vision.Tools.ToolImpls
                         throw new ToolException($"工具[{ToolName}]运行失败！")
                         {
                             ToolName = ToolName,
-                            RunError = true
                         };
                     }
                     ImageOut = (ICogImage)ToolBlock.Outputs["OutputImage"].Value;

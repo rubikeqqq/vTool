@@ -40,6 +40,7 @@ namespace PlcComm
                 IP = IPAddress.Parse(str_ip);
                 Host = new IPEndPoint(IP, Convert.ToInt32(str_port));
                 client = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+                
                 //client.Bind(new IPEndPoint(localip,0));
                 client.Connect(Host);
                 _isconnected = true;

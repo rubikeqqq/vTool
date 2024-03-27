@@ -12,10 +12,10 @@ namespace Bracket
         public Form1()
         {
             InitializeComponent();
-            _plc.sClient("127.0.0.1", "6000");
-            _plc.Connect();
-            var f = _plc.IsConnected;
-            _main = new UcMain(_plc);
+            //_plc.sClient("127.0.0.1", "6000");
+            //_plc.Connect();
+            //var f = _plc.IsConnected;
+            _main = new UcMain(null);
             this.WindowState = FormWindowState.Maximized;
         }
 

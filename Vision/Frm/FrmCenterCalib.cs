@@ -54,14 +54,14 @@ namespace Vision.Frm
                         //}
                         var x = _fitCircleTool.Result.GetX(0);
                         var y = _fitCircleTool.Result.GetY(0);
-                        _centerTool.CenterPoint = new PointD(x, y);
+                        Config.CalibConfig.CenterPoint = new PointD(x, y);
                         _centerTool.IsCalibed = true;
                     }
                 }
             }
             catch (Exception ex)
             {
-                _centerTool.CenterPoint = null;
+                Config.CalibConfig.CenterPoint = null;
                 _centerTool.IsCalibed = false;
                 ex.MsgBox();
             }

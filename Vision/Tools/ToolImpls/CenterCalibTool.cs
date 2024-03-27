@@ -19,7 +19,7 @@ namespace Vision.Tools.ToolImpls
     [ToolName("旋转标定", 1)]
     [GroupInfo(name: "标定工具", index: 1)]
     [Description("旋转中心标定工具")]
-    public class CenterCalibTool : ToolBase, IVpp, ICenterCalib, IPointIn, IPointOut
+    public class CenterCalibTool : ToolBase, IVpp
     {
         //DetectTool工具完成得到的点位 传入此旋转工具进行计算
         [NonSerialized]
@@ -31,9 +31,10 @@ namespace Vision.Tools.ToolImpls
         [NonSerialized]
         private KkRobotCalibTool _robotTool;
 
+        /// <summary>
+        /// 是否已经标定
+        /// </summary>
         public bool IsCalibed { get; set; }
-
-        public PointD CenterPoint { get; set; }
 
         [field: NonSerialized]
         public bool IsLoaded { get; set; }
@@ -44,6 +45,9 @@ namespace Vision.Tools.ToolImpls
         [field: NonSerialized]
         public CogToolBlock ToolBlock { get; set; }
 
+        /// <summary>
+        /// 输入点位
+        /// </summary>
         [field: NonSerialized]
         public PointA PointIn { get; set; }
 
@@ -59,6 +63,9 @@ namespace Vision.Tools.ToolImpls
         [field: NonSerialized]
         public PointD CenterRobotDelta { get; set; }
 
+        /// <summary>
+        /// 数据输出的点
+        /// </summary>
         [field: NonSerialized]
         public PointA PointOut { get; set; }
 
@@ -83,13 +90,13 @@ namespace Vision.Tools.ToolImpls
             if (!Enable) return;
             if (_robotTool == null)
             {
-                _robotTool = (KkRobotCalibTool)_station.GetRobotTool(0);
+                _robotTool = (KkRobotCalibTool)_station.GetRobotCalibTool(0);
                 if (_robotTool == null)
                     throw new ToolException("旋转检测不存在！");
             }
             if (_detectTool == null)
             {
-                _detectTool = (CenterDetectTool)_station.GetModelTool(0);
+                _detectTool = (CenterDetectTool)_station.GetCenterDetectTool(0);
                 if (_detectTool == null)
                     throw new ToolException("KK机械手标定不存在！");
             }
@@ -186,8 +193,8 @@ namespace Vision.Tools.ToolImpls
         /// </summary>
         private void GetRobotCenterData()
         {
-            PointIn = ((IModelPoint)_detectTool).ModelPoint ?? new PointA();
-            RobotDelta = ((IRobotDeltaPoint)_robotTool).RobotDelta ?? new PointD();
+            PointIn = _detectTool.ModelPoint ?? new PointA();
+            RobotDelta = _robotTool.RobotDelta ?? new PointD();
 
             CenterRobotDelta.X = Config.CalibConfig.RobotOriginPosition.X - Config.CalibConfig.CenterCalibRobotPoint.X;
             CenterRobotDelta.Y = Config.CalibConfig.RobotOriginPosition.Y - Config.CalibConfig.CenterCalibRobotPoint.Y;

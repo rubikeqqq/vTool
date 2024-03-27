@@ -48,10 +48,6 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>C:\Program Files\Cognex\VisionPro\ReferencedAssemblies\Cognex.VisionPro.Blob.Controls.dll</HintPath>
     </Reference>
-    <Reference Include="Cognex.VisionPro.CAD, Version=69.3.0.0, Culture=neutral, PublicKeyToken=ef0f902af9dee505, processorArchitecture=AMD64">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>C:\Program Files\Cognex\VisionPro\ReferencedAssemblies\Cognex.VisionPro.CAD.dll</HintPath>
-    </Reference>
     <Reference Include="Cognex.VisionPro.CalibFix, Version=69.3.0.0, Culture=neutral, PublicKeyToken=ef0f902af9dee505, processorArchitecture=AMD64">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>C:\Program Files\Cognex\VisionPro\ReferencedAssemblies\Cognex.VisionPro.CalibFix.dll</HintPath>
@@ -172,10 +168,6 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>C:\Program Files\Cognex\VisionPro\ReferencedAssemblies\Cognex.VisionPro.FGGigE.dll</HintPath>
     </Reference>
-    <Reference Include="Cognex.VisionPro.GenTL, Version=69.3.0.0, Culture=neutral, PublicKeyToken=ef0f902af9dee505, processorArchitecture=AMD64">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>C:\Program Files\Cognex\VisionPro\ReferencedAssemblies\Cognex.VisionPro.GenTL.dll</HintPath>
-    </Reference>
     <Reference Include="Cognex.VisionPro.ID, Version=69.3.0.0, Culture=neutral, PublicKeyToken=ef0f902af9dee505, processorArchitecture=AMD64">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>C:\Program Files\Cognex\VisionPro\ReferencedAssemblies\Cognex.VisionPro.ID.dll</HintPath>
@@ -216,14 +208,6 @@
       <SpecificVersion>False</SpecificVersion>
       <EmbedInteropTypes>True</EmbedInteropTypes>
       <HintPath>C:\Program Files\Cognex\VisionPro\ReferencedAssemblies\Cognex.VisionPro.Interop.Core.dll</HintPath>
-    </Reference>
-    <Reference Include="Cognex.VisionPro.LineMax, Version=69.3.0.0, Culture=neutral, PublicKeyToken=ef0f902af9dee505, processorArchitecture=AMD64">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>C:\Program Files\Cognex\VisionPro\ReferencedAssemblies\Cognex.VisionPro.LineMax.dll</HintPath>
-    </Reference>
-    <Reference Include="Cognex.VisionPro.LineMax.Controls, Version=69.3.0.0, Culture=neutral, PublicKeyToken=ef0f902af9dee505, processorArchitecture=AMD64">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>C:\Program Files\Cognex\VisionPro\ReferencedAssemblies\Cognex.VisionPro.LineMax.Controls.dll</HintPath>
     </Reference>
     <Reference Include="Cognex.VisionPro.LinescanDistortionCorrection, Version=69.3.0.0, Culture=neutral, PublicKeyToken=ef0f902af9dee505, processorArchitecture=AMD64">
       <SpecificVersion>False</SpecificVersion>
@@ -325,14 +309,6 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>C:\Program Files\Cognex\VisionPro\ReferencedAssemblies\Cognex.VisionPro.StreetFinder.dll</HintPath>
     </Reference>
-    <Reference Include="Cognex.VisionPro.SurfaceFX, Version=69.3.0.0, Culture=neutral, PublicKeyToken=ef0f902af9dee505, processorArchitecture=AMD64">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>C:\Program Files\Cognex\VisionPro\ReferencedAssemblies\Cognex.VisionPro.SurfaceFX.dll</HintPath>
-    </Reference>
-    <Reference Include="Cognex.VisionPro.SurfaceFX.Controls, Version=69.3.0.0, Culture=neutral, PublicKeyToken=ef0f902af9dee505, processorArchitecture=AMD64">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>C:\Program Files\Cognex\VisionPro\ReferencedAssemblies\Cognex.VisionPro.SurfaceFX.Controls.dll</HintPath>
-    </Reference>
     <Reference Include="Cognex.VisionPro.ToolGroup, Version=69.3.0.0, Culture=neutral, PublicKeyToken=ef0f902af9dee505, processorArchitecture=AMD64">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>C:\Program Files\Cognex\VisionPro\ReferencedAssemblies\Cognex.VisionPro.ToolGroup.dll</HintPath>
@@ -342,7 +318,7 @@
       <HintPath>C:\Program Files\Cognex\VisionPro\ReferencedAssemblies\Cognex.VisionPro.ToolGroup.Controls.dll</HintPath>
     </Reference>
     <Reference Include="HslCommunication">
-      <HintPath>..\Dll\HslCommunication.dll</HintPath>
+      <HintPath>..\Dlls\HslCommunication.dll</HintPath>
     </Reference>
     <Reference Include="Newtonsoft.Json">
       <HintPath>..\Dll\Newtonsoft.Json.dll</HintPath>
@@ -386,7 +362,6 @@
     <Compile Include="Frm\FrmCenterCalib.designer.cs">
       <DependentUpon>FrmCenterCalib.cs</DependentUpon>
     </Compile>
-    <Compile Include="Tools\Interfaces\INPoint.cs" />
     <Compile Include="Tools\ToolImpls\DetectTool.cs" />
     <Compile Include="Tools\ToolImpls\EndTool.cs" />
     <Compile Include="Tools\UcControlBase.cs">
@@ -460,11 +435,7 @@
     <Compile Include="Core\Local.cs" />
     <Compile Include="Core\SerializerHelper.cs" />
     <Compile Include="Core\XmlHelper.cs" />
-    <Compile Include="Tools\Interfaces\ICenterCalib.cs" />
-    <Compile Include="Tools\Interfaces\IModelPoint.cs" />
-    <Compile Include="Tools\Interfaces\IPointIn.cs" />
     <Compile Include="Tools\Interfaces\IRegisterStation.cs" />
-    <Compile Include="Tools\Interfaces\IResult.cs" />
     <Compile Include="Stations\Station.cs" />
     <Compile Include="Frm\FrmToolBox.cs">
       <SubType>Form</SubType>
@@ -478,9 +449,7 @@
     <Compile Include="Stations\UcDebug.designer.cs">
       <DependentUpon>UcDebug.cs</DependentUpon>
     </Compile>
-    <Compile Include="Tools\Interfaces\IRobotDeltaPoint.cs" />
     <Compile Include="Tools\ToolImpls\CenterCalibTool.cs" />
-    <Compile Include="Tools\Interfaces\IPointOut.cs" />
     <Compile Include="Tools\ToolImpls\KkRobotCalibTool.cs" />
     <Compile Include="Tools\ToolImpls\NPointCalibTool.cs" />
     <Compile Include="Tools\ToolFactory.cs" />

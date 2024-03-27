@@ -13,11 +13,14 @@ namespace Vision.Tools.ToolImpls
     [GroupInfo("结果工具", 3)]
     [ToolName("结果编辑",0)]
     [Description("编辑结果和其他控制系统进行交互")]
-    public class ResultTool : ToolBase, IResult, IRegisterStation
+    public class ResultTool : ToolBase, IRegisterStation
     {
         [NonSerialized]
         private Station _station;
 
+        /// <summary>
+        /// 运行的结果数据
+        /// </summary>
         public List<ResultInfo> ResultData { get; set; } = new List<ResultInfo>();
 
         [field: NonSerialized]
@@ -85,7 +88,7 @@ namespace Vision.Tools.ToolImpls
                         result.Value = dTool.GetValue(data);
                         break;
 
-                    case IPointOut pointTool:
+                    case CenterCalibTool pointTool:
                         //总共就3个结果
                         switch (data)
                         {

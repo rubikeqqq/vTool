@@ -15,7 +15,7 @@ namespace Vision.Tools.ToolImpls
     [GroupInfo("标定工具",1)]
     [ToolName("kk机械手标定",2)]
     [Description("kk轴和机械手的标定工具")]
-    public class KkRobotCalibTool : ToolBase, IVpp, IRobotDeltaPoint
+    public class KkRobotCalibTool : ToolBase, IVpp
     {
         [NonSerialized]
         private Station _station;
@@ -23,6 +23,9 @@ namespace Vision.Tools.ToolImpls
         [field: NonSerialized]
         public bool IsLoaded { get; private set; }
 
+        /// <summary>
+        /// 机械手偏移值
+        /// </summary>
         [field: NonSerialized]
         public PointD RobotDelta { get; set; }
 

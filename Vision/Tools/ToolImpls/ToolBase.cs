@@ -78,11 +78,6 @@ namespace Vision.Tools.ToolImpls
         public bool ImageInNull { get; set; }
 
         /// <summary>
-        /// 工具运行失败
-        /// </summary>
-        public bool RunError { get; set; }
-
-        /// <summary>
         /// 工具名称
         /// </summary>
         public string ToolName { get; set; }

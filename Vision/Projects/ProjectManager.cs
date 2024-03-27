@@ -15,8 +15,6 @@ namespace Vision.Projects
         private static ProjectManager _instance;
         private Project _project;
         private static object _lock = new object();
-        private Config _config;
-
         private ProjectManager()
         {
             if (!Directory.Exists(ProjectDir))
@@ -79,15 +77,6 @@ namespace Vision.Projects
         {
             get => _project;
             set => _project = value;
-        }
-
-        /// <summary>
-        /// 配置文件
-        /// </summary>
-        public Config Config
-        {
-            get => _config;
-            set => _config = value;
         }
 
         /// <summary>
@@ -239,7 +228,6 @@ namespace Vision.Projects
         /// <summary>
         /// 添加工位
         /// </summary>
-        /// <param name="station"></param>
         /// <returns></returns>
         public bool AddStation()
         {
@@ -289,7 +277,6 @@ namespace Vision.Projects
         /// 工位重命名
         /// </summary>
         /// <param name="station"></param>
-        /// <param name="newName"></param>
         public void RenameStation(Station station)
         {
             if (!IsLoaded) return;
@@ -381,7 +368,6 @@ namespace Vision.Projects
         /// </summary>
         /// <param name="station"></param>
         /// <param name="tool"></param>
-        /// <param name="newName"></param>
         public void RenameTool(Station station, ToolBase tool)
         {
             if (!IsLoaded) return;
