@@ -4,7 +4,7 @@ using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using Vision.Comm;
+using Vision.Hardware;
 using Vision.Core;
 using Vision.Frm;
 using Vision.Stations;
@@ -200,6 +200,10 @@ namespace Vision.Projects
                 var plc = MXPlc.GetInstance();
                 plc.PLCIPAddress = Config.PLCConfig.IP;
                 plc.PLCPort = int.Parse(Config.PLCConfig.Port);
+                if (!string.IsNullOrEmpty(Config.SystemConfig.HeartAddress))
+                {
+                    plc.HeartBeatAddress = Config.SystemConfig.HeartAddress;
+                }
                 if (!plc.IsOpened)
                 {
                     plc.OpenPLC();
@@ -264,7 +268,6 @@ namespace Vision.Projects
             _imageThreadFlag = true;
             _systemThreadFlag = true;
             Task.Run(ImageDelete);
-            Task.Run(HeartBeat);
         }
 
         #endregion
@@ -610,35 +613,5 @@ namespace Vision.Projects
             }
         }
 
-        /// <summary>
-        /// 心跳
-        /// </summary>
-        private void HeartBeat()
-        {
-            short num = 0;
-            var plc = MXPlc.GetInstance();
-            //判断是否连接
-            if (plc.IsOpened)
-            {
-                while (_systemThreadFlag)
-                {
-                    //心跳 
-                    plc.WriteShort(Config.SystemConfig.HeartAddress, num);
-                    if (num == 0)
-                    {
-                        num = 1;
-                    }
-                    else if (num == 1)
-                    {
-                        num = 0;
-                    }
-
-                    //联机状态
-                    plc.WriteShort(Config.SystemConfig.OnlineAddress, 1);
-
-                    Thread.Sleep(1000);
-                }
-            }
-        }
     }
 }

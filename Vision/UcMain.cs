@@ -2,7 +2,7 @@
 using System.ComponentModel;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using Vision.Comm;
+using Vision.Hardware;
 using Vision.Core;
 using Vision.Projects;
 using Vision.Stations;

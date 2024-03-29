@@ -1,4 +1,4 @@
-﻿namespace Vision.Comm
+﻿namespace Vision.Hardware
 {
     /// <summary>
     /// PLC接口

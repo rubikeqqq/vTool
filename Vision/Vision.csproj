@@ -336,8 +336,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Comm\IPlc.cs" />
-    <Compile Include="Comm\MxPlc.cs" />
+    <Compile Include="Hardware\IPlc.cs" />
+    <Compile Include="Hardware\MxPlc.cs" />
     <Compile Include="Projects\StationToolData.cs" />
     <Compile Include="Projects\UcSet.cs">
       <SubType>UserControl</SubType>

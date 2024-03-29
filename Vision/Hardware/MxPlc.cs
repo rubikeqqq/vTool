@@ -3,12 +3,12 @@ using System;
 using System.Threading;
 using Vision.Core;
 
-namespace Vision.Comm
+namespace Vision.Hardware
+
 {
     public class MXPlc : IPlc
     {
         #region Fields
-        //public HslCommunication.Profinet.Melsec.MelsecA1ENet mPlcMC;
         private HslCommunication.Profinet.Melsec.MelsecMcNet mPlcMC;
         private static MXPlc mInstance;
 
@@ -19,6 +19,9 @@ namespace Vision.Comm
         private string mIPAddr;
         private int mPort;
         private int mDelayTime;
+        private bool mConnectThreadFlag;
+        private Thread mConnectThread;
+        private string mHeartBeatAddress = string.Empty;//心跳数据地址
         #endregion
 
         #region Properties
@@ -45,6 +48,11 @@ namespace Vision.Comm
             set { mDelayTime = value; }
         }
 
+        public string HeartBeatAddress
+        {
+            set => mHeartBeatAddress = value;
+            get => mHeartBeatAddress;
+        }
         #endregion
 
         #region Implements
@@ -64,12 +72,19 @@ namespace Vision.Comm
             mIsOpened = false;
             mDelayTime = 15;
             mAccessMutex = new Mutex();
+
+            //开启PLC线重连
+            mConnectThread = new Thread(new ThreadStart(this.ConnectThread))
+            {
+                IsBackground = true
+            };
+            mConnectThread.Start();
+            mConnectThreadFlag = true;
         }
 
         public bool OpenPLC()
         {
             OperateResult opres;
-            //mPlcMC = new HslCommunication.Profinet.Melsec.MelsecA1ENet(mIPAddr, mPort);
             mPlcMC = new HslCommunication.Profinet.Melsec.MelsecMcNet(mIPAddr, mPort);
             opres = mPlcMC.ConnectServer();
             if (opres.IsSuccess)
@@ -96,6 +111,11 @@ namespace Vision.Comm
             {
                 LogNet.Log("PLC关闭失败!");
             }
+        }
+
+        ~MXPlc()
+        {
+            mConnectThreadFlag = false;
         }
 
         public bool WriteBool(string DeviceName, bool Value)
@@ -569,6 +589,50 @@ namespace Vision.Comm
                 mAccessMutex.ReleaseMutex();
                 LogNet.Log("Write PLC data exception " + ex.Message);
                 return false;
+            }
+        }
+
+        /// <summary>
+        /// 断线重连线程
+        /// </summary>
+        private void ConnectThread()
+        {
+            //如果没有设置心跳 直接返回
+            if (string.IsNullOrEmpty(mHeartBeatAddress))
+            {
+                return;
+            }
+            while (mConnectThreadFlag)
+            {
+                //循环次数
+                int LoopCount = 0;
+                int Index = 0;
+                //连接PLC
+                OpenPLC();
+                //已经连接上
+                while (IsOpened && mConnectThreadFlag)
+                {
+                    Thread.Sleep(200);
+                    if (LoopCount < 5)
+                    {
+                        if (Index != 1)
+                        {
+                            WriteShort(mHeartBeatAddress, 0);
+                            Index = 1;
+                        }
+                    }
+                    else
+                    {
+                        if (Index != 0)
+                        {
+                            WriteShort(mHeartBeatAddress, 0);
+                            Index = 0;
+                        }
+                    }
+                    LoopCount++;
+                    LoopCount = LoopCount % 20;
+                }
+                Thread.Sleep(1000);
             }
         }
 
