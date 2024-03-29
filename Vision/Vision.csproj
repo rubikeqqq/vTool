@@ -336,6 +336,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Comm\IPlc.cs" />
+    <Compile Include="Comm\MxPlc.cs" />
     <Compile Include="Projects\StationToolData.cs" />
     <Compile Include="Projects\UcSet.cs">
       <SubType>UserControl</SubType>
@@ -349,7 +351,6 @@
     <Compile Include="Stations\CogDisplayView.designer.cs">
       <DependentUpon>CogDisplayView.cs</DependentUpon>
     </Compile>
-    <Compile Include="Core\MxPlc.cs" />
     <Compile Include="Core\AssemblyFactory.cs" />
     <Compile Include="Core\PointD.cs" />
     <Compile Include="Core\ResultInfo.cs" />
@@ -688,12 +689,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\PLC信息管理.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\PlcComm\PlcComm.csproj">
-      <Project>{9cfae265-8084-42ce-97b2-5e8c38baeeba}</Project>
-      <Name>PlcComm</Name>
-    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

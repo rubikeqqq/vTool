@@ -1,6 +1,7 @@
 ﻿using System;
 using System.ComponentModel;
 using System.Windows.Forms;
+using Vision.Comm;
 using Vision.Core;
 using Vision.Projects;
 using Vision.Stations;
@@ -32,12 +33,11 @@ namespace Vision.Tools.ToolImpls
 
         public override void Run()
         {
-            var plc = ProjectManager.Instance.Project.MxPlc;
-            if (plc != null && plc.IsConnected)
+            if (MXPlc.GetInstance().IsOpened)
             {
                 if (!string.IsNullOrEmpty(EndAddress))
                 {
-                    plc.WriteShort(EndAddress, 1);
+                    MXPlc.GetInstance().WriteShort(EndAddress, 1);
                 }
             }
             else

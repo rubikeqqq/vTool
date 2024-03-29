@@ -146,7 +146,12 @@ namespace Vision.Stations
                 {
                     try
                     {
+                        Stopwatch stopwatch1 = new Stopwatch();
+                        stopwatch1.Start();
                         tool.RunDebug();
+                        stopwatch1.Stop();
+                        var t = stopwatch1.Elapsed;
+                        LogUI.AddToolLog(tool.ToolName +"=> "+ t.TotalMilliseconds.ToString("f2")+"ms");
                     }
                     catch (ToolException ex)
                     {

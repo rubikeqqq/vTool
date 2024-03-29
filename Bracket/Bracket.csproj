@@ -81,10 +81,6 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\PlcComm\PlcComm.csproj">
-      <Project>{9CFAE265-8084-42CE-97B2-5E8C38BAEEBA}</Project>
-      <Name>PlcComm</Name>
-    </ProjectReference>
     <ProjectReference Include="..\Vision\Vision.csproj">
       <Project>{EEF84B6E-AD88-408F-927B-C73CB408753C}</Project>
       <Name>Vision</Name>

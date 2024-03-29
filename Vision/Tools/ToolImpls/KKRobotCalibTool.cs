@@ -4,6 +4,7 @@ using System;
 using System.ComponentModel;
 using System.IO;
 using System.Windows.Forms;
+using Vision.Comm;
 using Vision.Core;
 using Vision.Projects;
 using Vision.Stations;
@@ -68,17 +69,14 @@ namespace Vision.Tools.ToolImpls
                 throw new ToolException("kk坐标的地址不存在！");
             }
 
-            var plc = ProjectManager.Instance.Project.MxPlc;
-            if (plc == null)
+            var plc = MXPlc.GetInstance();
+            if (!plc.IsOpened)
             {
                 throw new ToolException("plc未连接！");
             }
 
-
-
-
-            var x = plc.ReadDouble(Config.KKConfig.AddressX,4);
-            var y = plc.ReadDouble(Config.KKConfig.AddressY,4);
+            plc.ReadDouble(Config.KKConfig.AddressX,out double x);
+            plc.ReadDouble(Config.KKConfig.AddressY,out double y);
 
             //LogUI.AddLog($"KK当前坐标 x:{x} y:{y}");
 

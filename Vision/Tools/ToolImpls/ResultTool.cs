@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Threading;
 using System.Windows.Forms;
+using Vision.Comm;
 using Vision.Core;
 using Vision.Projects;
 using Vision.Stations;
@@ -118,8 +120,8 @@ namespace Vision.Tools.ToolImpls
             {
                 return;
             }
-            var plc = ProjectManager.Instance.Project.MxPlc;
-            if (plc == null || !plc.IsConnected)
+            var plc = MXPlc.GetInstance();
+            if (!plc.IsOpened)
             {
                 LogUI.AddLog("plc未连接！");
                 return;
@@ -157,7 +159,7 @@ namespace Vision.Tools.ToolImpls
                             }
                             break;
                     }
-
+                    Thread.Sleep(20);
                     LogNet.Log($"数据地址：{res.Address} 数据结果:{res.Value}");
                 }
             }

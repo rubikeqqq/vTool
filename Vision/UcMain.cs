@@ -1,8 +1,8 @@
-﻿using PlcComm;
-using System;
+﻿using System;
 using System.ComponentModel;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using Vision.Comm;
 using Vision.Core;
 using Vision.Projects;
 using Vision.Stations;
@@ -12,14 +12,9 @@ namespace Vision
     [ToolboxItem(false)]
     public partial class UcMain : UserControl
     {
-        public UcMain(Melsoft_PLC_TCP2 plc)
+        public UcMain()
         {
             InitializeComponent();
-            //加载plc
-            if (ProjectManager.Instance.IsLoaded)
-            {
-                ProjectManager.Instance.Project.RegisterPlc(plc);
-            }
             _ucWindow = new UcWindowShow(ProjectManager.Instance.Project);
             _ucProject = new UcProject();
             _ucSet = new UcSet();
@@ -50,6 +45,10 @@ namespace Vision
             if (ProjectManager.Instance.IsLoaded)
             {
                 ProjectManager.Instance.CloseProject();
+            }
+            if(MXPlc.GetInstance().IsOpened)
+            {
+                MXPlc.GetInstance().ClosePLC();
             }
             ProjectManager.Instance.UcStationChangedEvent -= Instance_UcStationChangedEvent;
         }

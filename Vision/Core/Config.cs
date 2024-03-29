@@ -229,6 +229,37 @@ namespace Vision.Core
     }
 
     /// <summary>
+    /// PLC配置类
+    /// </summary>
+    public class PLCConfig
+    {
+        public string IP { get; set; } = "127.0.0.1";
+        public string Port { get; set; } = "60000";
+
+        public bool Load(string path)
+        {
+            if (!File.Exists(path)) return false;
+            string section = nameof(PLCConfig);
+
+
+            IP = IniHelper.ReadString(section, nameof(IP), default, path);
+            Port = IniHelper.ReadString(section, nameof(Port), default, path);
+            return true;
+        }
+
+        public bool Save(string path)
+        {
+            if (!File.Exists(path)) return false;
+            string section = nameof(OffsetConfig);
+
+
+            IniHelper.WriteString(section, nameof(IP), IP, path);
+            IniHelper.WriteString(section, nameof(Port), Port, path);
+            return true;
+        }
+    }
+
+    /// <summary>
     /// 补偿配置类
     /// </summary>
     public class OffsetConfig
@@ -278,6 +309,8 @@ namespace Vision.Core
 
         public static OffsetConfig OffsetConfig { get; set; } = new OffsetConfig();
 
+        public static PLCConfig PLCConfig { get; set; } = new PLCConfig();
+
         public static bool LoadConfig(string path)
         {
             var b1 = ImageConfig.Load(path);
@@ -285,7 +318,8 @@ namespace Vision.Core
             var b3 = KKConfig.Load(path);
             var b4 = SystemConfig.Load(path);
             var b5 = OffsetConfig.Load(path);
-            return b1 & b2 & b3 & b4 & b5;
+            var b6 = PLCConfig.Load(path);
+            return b1 & b2 & b3 & b4 & b5 & b6;
         }
 
         public static bool SaveConfig(string path)
@@ -295,7 +329,8 @@ namespace Vision.Core
             var b3 = KKConfig.Save(path);
             var b4 = SystemConfig.Save(path);
             var b5 = OffsetConfig.Save(path);
-            return b1 & b2 & b3 & b4 & b5;
+            var b6 = PLCConfig.Save(path);
+            return b1 & b2 & b3 & b4 & b5 & b6;
         }
     }
 }

@@ -1,10 +1,7 @@
-﻿using PlcComm;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 using Vision.Core;
 using Vision.Stations;
 
@@ -15,19 +12,10 @@ namespace Vision.Projects
     {
         private List<Station> _stations;    //工位集合
 
-        [NonSerialized]
-        private bool _imageThreadFlag;
-
-        [NonSerialized]
-        private bool _systemThreadFlag;
-
         public Project()
         {
             
         }
-
-        [field: NonSerialized]
-        public MxPlc MxPlc { get; set; }
 
         /// <summary>
         /// 工位列表
@@ -47,31 +35,6 @@ namespace Vision.Projects
         }
 
         public Station this[int index] => StationList[index];
-
-        /// <summary>
-        /// 注册plc
-        /// </summary>
-        /// <param name="plc"></param>
-        public void RegisterPlc(Melsoft_PLC_TCP2 plc)
-        {
-            if (plc == null)
-            {
-                throw new Exception("plc加载失败！");
-            }
-            MxPlc = new MxPlc(plc);
-            RunThread();
-        }
-
-        /// <summary>
-        /// 一些循环
-        /// </summary>
-        public void RunThread()
-        {
-            _imageThreadFlag = true;
-            _systemThreadFlag = true;
-            Task.Run(ImageDelete);
-            Task.Run(HeartBeat);
-        }
 
         /// <summary>
         /// 添加工位
@@ -215,105 +178,7 @@ namespace Vision.Projects
                 }
                 StationList.Clear();
             }
-            _imageThreadFlag = false;
-            _systemThreadFlag = false;
         }
 
-        /// <summary>
-        /// 异步循环删除图像文件
-        /// </summary>
-        private void ImageDelete()
-        {
-            while (_imageThreadFlag)
-            {
-                //按图像保存的时间进行删除
-                if (Config.ImageConfig.IsDeleteByTime)
-                {
-                    DateTime now = DateTime.Now;
-                    string rootDir = Config.ImageConfig.SaveImageDir;
-                    //工位 文件夹
-                    var dirs = Directory.GetDirectories(rootDir);
-                    foreach (var x in dirs)
-                    {
-                        //OK NG
-                        var stations = Directory.GetDirectories(x);
-                        foreach (var station in stations)
-                        {
-                            //日期文件夹
-                            var dates = Directory.GetDirectories(station);
-                            foreach (var date in dates)
-                            {
-                                //每天文件夹路径 -- 最终判断路径
-                                if ((now - Directory.GetCreationTime(date)).TotalDays >= Config.ImageConfig.DeleteDayTime)
-                                {
-                                    Directory.Delete(date, true);
-                                }
-                            }
-                        }
-                    }
-                }
-
-                //按图像文件夹的大小进行删除
-                if (Config.ImageConfig.IsDeleteBySize)
-                {
-                    string rootDir = Config.ImageConfig.SaveImageDir;
-                    //获取图像文件夹的大小
-                    var size = Local.GetFolderSize(rootDir);
-                    int msize = (int)(size / 1024 / 1024);
-                    if (msize >= Config.ImageConfig.DeleteSize)
-                    {
-                        //工位文件夹
-                        var dirs = Directory.GetDirectories(rootDir);
-
-                        foreach (var x in dirs)
-                        {
-                            //OK NG 文件夹
-                            var stations = Directory.GetDirectories(x);
-                            foreach (var station in stations)
-                            {
-                                //日期文件夹
-                                var dates = Directory.GetDirectories(station);
-                                foreach (var date in dates)
-                                {
-                                    Directory.Delete(date, true);
-                                }
-                            }
-                        }
-                    }
-                }
-
-                Thread.Sleep(1000);
-            }
-        }
-
-        /// <summary>
-        /// 心跳
-        /// </summary>
-        private void HeartBeat()
-        {
-            short num = 0;
-            //判断是否连接
-            if (MxPlc != null && MxPlc.IsConnected)
-            {
-                while (_systemThreadFlag)
-                {
-                    //心跳 
-                    MxPlc.WriteShort(Config.SystemConfig.HeartAddress, num);
-                    if (num == 0)
-                    {
-                        num = 1;
-                    }
-                    else if (num == 1)
-                    {
-                        num = 0;
-                    }
-
-                    //联机状态
-                    MxPlc.WriteShort(Config.SystemConfig.OnlineAddress, 1);
-
-                    Thread.Sleep(1000);
-                }
-            }
-        }
     }
 }

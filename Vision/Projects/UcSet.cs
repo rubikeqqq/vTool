@@ -20,6 +20,7 @@ namespace Vision.Projects
         private OffsetConfig _offset;
         private CalibConfig _calibConfig;
         private KKConfig _kkConfig;
+        private PLCConfig _plcConfig;
 
         private void ControlInit()
         {
@@ -33,6 +34,7 @@ namespace Vision.Projects
                 _offset = Config.OffsetConfig;
                 _calibConfig = Config.CalibConfig;
                 _kkConfig = Config.KKConfig;
+                _plcConfig = Config.PLCConfig;
 
                 //图像配置
                 cbNG.Checked = _imageImageConfig.IsSaveNGImage;
@@ -47,6 +49,9 @@ namespace Vision.Projects
 
                 tbHeart.Text = _systemConfig.HeartAddress;
                 tbOnline.Text = _systemConfig.OnlineAddress;
+
+                tbIP.Text = _plcConfig.IP;
+                tbPort.Text = _plcConfig.Port;
 
                 //补偿
                 numOffsetX.Value = (decimal)_offset.OffsetX;
@@ -260,6 +265,18 @@ namespace Vision.Projects
         {
             if (_init)
                 _kkConfig.AddressY = tbPLCY.Text;
+        }
+
+        private void tbIP_TextChanged(object sender, EventArgs e)
+        {
+            if (_init)
+                _plcConfig.IP = tbIP.Text;
+        }
+
+        private void tbPort_TextChanged(object sender, EventArgs e)
+        {
+            if (_init)
+                _plcConfig.Port = tbPort.Text;
         }
     }
 }

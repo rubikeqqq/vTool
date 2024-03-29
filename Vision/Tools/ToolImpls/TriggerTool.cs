@@ -2,6 +2,7 @@
 using System.ComponentModel;
 using System.Threading;
 using System.Windows.Forms;
+using Vision.Comm;
 using Vision.Core;
 using Vision.Projects;
 using Vision.Stations;
@@ -29,20 +30,18 @@ namespace Vision.Tools.ToolImpls
 
         public override void Run()
         {
-            var plc = ProjectManager.Instance.Project.MxPlc;
-            if (plc != null && plc.IsConnected)
+            var plc = MXPlc.GetInstance();
+            if (plc.IsOpened)
             {
                 if (!string.IsNullOrEmpty(TriggerAddress))
                 {
                     while (true)
                     {
-                        var flag = plc.ReadShort(TriggerAddress);
+                        plc.ReadShort(TriggerAddress,out short flag);
                         if (flag == 1)
                         {
-                            //LogUI.AddLog($"收到触发信号{TriggerAddress}！");
                             //复位
                             plc.WriteShort(TriggerAddress, 0);
-                            // LogUI.AddLog($"复位触发信号{TriggerAddress}！");
                             break;
                         }
                         Thread.Sleep(10);

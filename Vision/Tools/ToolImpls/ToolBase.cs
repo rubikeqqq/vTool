@@ -34,6 +34,9 @@ namespace Vision.Tools.ToolImpls
             }
         }
 
+        [field: NonSerialized]
+        public double RunTime {  get; set; }
+
         /// <summary>
         /// 运行工具
         /// </summary>

@@ -94,6 +94,11 @@
             this.numInitX = new System.Windows.Forms.NumericUpDown();
             this.panel1 = new System.Windows.Forms.Panel();
             this.btnSave = new System.Windows.Forms.Button();
+            this.groupBox12 = new System.Windows.Forms.GroupBox();
+            this.tbPort = new System.Windows.Forms.TextBox();
+            this.label20 = new System.Windows.Forms.Label();
+            this.tbIP = new System.Windows.Forms.TextBox();
+            this.label21 = new System.Windows.Forms.Label();
             this.tableLayoutPanel1.SuspendLayout();
             this.tabControl1.SuspendLayout();
             this.tabPage1.SuspendLayout();
@@ -129,6 +134,7 @@
             ((System.ComponentModel.ISupportInitialize)(this.numInitY)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.numInitX)).BeginInit();
             this.panel1.SuspendLayout();
+            this.groupBox12.SuspendLayout();
             this.SuspendLayout();
             // 
             // tableLayoutPanel1
@@ -336,6 +342,7 @@
             // tabPage2
             // 
             this.tabPage2.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
+            this.tabPage2.Controls.Add(this.groupBox12);
             this.tabPage2.Controls.Add(this.groupBox3);
             this.tabPage2.Controls.Add(this.cbAutoRun);
             this.tabPage2.Location = new System.Drawing.Point(4, 39);
@@ -358,14 +365,14 @@
             this.groupBox3.Margin = new System.Windows.Forms.Padding(2);
             this.groupBox3.Name = "groupBox3";
             this.groupBox3.Padding = new System.Windows.Forms.Padding(2);
-            this.groupBox3.Size = new System.Drawing.Size(622, 137);
+            this.groupBox3.Size = new System.Drawing.Size(622, 83);
             this.groupBox3.TabIndex = 2;
             this.groupBox3.TabStop = false;
             this.groupBox3.Text = "心跳";
             // 
             // tbOnline
             // 
-            this.tbOnline.Location = new System.Drawing.Point(145, 83);
+            this.tbOnline.Location = new System.Drawing.Point(430, 30);
             this.tbOnline.Name = "tbOnline";
             this.tbOnline.Size = new System.Drawing.Size(136, 27);
             this.tbOnline.TabIndex = 3;
@@ -374,7 +381,7 @@
             // label2
             // 
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(57, 86);
+            this.label2.Location = new System.Drawing.Point(342, 33);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(69, 20);
             this.label2.TabIndex = 2;
@@ -1119,6 +1126,56 @@
             this.btnSave.UseVisualStyleBackColor = true;
             this.btnSave.Click += new System.EventHandler(this.btnSave_Click);
             // 
+            // groupBox12
+            // 
+            this.groupBox12.Controls.Add(this.tbPort);
+            this.groupBox12.Controls.Add(this.label20);
+            this.groupBox12.Controls.Add(this.tbIP);
+            this.groupBox12.Controls.Add(this.label21);
+            this.groupBox12.Dock = System.Windows.Forms.DockStyle.Top;
+            this.groupBox12.Location = new System.Drawing.Point(2, 85);
+            this.groupBox12.Margin = new System.Windows.Forms.Padding(2);
+            this.groupBox12.Name = "groupBox12";
+            this.groupBox12.Padding = new System.Windows.Forms.Padding(2);
+            this.groupBox12.Size = new System.Drawing.Size(622, 83);
+            this.groupBox12.TabIndex = 3;
+            this.groupBox12.TabStop = false;
+            this.groupBox12.Text = "PLC";
+            // 
+            // tbPort
+            // 
+            this.tbPort.Location = new System.Drawing.Point(430, 30);
+            this.tbPort.Name = "tbPort";
+            this.tbPort.Size = new System.Drawing.Size(136, 27);
+            this.tbPort.TabIndex = 3;
+            this.tbPort.TextChanged += new System.EventHandler(this.tbPort_TextChanged);
+            // 
+            // label20
+            // 
+            this.label20.AutoSize = true;
+            this.label20.Location = new System.Drawing.Point(342, 33);
+            this.label20.Name = "label20";
+            this.label20.Size = new System.Drawing.Size(40, 20);
+            this.label20.TabIndex = 2;
+            this.label20.Text = "Port";
+            // 
+            // tbIP
+            // 
+            this.tbIP.Location = new System.Drawing.Point(145, 26);
+            this.tbIP.Name = "tbIP";
+            this.tbIP.Size = new System.Drawing.Size(136, 27);
+            this.tbIP.TabIndex = 1;
+            this.tbIP.TextChanged += new System.EventHandler(this.tbIP_TextChanged);
+            // 
+            // label21
+            // 
+            this.label21.AutoSize = true;
+            this.label21.Location = new System.Drawing.Point(57, 29);
+            this.label21.Name = "label21";
+            this.label21.Size = new System.Drawing.Size(22, 20);
+            this.label21.TabIndex = 0;
+            this.label21.Text = "IP";
+            // 
             // UcSet
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
@@ -1175,6 +1232,8 @@
             ((System.ComponentModel.ISupportInitialize)(this.numInitY)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.numInitX)).EndInit();
             this.panel1.ResumeLayout(false);
+            this.groupBox12.ResumeLayout(false);
+            this.groupBox12.PerformLayout();
             this.ResumeLayout(false);
 
         }
@@ -1247,5 +1306,10 @@
         private System.Windows.Forms.NumericUpDown numInitY;
         private System.Windows.Forms.Label label19;
         private System.Windows.Forms.NumericUpDown numInitX;
+        private System.Windows.Forms.GroupBox groupBox12;
+        private System.Windows.Forms.TextBox tbPort;
+        private System.Windows.Forms.Label label20;
+        private System.Windows.Forms.TextBox tbIP;
+        private System.Windows.Forms.Label label21;
     }
 }

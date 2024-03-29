@@ -1,7 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Windows.Forms;
+using Vision.Comm;
 using Vision.Core;
 using Vision.Frm;
 using Vision.Stations;
@@ -15,6 +18,8 @@ namespace Vision.Projects
         private static ProjectManager _instance;
         private Project _project;
         private static object _lock = new object();
+        private bool _imageThreadFlag;
+        private bool _systemThreadFlag;
         private ProjectManager()
         {
             if (!Directory.Exists(ProjectDir))
@@ -25,6 +30,8 @@ namespace Vision.Projects
             {
                 OpenProject();
                 LoadConfig();
+                ConnectPlc();
+                RunThread();
             }
             catch (Exception ex)
             {
@@ -134,7 +141,7 @@ namespace Vision.Projects
         /// <summary>
         /// 打开项目
         /// </summary>
-        public void OpenProject()
+        private void OpenProject()
         {
             if (IsLoaded)
             {
@@ -186,6 +193,31 @@ namespace Vision.Projects
             }
         }
 
+        private bool ConnectPlc()
+        {
+            try
+            {
+                var plc = MXPlc.GetInstance();
+                plc.PLCIPAddress = Config.PLCConfig.IP;
+                plc.PLCPort = int.Parse(Config.PLCConfig.Port);
+                if (!plc.IsOpened)
+                {
+                    plc.OpenPLC();
+                }
+
+                var res = plc.IsOpened;
+                LogUI.AddLog(res ? "plc 连接成功！" : "plc 连接失败！");
+                LogNet.Log(res ? "plc 连接成功！" : "plc 连接失败！");
+                return res;
+            }
+            catch
+            {
+                LogUI.AddLog("plc 连接失败！");
+                LogNet.Log($"plc 连接失败!");
+                return false;
+            }
+        }
+
         /// <summary>
         /// 关闭项目
         /// </summary>
@@ -197,6 +229,8 @@ namespace Vision.Projects
                 station.ShowDisplayChangedEvent -= Station_ShowDisplayChangedEvent;
             }
             _project.Close();
+            _imageThreadFlag = false;
+            _systemThreadFlag = false;
             IsLoaded = false;
         }
 
@@ -220,6 +254,17 @@ namespace Vision.Projects
                 File.Create(ConfigPath).Close();
             }
             return Config.SaveConfig(ConfigPath);
+        }
+
+        /// <summary>
+        /// 一些循环
+        /// </summary>
+        public void RunThread()
+        {
+            _imageThreadFlag = true;
+            _systemThreadFlag = true;
+            Task.Run(ImageDelete);
+            Task.Run(HeartBeat);
         }
 
         #endregion
@@ -496,5 +541,104 @@ namespace Vision.Projects
         }
 
         #endregion
+
+
+        /// <summary>
+        /// 异步循环删除图像文件
+        /// </summary>
+        private void ImageDelete()
+        {
+            while (_imageThreadFlag)
+            {
+                //按图像保存的时间进行删除
+                if (Config.ImageConfig.IsDeleteByTime)
+                {
+                    DateTime now = DateTime.Now;
+                    string rootDir = Config.ImageConfig.SaveImageDir;
+                    //工位 文件夹
+                    var dirs = Directory.GetDirectories(rootDir);
+                    foreach (var x in dirs)
+                    {
+                        //OK NG
+                        var stations = Directory.GetDirectories(x);
+                        foreach (var station in stations)
+                        {
+                            //日期文件夹
+                            var dates = Directory.GetDirectories(station);
+                            foreach (var date in dates)
+                            {
+                                //每天文件夹路径 -- 最终判断路径
+                                if ((now - Directory.GetCreationTime(date)).TotalDays >= Config.ImageConfig.DeleteDayTime)
+                                {
+                                    Directory.Delete(date, true);
+                                }
+                            }
+                        }
+                    }
+                }
+
+                //按图像文件夹的大小进行删除
+                if (Config.ImageConfig.IsDeleteBySize)
+                {
+                    string rootDir = Config.ImageConfig.SaveImageDir;
+                    //获取图像文件夹的大小
+                    var size = Local.GetFolderSize(rootDir);
+                    int msize = (int)(size / 1024 / 1024);
+                    if (msize >= Config.ImageConfig.DeleteSize)
+                    {
+                        //工位文件夹
+                        var dirs = Directory.GetDirectories(rootDir);
+
+                        foreach (var x in dirs)
+                        {
+                            //OK NG 文件夹
+                            var stations = Directory.GetDirectories(x);
+                            foreach (var station in stations)
+                            {
+                                //日期文件夹
+                                var dates = Directory.GetDirectories(station);
+                                foreach (var date in dates)
+                                {
+                                    Directory.Delete(date, true);
+                                }
+                            }
+                        }
+                    }
+                }
+
+                Thread.Sleep(1000);
+            }
+        }
+
+        /// <summary>
+        /// 心跳
+        /// </summary>
+        private void HeartBeat()
+        {
+            short num = 0;
+            var plc = MXPlc.GetInstance();
+            //判断是否连接
+            if (plc.IsOpened)
+            {
+                while (_systemThreadFlag)
+                {
+                    //心跳 
+                    plc.WriteShort(Config.SystemConfig.HeartAddress, num);
+                    if (num == 0)
+                    {
+                        num = 1;
+                    }
+                    else if (num == 1)
+                    {
+                        num = 0;
+                    }
+
+                    //联机状态
+                    plc.WriteShort(Config.SystemConfig.OnlineAddress, 1);
+
+                    Thread.Sleep(1000);
+                }
+            }
+        }
     }
 }
