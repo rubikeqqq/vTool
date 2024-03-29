@@ -33,6 +33,7 @@ namespace Vision.Comm
             get { return mIPAddr; }
             set { mIPAddr = value; }
         }
+
         public int PLCPort
         {
             get { return mPort; }

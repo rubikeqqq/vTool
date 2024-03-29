@@ -250,7 +250,7 @@ namespace Vision.Core
         public bool Save(string path)
         {
             if (!File.Exists(path)) return false;
-            string section = nameof(OffsetConfig);
+            string section = nameof(PLCConfig);
 
 
             IniHelper.WriteString(section, nameof(IP), IP, path);
