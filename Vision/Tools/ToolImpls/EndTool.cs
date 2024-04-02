@@ -33,6 +33,7 @@ namespace Vision.Tools.ToolImpls
 
         public override void Run()
         {
+            if (!Enable) return;
             if (MXPlc.GetInstance().IsOpened)
             {
                 if (!string.IsNullOrEmpty(EndAddress))

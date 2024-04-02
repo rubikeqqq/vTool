@@ -30,6 +30,7 @@ namespace Vision.Tools.ToolImpls
 
         public override void Run()
         {
+            if (!Enable) return;
             var plc = MXPlc.GetInstance();
             if (plc.IsOpened)
             {

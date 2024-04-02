@@ -114,7 +114,7 @@ namespace Vision.Projects
         private void ToolEnableEvent(object sender, bool e)
         {
             var toolNode =  tvProject.SelectedNode;
-            toolNode.ForeColor = e ? Color.Black : Color.Gray;
+            toolNode.ForeColor = e ? Color.Black : Color.LightGray;
         }
 
         /// <summary>

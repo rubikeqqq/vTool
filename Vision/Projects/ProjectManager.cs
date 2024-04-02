@@ -1,12 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using Vision.Hardware;
 using Vision.Core;
 using Vision.Frm;
+using Vision.Hardware;
 using Vision.Stations;
 using Vision.Tools.Interfaces;
 using Vision.Tools.ToolImpls;
@@ -19,7 +20,6 @@ namespace Vision.Projects
         private Project _project;
         private static object _lock = new object();
         private bool _imageThreadFlag;
-        private bool _systemThreadFlag;
         private ProjectManager()
         {
             if (!Directory.Exists(ProjectDir))
@@ -193,6 +193,10 @@ namespace Vision.Projects
             }
         }
 
+        /// <summary>
+        /// 连接plc
+        /// </summary>
+        /// <returns></returns>
         private bool ConnectPlc()
         {
             try
@@ -234,7 +238,6 @@ namespace Vision.Projects
             }
             _project.Close();
             _imageThreadFlag = false;
-            _systemThreadFlag = false;
             IsLoaded = false;
         }
 
@@ -266,7 +269,6 @@ namespace Vision.Projects
         public void RunThread()
         {
             _imageThreadFlag = true;
-            _systemThreadFlag = true;
             Task.Run(ImageDelete);
         }
 
@@ -495,6 +497,9 @@ namespace Vision.Projects
         #endregion
 
         #region TreeView
+        /// <summary>
+        /// 更新工具的TreeNode
+        /// </summary>
         public void UpdateTreeNode()
         {
             TreeNode node = new TreeNode() { Text = "项目信息" };
@@ -517,6 +522,11 @@ namespace Vision.Projects
                     tnTool.Name = "子工具=" + tnStation.Text + ">" + tool.ToolName;
                     tnTool.ImageIndex = 2;
                     tnTool.SelectedImageIndex = 2;
+                    //当工具未启用状态时 改变其颜色
+                    if (!tool.Enable)
+                    {
+                        tnTool.ForeColor = Color.LightGray;
+                    }
                     tnStation.Nodes.Add(tnTool);
                 }
                 node.Nodes.Add(tnStation);
@@ -524,7 +534,12 @@ namespace Vision.Projects
             OnTreeChanged(new TreeEventArgs(node));
         }
 
-        public List<string> GetToolNameList(string toolPath)
+        /// <summary>
+        /// 根据点击的TreeNode的名称 获取所有工具的名称
+        /// </summary>
+        /// <param name="toolPath"></param>
+        /// <returns></returns>
+        private List<string> GetToolNameList(string toolPath)
         {
             int index1 = toolPath.IndexOf("=");
             int index2 = toolPath.IndexOf(">");
@@ -535,6 +550,11 @@ namespace Vision.Projects
             return list;
         }
 
+        /// <summary>
+        /// 根据点击的TreeNode的名称 获取station和tool
+        /// </summary>
+        /// <param name="toolPath"></param>
+        /// <returns></returns>
         public StationToolData GetStationAndTool(string toolPath)
         {
             var nameList = GetToolNameList(toolPath);
@@ -612,6 +632,5 @@ namespace Vision.Projects
                 Thread.Sleep(1000);
             }
         }
-
     }
 }

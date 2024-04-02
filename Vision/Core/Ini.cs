@@ -316,7 +316,7 @@ namespace Vision.Core
                 GetPrivateProfileString(sectionName, keyName, defaultValue, temp, 255, path);
                 return temp.ToString();
             }
-            catch (Exception e)
+            catch 
             {
                 return default;
             }
