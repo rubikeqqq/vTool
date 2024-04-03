@@ -50,6 +50,7 @@
             this.imageList1 = new System.Windows.Forms.ImageList(this.components);
             this.panelMain = new System.Windows.Forms.Panel();
             this.imageList2 = new System.Windows.Forms.ImageList(this.components);
+            this.参数设置ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.cmsProject.SuspendLayout();
             this.cmsStation.SuspendLayout();
             this.cmsTool.SuspendLayout();
@@ -85,9 +86,10 @@
             this.工位上移ToolStripMenuItem,
             this.工位下移ToolStripMenuItem,
             this.删除组ToolStripMenuItem,
-            this.删除全部工具ToolStripMenuItem});
+            this.删除全部工具ToolStripMenuItem,
+            this.参数设置ToolStripMenuItem});
             this.cmsStation.Name = "cmsStation";
-            this.cmsStation.Size = new System.Drawing.Size(169, 148);
+            this.cmsStation.Size = new System.Drawing.Size(169, 172);
             this.cmsStation.ItemClicked += new System.Windows.Forms.ToolStripItemClickedEventHandler(this.cmsStation_ItemClicked);
             // 
             // 新建工具ToolStripMenuItem
@@ -167,7 +169,7 @@
             // 
             this.splitContainer1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.splitContainer1.Location = new System.Drawing.Point(0, 0);
-            this.splitContainer1.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.splitContainer1.Margin = new System.Windows.Forms.Padding(2);
             this.splitContainer1.Name = "splitContainer1";
             // 
             // splitContainer1.Panel1
@@ -189,7 +191,7 @@
             this.tvProject.ImageIndex = 2;
             this.tvProject.ImageList = this.imageList1;
             this.tvProject.Location = new System.Drawing.Point(0, 0);
-            this.tvProject.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.tvProject.Margin = new System.Windows.Forms.Padding(2);
             this.tvProject.Name = "tvProject";
             this.tvProject.SelectedImageIndex = 2;
             this.tvProject.Size = new System.Drawing.Size(129, 523);
@@ -213,7 +215,7 @@
             this.panelMain.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
             this.panelMain.Dock = System.Windows.Forms.DockStyle.Fill;
             this.panelMain.Location = new System.Drawing.Point(0, 0);
-            this.panelMain.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.panelMain.Margin = new System.Windows.Forms.Padding(2);
             this.panelMain.Name = "panelMain";
             this.panelMain.Size = new System.Drawing.Size(553, 523);
             this.panelMain.TabIndex = 0;
@@ -226,12 +228,18 @@
             this.imageList2.Images.SetKeyName(1, "OK.png");
             this.imageList2.Images.SetKeyName(2, "NG.png");
             // 
+            // 参数设置ToolStripMenuItem
+            // 
+            this.参数设置ToolStripMenuItem.Name = "参数设置ToolStripMenuItem";
+            this.参数设置ToolStripMenuItem.Size = new System.Drawing.Size(168, 24);
+            this.参数设置ToolStripMenuItem.Text = "参数设置";
+            // 
             // UcProject
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.Controls.Add(this.splitContainer1);
-            this.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.Margin = new System.Windows.Forms.Padding(2);
             this.Name = "UcProject";
             this.Size = new System.Drawing.Size(688, 523);
             this.Load += new System.EventHandler(this.UcProject_Load);
@@ -266,5 +274,6 @@
         private System.Windows.Forms.ToolStripMenuItem 下移ToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem 工位上移ToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem 工位下移ToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem 参数设置ToolStripMenuItem;
     }
 }

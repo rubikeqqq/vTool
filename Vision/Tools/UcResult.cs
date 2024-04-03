@@ -90,7 +90,7 @@ namespace Vision.Tools
             {
                 if (item == _rTool) { break; }
 
-                if (item is CenterCalibTool outTool)
+                if (item is CenterCalibTool)
                 {
                     outputs.Add($"{item.ToolName}.X");
                     outputs.Add($"{item.ToolName}.Y");
@@ -101,13 +101,13 @@ namespace Vision.Tools
         }
 
         /// <summary>
-        /// 获取vpp的输出和IPointOut的集合
+        /// 获取vpp的输出
         /// </summary>
         /// <returns></returns>
         private List<string> GetToolSources()
         {
             var list = GetTerminals();
-            list.AddRange(GetPointOut());
+            //list.AddRange(GetPointOut());
             return list;
         }
 

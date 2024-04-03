@@ -61,10 +61,10 @@ namespace Vision.Tools.ToolImpls
             }
 
             //先获取kk的原始坐标
-            var kkOrigin = Config.KKConfig.KKOriginPosition;
+            var kkOrigin = _station.DataConfig.KKConfig.KKOriginPosition;
 
             //读取现在的kk坐标
-            if(string.IsNullOrEmpty(Config.KKConfig.AddressX) || string.IsNullOrEmpty(Config.KKConfig.AddressY))
+            if(string.IsNullOrEmpty(_station.DataConfig.KKConfig.AddressX) || string.IsNullOrEmpty(_station.DataConfig.KKConfig.AddressY))
             {
                 throw new ToolException("kk坐标的地址不存在！");
             }
@@ -75,8 +75,8 @@ namespace Vision.Tools.ToolImpls
                 throw new ToolException("plc未连接！");
             }
 
-            plc.ReadDouble(Config.KKConfig.AddressX,out double x);
-            plc.ReadDouble(Config.KKConfig.AddressY,out double y);
+            plc.ReadDouble(_station.DataConfig.KKConfig.AddressX,out double x);
+            plc.ReadDouble(_station.DataConfig.KKConfig.AddressY,out double y);
 
             //LogUI.AddLog($"KK当前坐标 x:{x} y:{y}");
 

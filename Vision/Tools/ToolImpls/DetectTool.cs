@@ -40,7 +40,11 @@ namespace Vision.Tools.ToolImpls
             {
                 UI = new UcDetectTool(station, this);
             }
-            UI.GetImageIn();
+            else
+            {
+                UI.GetImageIn();
+            }
+            
             return UI;
         }
 
@@ -95,7 +99,7 @@ namespace Vision.Tools.ToolImpls
 
         public void RemoveVpp()
         {
-            if (!IsLoaded)
+            if (IsLoaded)
             {
                 try
                 {

@@ -1,8 +1,6 @@
 ﻿using Cognex.VisionPro;
 using Cognex.VisionPro.CalibFix;
-using Cognex.VisionPro.Caliper;
-using Cognex.VisionPro.Implementation;
-using Cognex.VisionPro.PMAlign;
+using Cognex.VisionPro.ID;
 using Cognex.VisionPro.ToolBlock;
 using System;
 using System.ComponentModel;
@@ -19,7 +17,7 @@ namespace Vision.Tools.ToolImpls
     [ToolName("旋转标定", 1)]
     [GroupInfo(name: "标定工具", index: 1)]
     [Description("旋转中心标定工具")]
-    public class CenterCalibTool : ToolBase, IVpp
+    public class CenterCalibTool : ToolBase, IVpp, IImageIn, IImageOut
     {
         //DetectTool工具完成得到的点位 传入此旋转工具进行计算
         [NonSerialized]
@@ -63,6 +61,11 @@ namespace Vision.Tools.ToolImpls
         [field: NonSerialized]
         public PointD CenterRobotDelta { get; set; }
 
+        public string ImageInName { get; set; }
+
+        [field: NonSerialized]
+        public ICogImage ImageIn { get; set; }
+
         /// <summary>
         /// 数据输出的点
         /// </summary>
@@ -70,11 +73,23 @@ namespace Vision.Tools.ToolImpls
         public PointA PointOut { get; set; }
 
         [field: NonSerialized]
-        public UserControl UI { get; set; }
+        public UcCenterCalibTool UI { get; set; }
+
+        [field: NonSerialized]
+        public ICogImage ImageOut {  get; set; }
 
         public override UserControl GetToolControl(Station station)
         {
-            return UI ?? (UI = new UcCenterCalibTool(station, this));
+            if (UI == null)
+            {
+                UI = new UcCenterCalibTool(station, this);
+            }
+            else
+            {
+                UI.GetImageIn();
+            }
+            
+            return UI;
         }
 
         public override void Save()
@@ -88,6 +103,29 @@ namespace Vision.Tools.ToolImpls
         public override void Run()
         {
             if (!Enable) return;
+            GetImageIn();
+            if (ImageIn != null)
+            {
+                if (ToolBlock != null)
+                {
+                    ToolBlock.Inputs["InputImage"].Value = ImageIn;
+                    ToolBlock.Run();
+                    if (ToolBlock.RunStatus.Result != CogToolResultConstants.Accept)
+                    {
+                        throw new ToolException($"工具[{ToolName}]运行失败！")
+                        {
+                            ToolName = ToolName,
+                        };
+                    }
+                    ImageOut = (ICogImage)ToolBlock.Outputs["OutputImage"].Value;
+                }
+            }
+            else
+            {
+                throw new ToolException($"[{ToolName}]没有输入图像");
+            }
+
+
             if (_robotTool == null)
             {
                 _robotTool = (KkRobotCalibTool)_station.GetRobotCalibTool(0);
@@ -121,6 +159,21 @@ namespace Vision.Tools.ToolImpls
         }
 
         /// <summary>
+        /// 获取输入图像
+        /// </summary>
+        private bool GetImageIn()
+        {
+            if (_station == null || ImageInName == null) return false;
+
+            var tool = _station[ImageInName];
+
+            if (tool == null) return false;
+
+            ImageIn = ((IImageOut)tool).ImageOut;
+            return true;
+        }
+
+        /// <summary>
         /// 计算当机械手旋转后的坐标
         /// </summary>
         /// <returns></returns>
@@ -139,7 +192,7 @@ namespace Vision.Tools.ToolImpls
 
                 //相当于将机械手从原模板位移动到现在的位置
                 var a1 = PointIn.Angle;
-                var a2 = Config.CalibConfig.ModelOriginPoint.Angle;
+                var a2 = _station.DataConfig.CalibConfig.ModelOriginPoint.Angle;
                 //if (a2 < -Math.PI / 2)
                 //{
                 //    a2 = a2 + Math.PI;
@@ -158,8 +211,8 @@ namespace Vision.Tools.ToolImpls
                 //var deltaY = rotatedY - _station.ModelPosition.Y ;
 
 
-                RotatedAffine.Math_Transfer(Config.CalibConfig.ModelOriginPoint.X, Config.CalibConfig.ModelOriginPoint.Y, deltaAngle,
-                    Config.CalibConfig.CenterPoint.X + CenterRobotDelta.X, Config.CalibConfig.CenterPoint.Y + CenterRobotDelta.Y,
+                RotatedAffine.Math_Transfer(_station.DataConfig.CalibConfig.ModelOriginPoint.X, _station.DataConfig.CalibConfig.ModelOriginPoint.Y, deltaAngle,
+                    _station.DataConfig.CalibConfig.CenterPoint.X + CenterRobotDelta.X, _station.DataConfig.CalibConfig.CenterPoint.Y + CenterRobotDelta.Y,
                    out var rotatedX, out var rotatedY);
 
                 var deltaX = PointIn.X - rotatedX;
@@ -172,10 +225,10 @@ namespace Vision.Tools.ToolImpls
                 PointA point = new PointA();
 
                 //机械手示教位 + 系统补偿 + kk机械手的偏移量+ delta 
-                point.X = (Config.CalibConfig.RobotOriginPosition.X + offset.X) + RobotDelta.X + deltaX;
-                point.Y = (Config.CalibConfig.RobotOriginPosition.Y + offset.Y) + RobotDelta.Y + deltaY;
+                point.X = (_station.DataConfig.CalibConfig.RobotOriginPosition.X + offset.X) + RobotDelta.X + deltaX;
+                point.Y = (_station.DataConfig.CalibConfig.RobotOriginPosition.Y + offset.Y) + RobotDelta.Y + deltaY;
                 //角度就是当前角度 - 模板角度
-                point.Angle = deltaAngle * 180 / Math.PI + Config.CalibConfig.RobotOriginPosition.Angle;
+                point.Angle = deltaAngle * 180 / Math.PI + _station.DataConfig.CalibConfig.RobotOriginPosition.Angle;
 
                 LogUI.AddLog($"=>{point}");
                 return point;
@@ -196,8 +249,8 @@ namespace Vision.Tools.ToolImpls
             PointIn = _detectTool.ModelPoint ?? new PointA();
             RobotDelta = _robotTool.RobotDelta ?? new PointD();
 
-            CenterRobotDelta.X = Config.CalibConfig.RobotOriginPosition.X - Config.CalibConfig.CenterCalibRobotPoint.X;
-            CenterRobotDelta.Y = Config.CalibConfig.RobotOriginPosition.Y - Config.CalibConfig.CenterCalibRobotPoint.Y;
+            CenterRobotDelta.X = _station.DataConfig.CalibConfig.RobotOriginPosition.X - _station.DataConfig.CalibConfig.CenterCalibRobotPoint.X;
+            CenterRobotDelta.Y = _station.DataConfig.CalibConfig.RobotOriginPosition.Y - _station.DataConfig.CalibConfig.CenterCalibRobotPoint.Y;
         }
 
         /// <summary>
@@ -206,7 +259,7 @@ namespace Vision.Tools.ToolImpls
         /// <returns></returns>
         private PointD GetOffset()
         {
-            var point = Config.OffsetConfig;
+            var point = _station.DataConfig.OffsetConfig;
             return new PointD(point.OffsetX, point.OffsetY);
         }
 
@@ -225,6 +278,9 @@ namespace Vision.Tools.ToolImpls
                 }
 
                 ToolBlock = new CogToolBlock();
+                ToolBlock.Inputs.Add(new CogToolBlockTerminal("InputImage", typeof(ICogImage)));
+                ToolBlock.Outputs.Add(new CogToolBlockTerminal("OutputImage", typeof(ICogImage)));
+                AddTools(ToolBlock);
                 IsLoaded = true;
             }
         }
@@ -275,14 +331,6 @@ namespace Vision.Tools.ToolImpls
             }
         }
 
-        public void AddToolBlock()
-        {
-            if (IsLoaded)
-            {
-                AddTools(ToolBlock);
-            }
-        }
-
         /// <summary>
         /// 关闭相机
         /// </summary>
@@ -312,51 +360,27 @@ namespace Vision.Tools.ToolImpls
 
             acqTool.UserData.Add("_ToolOutputTerminals", s1);
 
-            if (!tb.Tools.Contains(acqTool.Name))
-            {
-                tb.Tools.Add(acqTool);
-            }
+            CogIDTool idTool = new CogIDTool();
+            idTool.Name = "CogIDTool1";
+            string[] s2 = new string[1];
+            s2[0] = "|InputImage|InputImage";
+            string[] s3 = new string[1];
+            s3[0] = "|Result.Count|Result.Count";
+
+            idTool.UserData.Add("_ToolOutputTerminals", s2);
+            idTool.UserData.Add("_ToolOutputTerminals", s3);
 
 
-            //自动寻找之前的9点标定
-            var tool = _station.GetNPointTool();
-            if (tool != null)
-            {
-                foreach (CogToolBase t in tool.ToolBlock.Tools)
-                {
-                    if (t is CogCalibNPointToNPointTool cTool)
-                    {
-                        if (!tb.Tools.Contains(cTool.Name))
-                        {
-                            tb.Tools.Add(cTool);
-                        }
-                    }
-                }
-                foreach (CogToolBase t in tool.ToolBlock.Tools)
-                {
-                    if (t is CogPMAlignTool pTool)
-                    {
-                        if (!tb.Tools.Contains(pTool.Name))
-                        {
-                            tb.Tools.Add(pTool);
-                        }
-                    }
-                }
-                foreach (CogToolBase t in tool.ToolBlock.Tools)
-                {
-                    if (t is CogFindCircleTool fcTool)
-                    {
-                        if (!tb.Tools.Contains(fcTool.Name))
-                        {
-                            tb.Tools.Add(fcTool);
-                        }
-                    }
-                }
-            }
-            else
-            {
-                "请先完成9点标定！".MsgBox();
-            }
+
+            CogCalibNPointToNPointTool nTool = new CogCalibNPointToNPointTool();
+            nTool.Name = "CogCalibNPointToNPointTool1";
+            string[] s4 = new string[1];
+            string[] s5 = new string[1];
+            s4[0] = "|InputImage|InputImage";
+            s5[0] = "|OutputImage|OutputImage";
+
+            nTool.UserData.Add("_ToolInputTerminals", s4);//添加终端-InputImage
+            nTool.UserData.Add("_ToolOutputTerminals", s5);
 
             CogFitCircleTool fitCircleTool = new CogFitCircleTool();
             fitCircleTool.Name = "CogFitCircleTool1";
@@ -372,10 +396,10 @@ namespace Vision.Tools.ToolImpls
             fitCircleTool.UserData.Add("_ToolInputTerminals", s8);//添加终端-InputImage
             fitCircleTool.UserData.Add("_ToolOutputTerminals", s9);
 
-            if (!tb.Tools.Contains(fitCircleTool.Name))
-            {
-                tb.Tools.Add(fitCircleTool);
-            }
+            tb.Tools.Add(acqTool);
+            tb.Tools.Add(idTool);
+            tb.Tools.Add(nTool);
+            tb.Tools.Add(fitCircleTool);
         }
 
         #endregion

@@ -46,8 +46,12 @@ namespace Vision.Tools.ToolImpls
             {
                 UI = new UcCenterDetectTool(station, this);
             }
-            //刷新图像源
-            UI.GetImageIn();
+            else
+            {
+                //刷新图像源
+                UI.GetImageIn();
+            }
+            
             return UI;
         }
 
@@ -71,9 +75,14 @@ namespace Vision.Tools.ToolImpls
 
                 ToolBlock = new CogToolBlock();
                 ToolBlock.Inputs.Add(new CogToolBlockTerminal("InputImage", typeof(ICogImage)));
+                //模板点位
                 ToolBlock.Outputs.Add(new CogToolBlockTerminal("ModelX", typeof(double)));
                 ToolBlock.Outputs.Add(new CogToolBlockTerminal("ModelY", typeof(double)));
                 ToolBlock.Outputs.Add(new CogToolBlockTerminal("ModelAngle", typeof(double)));
+                //加上旋转标定计算得到的点位
+                ToolBlock.Outputs.Add(new CogToolBlockTerminal("X", typeof(double)));
+                ToolBlock.Outputs.Add(new CogToolBlockTerminal("Y", typeof(double)));
+                ToolBlock.Outputs.Add(new CogToolBlockTerminal("Angle", typeof(double)));
                 IsLoaded = true;
             }
         }
@@ -142,20 +151,24 @@ namespace Vision.Tools.ToolImpls
                     //复位结果数据
                     ResetOutput();
 
+                    //运行
                     ToolBlock.Run();
                     if (ToolBlock.RunStatus.Result != CogToolResultConstants.Accept)
                     {
                         throw new ToolException($"[{ToolName}] NG!");
                     }
 
-
-                    if (ToolBlock.Outputs["ModelX"].Value != null &&
-                        ToolBlock.Outputs["ModelY"].Value != null &&
-                        ToolBlock.Outputs["ModelAngle"].Value != null)
+                    //获取运行结果
+                    if (ToolBlock.Outputs["X"].Value != null &&
+                        ToolBlock.Outputs["Y"].Value != null &&
+                        ToolBlock.Outputs["Angle"].Value != null)
                     {
-                        ModelPoint = new PointA((double)ToolBlock.Outputs["ModelX"].Value,
-                            (double)ToolBlock.Outputs["ModelY"].Value, (double)ToolBlock.Outputs["ModelAngle"].Value);
+                        ModelPoint = new PointA((double)ToolBlock.Outputs["X"].Value,
+                            (double)ToolBlock.Outputs["Y"].Value, (double)ToolBlock.Outputs["Angle"].Value);
                     }
+
+                    //计算机械手旋转后的坐标
+                    ModelPoint = GetRobotPoint();
                 }
             }
             else
@@ -230,6 +243,80 @@ namespace Vision.Tools.ToolImpls
                 }
             }
         }
-        #endregion  
+
+        /// <summary>
+        /// 计算当机械手旋转后的坐标
+        /// </summary>
+        /// <returns></returns>
+        private PointA GetRobotPoint()
+        {
+            try
+            {
+                //看看旋转中心有没有标定
+                var centerX = _station.DataConfig.CalibConfig.CenterPoint.X;
+                var centerY = _station.DataConfig.CalibConfig.CenterPoint.Y;
+
+                if(centerX == 0 && centerY == 0)
+                {
+                    LogUI.AddLog($"[{_station.StationName}]旋转中心未标定！");
+                    return null;
+                }
+
+                //====================================== 旋转中心带入计算机械手移动之后的位置 ========================================
+
+                //相当于将机械手从原模板位移动到现在的位置
+                var a1 = ModelPoint.Angle;  //现在找到的模板角度
+                var a2 = _station.DataConfig.CalibConfig.ModelOriginPoint.Angle;  //保存的模板角度
+                //if (a2 < -Math.PI / 2)
+                //{
+                //    a2 = a2 + Math.PI;
+                //}
+
+                var deltaAngle = a1 - a2;    //角度插值
+
+
+                //获取旋转中心的固定偏差
+                PointD _centerDelta = new PointD();
+                _centerDelta.X = _station.DataConfig.CalibConfig.RobotOriginPosition.X - _station.DataConfig.CalibConfig.CenterCalibRobotPoint.X;
+                _centerDelta.Y = _station.DataConfig.CalibConfig.RobotOriginPosition.Y - _station.DataConfig.CalibConfig.CenterCalibRobotPoint.Y;
+
+                //计算模板点的实际坐标绕旋转中心旋转后得到的新的坐标
+                RotatedAffine.Math_Transfer(_station.DataConfig.CalibConfig.ModelOriginPoint.X, _station.DataConfig.CalibConfig.ModelOriginPoint.Y, deltaAngle,
+                    _station.DataConfig.CalibConfig.CenterPoint.X + _centerDelta.X, _station.DataConfig.CalibConfig.CenterPoint.Y + _centerDelta.Y,
+                   out var rotatedX, out var rotatedY);
+
+                // 模板的坐标 - 旋转后的坐标 = delta
+                var deltaX = ModelPoint.X - rotatedX;
+                var deltaY = ModelPoint.Y - rotatedY;
+
+
+                //系统补偿
+                var offset = _station.DataConfig.OffsetConfig;
+
+                //KK移动的偏差
+                PointD _robotOffset = new PointD();
+                var _robotTool = (KkRobotCalibTool)_station.GetRobotCalibTool(0);
+                _robotOffset = _robotTool.RobotDelta ?? new PointD();
+
+
+                PointA point = new PointA();
+
+                //机械手示教位 + 系统补偿 + kk机械手的偏移量+ delta 
+                point.X = (_station.DataConfig.CalibConfig.RobotOriginPosition.X + offset.OffsetX) + _robotOffset.X + deltaX;
+                point.Y = (_station.DataConfig.CalibConfig.RobotOriginPosition.Y + offset.OffsetY) + _robotOffset.Y + deltaY;
+                //角度就是当前角度 - 模板角度
+                point.Angle = deltaAngle * 180 / Math.PI + _station.DataConfig.CalibConfig.RobotOriginPosition.Angle;
+
+                LogUI.AddLog($"=>{point}");
+                return point;
+                #endregion
+            }
+            catch (Exception ex)
+            {
+                ex.Message.MsgBox();
+                return null;
+            }
+        }
+       
     }
 }

@@ -1,20 +1,27 @@
 ﻿using Cognex.VisionPro;
 using Cognex.VisionPro.CalibFix;
-using Cognex.VisionPro.Caliper;
-using Cognex.VisionPro.PMAlign;
+using Cognex.VisionPro.ID;
+using Cognex.VisionPro.ImageFile;
 using System;
+using System.IO;
+using System.Threading;
 using System.Windows.Forms;
 using Vision.Core;
+using Vision.Projects;
+using Vision.Stations;
 using Vision.Tools.ToolImpls;
 
 namespace Vision.Frm
 {
     public partial class FrmCenterCalib : Form
     {
-        public FrmCenterCalib(CenterCalibTool tool)
+        public FrmCenterCalib(Station station, CenterCalibTool tool)
         {
             InitializeComponent();
+            _station = station;
+            _path = Path.Combine(ProjectManager.ProjectDir, station.StationName, "CenterCalib.xml"); 
             _centerTool = tool;
+            LoadData();
             this.WindowState = FormWindowState.Maximized;
             this.BringToFront();
         }
@@ -22,12 +29,16 @@ namespace Vision.Frm
         private ICogImage _image;
         private int _index = 0;
 
+        private Station _station;
         private readonly CenterCalibTool _centerTool;
         private CogCalibNPointToNPointTool _nPointTool;
         private CogAcqFifoTool _acqTool;
         private CogFitCircleTool _fitCircleTool;
-        private CogPMAlignTool _pmaTool;
-        private CogFindCircleTool _findCircleTool;
+        private CogIDTool _idTool;
+
+        private CogIDResult _idResult;
+        private CenterDataList _centerListData = new CenterDataList();
+        private readonly string _path;
 
         /// <summary>
         /// 计算标定
@@ -36,32 +47,37 @@ namespace Vision.Frm
         {
             try
             {
-                if (_fitCircleTool != null)
+                //==============================先9点标定================================
+                _nPointTool.InputImage = _image;
+                _nPointTool.Calibration.Calibrate();
+               
+
+                Thread.Sleep(100);
+
+                //============================旋转标定===================================
+                //使用9点标定的输出图像作为拟合圆的输出图像
+                _image = _nPointTool.OutputImage;
+                _fitCircleTool.InputImage = _image;
+                //保证大于3个点 拟合圆
+                if (_fitCircleTool.RunParams.NumPoints >= 3)
                 {
-                    _fitCircleTool.InputImage = _image as CogImage8Grey;
-                    if (_fitCircleTool.RunParams.NumPoints >= 3)
+                    _fitCircleTool.Run();
+
+                    if (_fitCircleTool.Result.GetCircle() == null)
                     {
-                        _fitCircleTool.Run();
-
-                        if (_fitCircleTool.Result.GetCircle() == null)
-                        {
-                            throw new Exception("标定失败！");
-                        }
-
-                        //if (_fitCircleTool.RunStatus.Result != CogToolResultConstants.Accept)
-                        //{
-                        //    throw new Exception("标定失败！");
-                        //}
-                        var x = _fitCircleTool.Result.GetX(0);
-                        var y = _fitCircleTool.Result.GetY(0);
-                        Config.CalibConfig.CenterPoint = new PointD(x, y);
-                        _centerTool.IsCalibed = true;
+                        throw new Exception("标定失败！");
                     }
+
+                    var x = _fitCircleTool.Result.GetX(0);
+                    var y = _fitCircleTool.Result.GetY(0);
+                    _station.DataConfig.CalibConfig.CenterPoint = new PointD(x, y);
+                    _centerTool.IsCalibed = true;
                 }
+
             }
             catch (Exception ex)
             {
-                Config.CalibConfig.CenterPoint = null;
+                _station.DataConfig.CalibConfig.CenterPoint = null;
                 _centerTool.IsCalibed = false;
                 ex.MsgBox();
             }
@@ -82,27 +98,24 @@ namespace Vision.Frm
 
             try
             {
-                _image = null;
-                //运行取像
-                _acqTool.Run();
-                _image = _acqTool.OutputImage;
-                //运行9点标定
-
-                if (!_nPointTool.Calibration.Calibrated)
+                if (_acqTool != null)
                 {
-                    "请先完成9点标定".MsgBox();
+                    _acqTool.Run();
+                    if (_acqTool.RunStatus.Result == CogToolResultConstants.Accept)
+                    {
+                        _image = _acqTool.OutputImage;
+                        return true;
+                    }
+                    else
+                    {
+                        "取图失败".MsgBox();
+                        return false;
+                    }
                 }
-
-                _nPointTool.InputImage = _image;
-                _nPointTool.Run();
-                _image = _nPointTool.OutputImage;
-
-                if (_image != null)
-                {
-                    return true;
-                }
-
                 return false;
+                //((CogImageFileTool)_centerTool.ToolBlock.Tools["CogImageFileTool1"]).Run();
+                //_image = ((CogImageFileTool)_centerTool.ToolBlock.Tools["CogImageFileTool1"]).OutputImage;
+                //return true;
             }
             catch (Exception ex)
             {
@@ -123,13 +136,16 @@ namespace Vision.Frm
             }
             try
             {
-                //如果已经标定完成，将结果显示在界面
-                if (_fitCircleTool == null) return;
-                for (int i = 0; i < _fitCircleTool.RunParams.NumPoints; i++)
+                //没数据
+                if (_centerListData.CenterList.Count == 0)
                 {
-                    var x1 = _fitCircleTool.RunParams.GetX(i);
-                    var y1 = _fitCircleTool.RunParams.GetY(i);
-                    dgv.Rows.Add(i + 1, x1, y1);
+                    return;
+                }
+                //有数据
+                for (int i = 0; i < _centerListData.CenterList.Count; i++)
+                {
+                    dgv.Rows.Add(i + 1, _centerListData.CenterList[i].ImageX, _centerListData.CenterList[i].ImageY,
+                        _centerListData.CenterList[i].RobotX, _centerListData.CenterList[i].RobotY);
                 }
             }
             catch (Exception ex)
@@ -150,12 +166,9 @@ namespace Vision.Frm
                 {
                     _acqTool = _centerTool.ToolBlock.Tools["CogAcqFifoTool1"] as CogAcqFifoTool;
                     _fitCircleTool = _centerTool.ToolBlock.Tools["CogFitCircleTool1"] as CogFitCircleTool;
-
-
                     _nPointTool = _centerTool.ToolBlock.Tools["CogCalibNPointToNPointTool1"] as CogCalibNPointToNPointTool;
-                    _pmaTool = _centerTool.ToolBlock.Tools["CogPMAlignTool1"] as CogPMAlignTool;
-                    _findCircleTool = _centerTool.ToolBlock.Tools["CogFindCircleTool1"] as CogFindCircleTool;
-                    
+                    _idTool = _centerTool.ToolBlock.Tools["CogIDTool1"] as CogIDTool;
+
                     return true;
                 }
                 return false;
@@ -186,35 +199,68 @@ namespace Vision.Frm
         /// </summary>
         private bool SetPoints()
         {
-            if (dgv.Rows.Count < 3)
+            if (dgv.Rows.Count < 14)
             {
-                "标定的点位不足3个".MsgBox();
+                "标定的点位不足14个".MsgBox();
                 return false;
             }
             try
             {
+                //=============================传入9点标定的数据===============================
+                //清除原有点位
+                int nNumber = _nPointTool.Calibration.NumPoints;
+                for (int i = 0; i < nNumber; i++)
+                {
+                    _nPointTool.Calibration.DeletePointPair(0);
+                }
+                //添加新的点位
+                for (int i = 0; i < 9; i++)
+                {
+                    var c1 = dgv.Rows[i].Cells[1].Value;
+                    var c2 = dgv.Rows[i].Cells[2].Value;
+                    var c3 = dgv.Rows[i].Cells[3].Value;
+                    var c4 = dgv.Rows[i].Cells[4].Value;
+
+
+                    if (c1 == null || c2 == null || c3 == null || c4 == null)
+                    {
+                        "9点标定的点位不正确，请检查".MsgBox();
+                        return false;
+                    }
+
+                    double imageX = double.Parse(c1.ToString().Trim());
+                    double imageY = double.Parse(c2.ToString().Trim());
+                    double rX = double.Parse(c3.ToString().Trim());
+                    double rY = double.Parse(c4.ToString().Trim());
+
+                    _nPointTool.Calibration.AddPointPair(imageX, imageY, rX, rY);
+                    _centerListData.Add(new CenterData() { ImageX = imageX, ImageY = imageY, RobotX = rX, RobotY = rY });
+                }
+
+                //=============================传入旋转标定的数据===============================
+                //清除原有点位
                 int pNumber = _fitCircleTool.RunParams.NumPoints;
                 for (int i = 0; i < pNumber; i++)
                 {
                     _fitCircleTool.RunParams.DeletePoint(0);
                 }
-
-                for (int i = 0; i < dgv.RowCount; i++)
+                //添加新的点位
+                for (int i = 9; i < 14; i++)
                 {
                     var cell1 = dgv.Rows[i].Cells[1].Value;
                     var cell2 = dgv.Rows[i].Cells[2].Value;
 
                     if (cell1 == null || cell2 == null)
                     {
-                        "点位不全，请检查！".MsgBox();
+                        "旋转标定点位不正确，请检查！".MsgBox();
                         return false;
                     }
 
                     double x1 = Convert.ToDouble(cell1.ToString().Trim());
                     double y1 = Convert.ToDouble(cell2.ToString().Trim());
 
-                    //_fitCircleTool.RunParams.SetPoint(i, x1, y1);
                     _fitCircleTool.RunParams.AddPoint(x1, y1);
+                    _centerListData.Add(new CenterData() { ImageX = x1, ImageY = y1 });
                 }
                 return true;
             }
@@ -230,7 +276,7 @@ namespace Vision.Frm
         /// </summary>
         /// <param name="x"></param>
         /// <param name="y"></param>
-        private void AddDgv(double x, double y)
+        private void AddData(double x, double y)
         {
             dgv.Rows.Add(_index + 1, x, y);
         }
@@ -239,17 +285,22 @@ namespace Vision.Frm
         /// 显示图像
         /// </summary>
         /// <param name="record"></param>
-        private void ShowRecord(ICogRecord record)
+        private void ShowRecord(ICogGraphic g)
         {
             //先清除图像
             cogRecordDisplay1.StaticGraphics.Clear();
             cogRecordDisplay1.InteractiveGraphics.Clear();
             cogRecordDisplay1.Image = null;
 
-            if (record != null)
+            if (g != null)
             {
                 cogRecordDisplay1.Image = _image;
-                cogRecordDisplay1.Record = record;
+                cogRecordDisplay1.StaticGraphics.Add(g, "");
+                cogRecordDisplay1.Fit(true);
+            }
+            else
+            {
+                cogRecordDisplay1.Image = _image;
                 cogRecordDisplay1.Fit(true);
             }
         }
@@ -285,45 +336,53 @@ namespace Vision.Frm
             bool r = Grab();
             try
             {
-                if (_index >= 5)
+                if (_index >= 14)
                     return;
-                if (_fitCircleTool != null && r)
+                if (r)
                 {
-                    _pmaTool.InputImage = _image;
+                    _idTool.InputImage = _image;
 
-                    _findCircleTool.InputImage = _image as CogImage8Grey;
+                    _idTool.Run();
 
-                    _pmaTool.Run();
-                    if(_pmaTool.RunStatus.Result == CogToolResultConstants.Accept)
+
+                    if (_idTool.RunStatus.Result == CogToolResultConstants.Accept)
                     {
-                        if (_pmaTool.Results.Count > 0)
+                        if (_idTool.Results.Count > 0)
                         {
-                            _findCircleTool.RunParams.ExpectedCircularArc.CenterX = _pmaTool.Results[0].GetPose().TranslationX;
-                            _findCircleTool.RunParams.ExpectedCircularArc.CenterY = _pmaTool.Results[0].GetPose().TranslationY;
-
-                            _findCircleTool.Run();
-                            if (_findCircleTool.Results.GetCircle() != null)
+                            //第一次设置查找的ID
+                            if (_index == 0)
                             {
-                                ICogRecord ir = _findCircleTool.CreateLastRunRecord();
-                                ShowRecord(ir);
-                                var x = Math.Round(_findCircleTool.Results.GetCircle().CenterX, 3);
-                                var y = Math.Round(_findCircleTool.Results.GetCircle().CenterY, 3);
-                                AddDgv(x, y);
-                                _index++;
+                                GetCalcID(_idTool);
+                            }
+                            if (_idResult == null)
+                            {
+                                "未设置标准idTool".MsgBox();
                                 return;
                             }
-                            else
+
+                            //查找设置的标准id
+                            foreach (CogIDResult res in _idTool.Results)
                             {
-                                ShowRecord(null);
-                                string err = "特征圆未找到！";
-                                err.MsgBox();
-                                return;
+                                if (res.DecodedData.DecodedString == _idResult.DecodedData.DecodedString)
+                                {
+                                    var x = Math.Round(res.CenterX, 3);
+                                    var y = Math.Round(res.CenterY, 3);
+                                    AddData(x, y);
+                                    _index++;
+
+                                    //显示
+                                    var g = res.BoundsPolygon;
+                                    g.Color = CogColorConstants.Green;
+                                    g.LineWidthInScreenPixels = 2;
+                                    ShowRecord(g);
+                                    return;
+                                }
                             }
                         }
                         else
                         {
                             ShowRecord(null);
-                            string err = "模板未找到！";
+                            string err = "二维码未找到！";
                             err.MsgBox();
                             return;
                         }
@@ -331,9 +390,8 @@ namespace Vision.Frm
                     else
                     {
                         ShowRecord(null);
-                        string err = "模板未找到！";
+                        string err = "二维码未找到！";
                         err.MsgBox();
-                        return;
                     }
                 }
             }
@@ -344,21 +402,46 @@ namespace Vision.Frm
         }
 
         /// <summary>
+        /// 查找中心的二维码工具
+        /// </summary>
+        /// <param name="idTool"></param>
+        private void GetCalcID(CogIDTool idTool)
+        {
+            ICogImage image = idTool.InputImage;
+            double cY = image.Height / 2;
+            double cX = image.Width / 2;
+
+            double min = 9999;
+
+
+            int index = 0;
+            //解析码的数据
+
+            for (int i = 0; i < idTool.Results.Count; i++)
+            {
+                double temp = Math.Pow((idTool.Results[i].CenterX - cX), 2) + Math.Pow((idTool.Results[i].CenterY - cY), 2);
+                double dis = Math.Sqrt(temp);
+                if (dis < min)
+                {
+                    min = dis;
+                    index = i;
+                }
+
+            }
+
+            _idResult = idTool.Results[index];
+        }
+
+        /// <summary>
         /// 清除拟合圆参数
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
         private void btnClear_Click(object sender, EventArgs e)
         {
-            if (_fitCircleTool != null)
-            {
-                var number = _fitCircleTool.RunParams.NumPoints;
-                for (int i = 0; i < number; i++)
-                {
-                    _fitCircleTool.RunParams.DeletePoint(0);
-                    dgv.Rows.RemoveAt(0);
-                }
-            }
+            dgv.Rows.Clear();
+            _centerListData.Clear();
+            _index = 0;
         }
 
         /// <summary>
@@ -426,6 +509,8 @@ namespace Vision.Frm
         private void btnSaveCalib_Click(object sender, EventArgs e)
         {
             _centerTool?.SaveVpp();
+            SaveData();
+            _station.SaveData();
         }
 
         private void FrmCenterCalib_FormClosing(object sender, FormClosingEventArgs e)
@@ -445,5 +530,29 @@ namespace Vision.Frm
             //}
 
         }
+
+        /// <summary>
+        /// 加载标定数据
+        /// </summary>
+        private void LoadData()
+        {
+            if (File.Exists(_path))
+            {
+                _centerListData = SerializerHelper.DeSerializeFromXml<CenterDataList>(_path);
+            }
+        }
+
+        /// <summary>
+        /// 保存标定数据
+        /// </summary>
+        private void SaveData()
+        {
+            if (!File.Exists(_path))
+            {
+                File.Create(_path).Close();
+            }
+            SerializerHelper.SerializeToXml(_centerListData, _path);
+        }
     }
+
 }

@@ -261,6 +261,11 @@ namespace Vision.Projects
                     ProjectManager.Instance.DeleteStation(station);
                     ShowNull();
                     break;
+
+                case "参数设置":
+                    FormStationSet form = new FormStationSet(station);
+                    form.ShowDialog();
+                    break;
             }
         }
 

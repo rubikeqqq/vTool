@@ -1,7 +1,7 @@
-﻿using System;
+﻿using Cognex.VisionPro.ToolBlock;
+using System;
 using System.ComponentModel;
 using System.Windows.Forms;
-using Cognex.VisionPro.ToolBlock;
 using Vision.Frm;
 using Vision.Projects;
 using Vision.Stations;
@@ -19,7 +19,6 @@ namespace Vision.Tools
             _station = station;
             _toolblock = tool.ToolBlock;
             GetImageIn();
-            ProjectManager.Instance.BeforeSaveProjectEvent += Instance_BeforeSaveProjectEvent;
         }
 
         private readonly NPointCalibTool _nTool;
@@ -61,21 +60,12 @@ namespace Vision.Tools
             {
                 _nTool.ImageInName = null;
             }
-        }
-
-        private void Instance_BeforeSaveProjectEvent(object sender, EventArgs e)
-        {
-            comboBox1_SelectedIndexChanged(this, null);
-        }
-
-        private void Close()
-        {
-            ProjectManager.Instance.BeforeSaveProjectEvent -= Instance_BeforeSaveProjectEvent;
+            ProjectManager.Instance.SaveProject();
         }
 
         private void button1_Click(object sender, EventArgs e)
         {
-            FrmNPointCalib frmNPointCalib = new FrmNPointCalib(_nTool);
+            FrmNPointCalib frmNPointCalib = new FrmNPointCalib(_station, _nTool);
             frmNPointCalib.ShowDialog();
         }
     }

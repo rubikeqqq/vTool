@@ -1,7 +1,6 @@
 ﻿using Cognex.VisionPro;
 using Cognex.VisionPro.CalibFix;
-using Cognex.VisionPro.Caliper;
-using Cognex.VisionPro.PMAlign;
+using Cognex.VisionPro.ID;
 using Cognex.VisionPro.ToolBlock;
 using System;
 using System.ComponentModel;
@@ -49,7 +48,10 @@ namespace Vision.Tools.ToolImpls
             {
                 UI = new UcNineCalibTool(station, this);
             }
-            UI.GetImageIn();
+            else
+            {
+                UI.GetImageIn();
+            }
             return UI;
         }
 
@@ -149,6 +151,10 @@ namespace Vision.Tools.ToolImpls
                     ImageOut = (ICogImage)ToolBlock.Outputs["OutputImage"].Value;
                 }
             }
+            else
+            {
+                throw new ToolException($"[{ToolName}]没有输入图像");
+            }
         }
 
         public override void RunDebug()
@@ -182,67 +188,39 @@ namespace Vision.Tools.ToolImpls
         /// <param name="tb"></param>
         private void AddTools(CogToolBlock tb)
         {
-            CogPMAlignTool pmaTool = new CogPMAlignTool();
-            pmaTool.Name = "CogPMAlignTool1";
+            CogAcqFifoTool acqTool = new CogAcqFifoTool();
+            acqTool.Name = "CogAcqFifoTool1";
             string[] s1 = new string[1];
-            string[] s2 = new string[5];
-            s1[0] = "|InputImage|InputImage";
+            s1[0] = "|OutputImage|OutputImage";
 
-            s2[0] = "|Results.Item[0].GetPose()|Results.Item[0].GetPose()";
-            s2[1] = "|Results.Item[0].GetPose().TranslationX|Results.Item[0].GetPose().TranslationX";
-            s2[2] = "|Results.Item[0].GetPose().TranslationY|Results.Item[0].GetPose().TranslationY";
-            s2[3] = "|Results.Item[0].GetPose().Rotation|Results.Item[0].GetPose().Rotation";
-            s2[4] = "|Results.Item[0].Score|Results.Item[0].Score";
+            acqTool.UserData.Add("_ToolOutputTerminals", s1);
 
-            pmaTool.UserData.Add("_ToolInputTerminals", s1);//添加终端-InputImage
-            pmaTool.UserData.Add("_ToolOutputTerminals", s2);
+            CogIDTool idTool = new CogIDTool();
+            idTool.Name = "CogIDTool1";
+            string[] s2 = new string[1];
+            s2[0] = "|InputImage|InputImage";
+            string[] s3 = new string[1];
+            s3[0] = "|Result.Count|Result.Count";
 
-            CogFindCircleTool circleTool = new CogFindCircleTool();
-            circleTool.Name = "CogFindCircleTool1";
-            string[] s3 = new string[3];
-            string[] s4 = new string[3];
-            s3[0] = "|InputImage|InputImage";
-            s3[1] = "|RunParams.ExpectedCircularArc.CenterX|RunParams.ExpectedCircularArc.CenterX";
-            s3[2] = "|RunParams.ExpectedCircularArc.CenterY|RunParams.ExpectedCircularArc.CenterY";
-
-            s4[0] = "|Results.GetCircle().CenterX|Results.GetCircle().CenterX";
-            s4[1] = "|Results.GetCircle().CenterY|Results.GetCircle().CenterY";
-            s4[2] = "|Results.GetCircle().Radius|Results.GetCircle().Radius";
-
-            circleTool.UserData.Add("_ToolInputTerminals", s3);//添加终端-InputImage
-            circleTool.UserData.Add("_ToolOutputTerminals", s4);
+            idTool.UserData.Add("_ToolOutputTerminals", s2);
+            idTool.UserData.Add("_ToolOutputTerminals", s3);
 
 
-            //CogCalibCheckerboardTool cTool = new CogCalibCheckerboardTool();
-            //cTool.Name = "CogCalibCheckerboardTool1";
-            //string[] s1 = new string[1];
-            //string[] s2 = new string[1];
-            //s1[0] = "|InputImage|InputImage";
-            //s2[0] = "|OutputImage|OutputImage";
-            //cTool.UserData.Add("_ToolInputTerminals", s1);//添加终端-InputImage
-            //cTool.UserData.Add("_ToolOutputTerminals", s2);
 
             CogCalibNPointToNPointTool nTool = new CogCalibNPointToNPointTool();
             nTool.Name = "CogCalibNPointToNPointTool1";
+            string[] s4 = new string[1];
             string[] s5 = new string[1];
-            string[] s6 = new string[1];
-            s5[0] = "|InputImage|InputImage";
+            s4[0] = "|InputImage|InputImage";
+            s5[0] = "|OutputImage|OutputImage";
 
-            s6[0] = "|OutputImage|OutputImage";
+            nTool.UserData.Add("_ToolInputTerminals", s4);//添加终端-InputImage
+            nTool.UserData.Add("_ToolOutputTerminals", s5);
 
-            nTool.UserData.Add("_ToolInputTerminals", s5);//添加终端-InputImage
-            nTool.UserData.Add("_ToolOutputTerminals", s6);
-
-            CogAcqFifoTool acqTool = new CogAcqFifoTool();
-            acqTool.Name = "CogAcqFifoTool1";
-            string[] s7 = new string[1];
-            s7[0] = "|OutputImage|OutputImage";
-
-            acqTool.UserData.Add("_ToolOutputTerminals", s7);
+            
 
             tb.Tools.Add(acqTool);
-            tb.Tools.Add(pmaTool);
-            tb.Tools.Add(circleTool);
+            tb.Tools.Add(idTool);
             tb.Tools.Add(nTool);
         }
 

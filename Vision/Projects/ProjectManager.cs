@@ -164,6 +164,9 @@ namespace Vision.Projects
                     //加载vpp
                     foreach (var station in _project.StationList)
                     {
+                        //加载station的数据
+                        station.Init();
+                        station.LoadData();
                         foreach (var tool in station.ToolList)
                         {
                             if (tool is IRegisterStation rTool)

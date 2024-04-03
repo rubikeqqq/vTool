@@ -1,6 +1,7 @@
 ﻿using System;
 using System.ComponentModel;
 using System.Windows.Forms;
+using Vision.Core;
 using Vision.Projects;
 using Vision.Stations;
 using Vision.Tools.ToolImpls;
@@ -89,5 +90,32 @@ namespace Vision.Tools
             }
         }
 
+        private void btnModel_Click(object sender, EventArgs e)
+        {
+            var dialog = MessageBox.Show("是否确定更新模板点？\r\n这将保存此工具的最后结果！", "重要提示", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+            if (dialog == DialogResult.Yes)
+            {
+                try
+                {
+                    if (_tool.ToolBlock.Outputs["ModelX"].Value != null &&
+                           _tool.ToolBlock.Outputs["ModelY"].Value != null &&
+                           _tool.ToolBlock.Outputs["ModelAngle"].Value != null)
+                    {
+                        _station.DataConfig.CalibConfig.ModelOriginPoint = new PointA((double)_tool.ToolBlock.Outputs["ModelX"].Value,
+                            (double)_tool.ToolBlock.Outputs["ModelY"].Value, (double)_tool.ToolBlock.Outputs["ModelAngle"].Value);
+
+                        _station.SaveData();
+                    }
+                    else
+                    {
+                        "模板数据不存在！".MsgBox();
+                    }
+                }
+                catch
+                {
+                    "模板点保存失败".MsgBox();
+                }
+            }
+        }
     }
 }

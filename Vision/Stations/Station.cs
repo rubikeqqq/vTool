@@ -71,6 +71,9 @@ namespace Vision.Stations
         [field: NonSerialized]
         public CogDisplayView DisplayView { get; set; }
 
+        [field: NonSerialized]
+        public StationDataConfig DataConfig { get; set; }
+
         public ToolBase this[string name]
         {
             get
@@ -88,6 +91,12 @@ namespace Vision.Stations
 
         public Station()
         {
+            DataConfig = new StationDataConfig();
+        }
+
+        public void Init()
+        {
+            DataConfig = new StationDataConfig();
         }
 
         #region 运行相关
@@ -151,7 +160,7 @@ namespace Vision.Stations
                         tool.RunDebug();
                         stopwatch1.Stop();
                         var t = stopwatch1.Elapsed;
-                        LogUI.AddToolLog(tool.ToolName +"=> "+ t.TotalMilliseconds.ToString("f2")+"ms");
+                        LogUI.AddToolLog(tool.ToolName + "=> " + t.TotalMilliseconds.ToString("f2") + "ms");
                     }
                     catch (ToolException ex)
                     {
@@ -274,7 +283,7 @@ namespace Vision.Stations
         {
             try
             {
-                
+
                 if (string.IsNullOrEmpty(Config.ImageConfig.SaveImageDir))
                 {
                     string err = "未设置图像的保存路径！";
@@ -635,5 +644,34 @@ namespace Vision.Stations
             ShowDisplayChangedEvent?.Invoke(sender, e);
         }
         #endregion
+
+        /// <summary>
+        /// 加载数据
+        /// </summary>
+        public void LoadData()
+        {
+            string path = Path.Combine(ProjectManager.ProjectDir, StationName, "Data.ini");
+            if (File.Exists(path))
+            {
+                if (!DataConfig.LoadConfig(path))
+                {
+                    ($"[{StationName}] 参数加载失败！").MsgBox();
+                }
+            }
+        }
+
+        /// <summary>
+        /// 保存数据
+        /// </summary>
+        public void SaveData()
+        {
+            string path = Path.Combine(ProjectManager.ProjectDir, StationName, "Data.ini");
+            if (!File.Exists(path))
+            {
+                File.Create(path).Close();
+            }
+            DataConfig.SaveConfig(path);
+            "数据保存成功！".MsgBox();
+        }
     }
 }

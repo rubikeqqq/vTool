@@ -1,19 +1,24 @@
 ﻿using Cognex.VisionPro;
 using Cognex.VisionPro.CalibFix;
-using Cognex.VisionPro.Caliper;
-using Cognex.VisionPro.PMAlign;
+using Cognex.VisionPro.ID;
+using Cognex.VisionPro.ImageFile;
 using System;
+using System.IO;
 using System.Windows.Forms;
 using Vision.Core;
+using Vision.Projects;
+using Vision.Stations;
 using Vision.Tools.ToolImpls;
 
 namespace Vision.Frm
 {
     public partial class FrmNPointCalib : Form
     {
-        public FrmNPointCalib(NPointCalibTool nTool)
+        public FrmNPointCalib(Station station, NPointCalibTool nTool)
         {
             InitializeComponent();
+            _path = Path.Combine(ProjectManager.ProjectDir, station.StationName, "Calib.xml");
+            LoadData();
             _nTool = nTool;
             this.WindowState = FormWindowState.Maximized;
             this.BringToFront();
@@ -24,9 +29,12 @@ namespace Vision.Frm
         private int _index = 0;
 
         private CogAcqFifoTool _acqTool;
-        private CogPMAlignTool _pmaTool;
-        private CogFindCircleTool _circleTool;
+        private CogIDTool _idTool;
         private CogCalibNPointToNPointTool _nPointTool;
+        private CogIDResult _idResult;
+
+        private CenterDataList _centerDataList = new CenterDataList();
+        private readonly string _path;
 
         /// <summary>
         /// 采集按钮颜色改变
@@ -37,6 +45,9 @@ namespace Vision.Frm
             btnStartLive.Enabled = !cogRecordDisplay1.LiveDisplayRunning;
         }
 
+        /// <summary>
+        /// 运行标定
+        /// </summary>
         private void Calibration()
         {
             try
@@ -50,6 +61,10 @@ namespace Vision.Frm
             }
         }
 
+        /// <summary>
+        /// 采集图像
+        /// </summary>
+        /// <returns></returns>
         private bool Grab()
         {
             if (cogRecordDisplay1.LiveDisplayRunning)
@@ -75,6 +90,9 @@ namespace Vision.Frm
                     }
                 }
                 return false;
+                //((CogImageFileTool)_nTool.ToolBlock.Tools["CogImageFileTool1"]).Run();
+                //_image = ((CogImageFileTool)_nTool.ToolBlock.Tools["CogImageFileTool1"]).OutputImage;
+                //return true;
             }
             catch (Exception ex)
             {
@@ -97,8 +115,7 @@ namespace Vision.Frm
                     try
                     {
                         _acqTool = tb.Tools["CogAcqFifoTool1"] as CogAcqFifoTool;
-                        _pmaTool = tb.Tools["CogPMAlignTool1"] as CogPMAlignTool;
-                        _circleTool = tb.Tools["CogFindCircleTool1"] as CogFindCircleTool;
+                        _idTool = tb.Tools["CogIDTool1"] as CogIDTool;
                         _nPointTool = tb.Tools["CogCalibNPointToNPointTool1"] as CogCalibNPointToNPointTool;
                         return true;
                     }
@@ -121,18 +138,17 @@ namespace Vision.Frm
             {
                 try
                 {
-                    //如果已经标定完成，将结果显示在界面
-                    if (_nPointTool.Calibration.Calibrated)
+                    //有标定数据
+                    if (_centerDataList.CenterList.Count == 0)
                     {
-                        for (int i = 0; i < _nPointTool.Calibration.NumPoints; i++)
-                        {
-                            var x1 = _nPointTool.Calibration.GetUncalibratedPointX(i);
-                            var y1 = _nPointTool.Calibration.GetUncalibratedPointY(i);
-                            var x2 = _nPointTool.Calibration.GetRawCalibratedPointX(i);
-                            var y2 = _nPointTool.Calibration.GetRawCalibratedPointY(i);
-                            dgv.Rows.Add(i + 1, x1, y1, x2, y2);
-                        }
+                        return;
                     }
+                    for (int i = 0; i < _centerDataList.CenterList.Count; i++)
+                    {
+                        dgv.Rows.Add(i + 1, _centerDataList.CenterList[i].ImageX, _centerDataList.CenterList[i].ImageY,
+                       _centerDataList.CenterList[i].RobotX, _centerDataList.CenterList[i].RobotY);
+                    }
+
                 }
                 catch (Exception ex)
                 {
@@ -199,9 +215,7 @@ namespace Vision.Frm
 
 
                     _nPointTool.Calibration.AddPointPair(x1, y1, x2, y2);
-                    //_nPointTool.Calibration.SetUncalibratedPoint(i, x1, y1);
-                    //_nPointTool.Calibration.SetRawCalibratedPoint(i, x2, y2);
-                    //_nPointTool.Calibration.NumPoints = 9;
+                    _centerDataList.Add(new CenterData() { ImageX = x1, ImageY = y1, RobotX = x2, RobotY = y2 });
                 }
                 return true;
             }
@@ -225,18 +239,18 @@ namespace Vision.Frm
         /// <summary>
         /// 显示图像
         /// </summary>
-        /// <param name="record"></param>
-        private void ShowRecord(ICogRecord record)
+        /// <param name="graphic"></param>
+        private void ShowRecord(ICogGraphic graphic)
         {
             //先清除图像
             cogRecordDisplay1.StaticGraphics.Clear();
             cogRecordDisplay1.InteractiveGraphics.Clear();
             cogRecordDisplay1.Image = null;
 
-            if (record != null)
+            if (graphic != null)
             {
                 cogRecordDisplay1.Image = _image;
-                cogRecordDisplay1.Record = record;
+                cogRecordDisplay1.StaticGraphics.Add(graphic, "");
                 cogRecordDisplay1.AutoFit = true;
             }
             else
@@ -290,6 +304,11 @@ namespace Vision.Frm
             ActiveButtonEnable();
         }
 
+        /// <summary>
+        /// 界面初始化
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void FrmNCalib_Load(object sender, EventArgs e)
         {
             ActiveButtonEnable();
@@ -297,54 +316,76 @@ namespace Vision.Frm
             InitControl();
         }
 
+        /// <summary>
+        /// 保存标定数据
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void btnSaveCalib_Click(object sender, EventArgs e)
         {
             _nTool?.SaveVpp();
+            SaveData();
         }
 
+        /// <summary>
+        /// 运行查找特征点
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void btnRun_Click(object sender, EventArgs e)
         {
             bool r = Grab();
             try
             {
                 if (_index >= 9)
+                {
+                    "已经有9个点".MsgBox();
                     return;
+                }
+
                 if (r)
                 {
-                    _pmaTool.InputImage = _image;
-                    _circleTool.InputImage = _image as CogImage8Grey;
+                    _idTool.InputImage = _image;
 
-                    _pmaTool.Run();
-                    if(_pmaTool.RunStatus.Result == CogToolResultConstants.Accept)
+                    _idTool.Run();
+                    if (_idTool.RunStatus.Result == CogToolResultConstants.Accept)
                     {
-                        if (_pmaTool.Results.Count > 0)
+                        if (_idTool.Results.Count > 0)
                         {
-                            _circleTool.RunParams.ExpectedCircularArc.CenterX = _pmaTool.Results[0].GetPose().TranslationX;
-                            _circleTool.RunParams.ExpectedCircularArc.CenterY = _pmaTool.Results[0].GetPose().TranslationY;
-
-                            _circleTool.Run();
-                            if (_circleTool.Results.GetCircle() != null)
+                            //第一次设置查找的ID
+                            if (_index == 0)
                             {
-                                ICogRecord ir = _circleTool.CreateLastRunRecord();
-                                ShowRecord(ir);
-                                var x = Math.Round(_circleTool.Results.GetCircle().CenterX, 3);
-                                var y = Math.Round(_circleTool.Results.GetCircle().CenterY, 3);
-                                AddDgv(x, y);
-                                _index++;
+                                GetCalcID(_idTool);
+                            }
+                            if (_idResult == null)
+                            {
+                                "未设置标准idTool".MsgBox();
                                 return;
                             }
-                            else
+
+                            //查找设置的标准id
+                            foreach (CogIDResult res in _idTool.Results)
                             {
-                                ShowRecord(null);
-                                string err = "特征圆未找到！";
-                                err.MsgBox();
-                                return;
+                                if (res.DecodedData.DecodedString == _idResult.DecodedData.DecodedString)
+                                {
+                                    var x = Math.Round(res.CenterX, 3);
+                                    var y = Math.Round(res.CenterY, 3);
+                                    AddDgv(x, y);
+                                    _index++;
+
+                                    //显示
+                                    var g = res.BoundsPolygon;
+                                    g.Color = CogColorConstants.Green;
+                                    g.LineWidthInScreenPixels = 2;
+                                    ShowRecord(g);
+                                    return;
+                                }
                             }
                         }
                         else
                         {
                             ShowRecord(null);
-                            string err = "模板未找到！";
+                            string err = "二维码未找到！";
                             err.MsgBox();
                             return;
                         }
@@ -352,7 +393,7 @@ namespace Vision.Frm
                     else
                     {
                         ShowRecord(null);
-                        string err = "模板查找失败！";
+                        string err = "二维码未找到！";
                         err.MsgBox();
                     }
                 }
@@ -363,20 +404,54 @@ namespace Vision.Frm
             }
         }
 
+        /// <summary>
+        /// 查找中心的二维码工具
+        /// </summary>
+        /// <param name="idTool"></param>
+        private void GetCalcID(CogIDTool idTool)
+        {
+            ICogImage image = idTool.InputImage;
+            double cY = image.Height / 2;
+            double cX = image.Width / 2;
+
+            double min = 9999;
+
+
+            int index = 0;
+            //解析码的数据
+
+            for (int i = 0; i < idTool.Results.Count; i++)
+            {
+                double temp = Math.Pow((idTool.Results[i].CenterX - cX), 2) + Math.Pow((idTool.Results[i].CenterY - cY), 2);
+                double dis = Math.Sqrt(temp);
+                if (dis < min)
+                {
+                    min = dis;
+                    index = i;
+                }
+
+            }
+
+            _idResult = idTool.Results[index];
+        }
+
+        /// <summary>
+        /// 清除数据
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void btnClear_Click(object sender, EventArgs e)
         {
-            if (_nPointTool.Calibration.Calibrated)
-            {
-                int count = _nPointTool.Calibration.NumPoints;
-                for (int i = 0; i < count; i++)
-                {
-                    _nPointTool.Calibration.DeletePointPair(0);
-                }
-            }
             dgv.Rows.Clear();
+            _centerDataList.Clear();
             _index = 0;
         }
 
+        /// <summary>
+        /// 标定计算
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void btnCalc_Click(object sender, EventArgs e)
         {
             if (SetPoints())
@@ -401,6 +476,29 @@ namespace Vision.Frm
             //    }
 
             //}
+        }
+
+        /// <summary>
+        /// 加载标定数据
+        /// </summary>
+        private void LoadData()
+        {
+            if (File.Exists(_path))
+            {
+                _centerDataList = SerializerHelper.DeSerializeFromXml<CenterDataList>(_path);
+            }
+        }
+
+        /// <summary>
+        /// 保存标定数据
+        /// </summary>
+        private void SaveData()
+        {
+            if (!File.Exists(_path))
+            {
+                File.Create(_path).Close();
+            }
+            SerializerHelper.SerializeToXml(_centerDataList, _path);
         }
     }
 }

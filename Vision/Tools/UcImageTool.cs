@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel;
 using System.Windows.Forms;
+using Vision.Projects;
 using Vision.Tools.ToolImpls;
 
 namespace Vision.Tools
@@ -129,6 +130,7 @@ namespace Vision.Tools
                 }
             }
             tbPath.Text = _imageTool.Path;
+            ProjectManager.Instance.SaveConfig();
         }
 
     }

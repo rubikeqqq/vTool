@@ -3,9 +3,8 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Threading;
 using System.Windows.Forms;
-using Vision.Hardware;
 using Vision.Core;
-using Vision.Projects;
+using Vision.Hardware;
 using Vision.Stations;
 using Vision.Tools.Interfaces;
 
@@ -13,7 +12,7 @@ namespace Vision.Tools.ToolImpls
 {
     [Serializable]
     [GroupInfo("结果工具", 3)]
-    [ToolName("结果编辑",0)]
+    [ToolName("结果编辑", 0)]
     [Description("编辑结果和其他控制系统进行交互")]
     public class ResultTool : ToolBase, IRegisterStation
     {
@@ -30,11 +29,14 @@ namespace Vision.Tools.ToolImpls
 
         public override UserControl GetToolControl(Station station)
         {
-            if(UI == null)
+            if (UI == null)
             {
                 UI = new UcResult(station, this);
             }
-            UI.InitUI();
+            else
+            {
+                UI.InitUI();
+            }
             return UI;
         }
 

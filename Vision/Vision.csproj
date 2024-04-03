@@ -336,6 +336,13 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Core\CalibInfo.cs" />
+    <Compile Include="Frm\FormStationSet.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Frm\FormStationSet.Designer.cs">
+      <DependentUpon>FormStationSet.cs</DependentUpon>
+    </Compile>
     <Compile Include="Hardware\IPlc.cs" />
     <Compile Include="Hardware\MxPlc.cs" />
     <Compile Include="Projects\StationToolData.cs" />
@@ -408,7 +415,7 @@
       <DependentUpon>FrmRename.cs</DependentUpon>
     </Compile>
     <Compile Include="Core\LogUI.cs" />
-    <Compile Include="Core\Config.cs" />
+    <Compile Include="Core\SystemConfig.cs" />
     <Compile Include="Projects\ProjectManager.cs" />
     <Compile Include="Projects\Project.cs" />
     <Compile Include="Projects\UcProject.cs">
@@ -514,6 +521,9 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="Frm\FormStationSet.resx">
+      <DependentUpon>FormStationSet.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Projects\UcSet.resx">
       <DependentUpon>UcSet.cs</DependentUpon>
     </EmbeddedResource>
