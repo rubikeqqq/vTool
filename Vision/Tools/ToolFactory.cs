@@ -129,7 +129,7 @@ namespace Vision.Tools
                     return item.Description;
                 }
             }
-            return "";
+            return toolName;
         }
 
         /// <summary>

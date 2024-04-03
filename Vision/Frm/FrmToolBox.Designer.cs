@@ -37,17 +37,19 @@
             // 
             // tbDescription
             // 
+            this.tbDescription.BackColor = System.Drawing.SystemColors.Info;
             this.tbDescription.Dock = System.Windows.Forms.DockStyle.Bottom;
             this.tbDescription.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.tbDescription.Location = new System.Drawing.Point(0, 406);
+            this.tbDescription.Location = new System.Drawing.Point(0, 461);
             this.tbDescription.Multiline = true;
             this.tbDescription.Name = "tbDescription";
             this.tbDescription.ReadOnly = true;
-            this.tbDescription.Size = new System.Drawing.Size(311, 140);
+            this.tbDescription.Size = new System.Drawing.Size(298, 85);
             this.tbDescription.TabIndex = 0;
             // 
             // tvTools
             // 
+            this.tvTools.BackColor = System.Drawing.SystemColors.InactiveBorder;
             this.tvTools.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tvTools.Font = new System.Drawing.Font("微软雅黑", 10.8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.tvTools.ImageIndex = 0;
@@ -55,7 +57,7 @@
             this.tvTools.Location = new System.Drawing.Point(0, 0);
             this.tvTools.Name = "tvTools";
             this.tvTools.SelectedImageIndex = 0;
-            this.tvTools.Size = new System.Drawing.Size(311, 406);
+            this.tvTools.Size = new System.Drawing.Size(298, 461);
             this.tvTools.TabIndex = 1;
             this.tvTools.MouseClick += new System.Windows.Forms.MouseEventHandler(this.tvTools_MouseClick);
             this.tvTools.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.tvTools_MouseDoubleClick);
@@ -80,9 +82,10 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(311, 546);
+            this.ClientSize = new System.Drawing.Size(298, 546);
             this.Controls.Add(this.tvTools);
             this.Controls.Add(this.tbDescription);
+            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.Fixed3D;
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MaximizeBox = false;
             this.MinimizeBox = false;

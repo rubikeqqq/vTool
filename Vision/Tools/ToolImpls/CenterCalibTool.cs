@@ -23,17 +23,6 @@ namespace Vision.Tools.ToolImpls
         [NonSerialized]
         private Station _station;
 
-        [NonSerialized]
-        private CenterDetectTool _detectTool;
-
-        [NonSerialized]
-        private KkRobotCalibTool _robotTool;
-
-        /// <summary>
-        /// 是否已经标定
-        /// </summary>
-        public bool IsCalibed { get; set; }
-
         [field: NonSerialized]
         public bool IsLoaded { get; set; }
 
@@ -124,22 +113,6 @@ namespace Vision.Tools.ToolImpls
             {
                 throw new ToolException($"[{ToolName}]没有输入图像");
             }
-
-
-            if (_robotTool == null)
-            {
-                _robotTool = (KkRobotCalibTool)_station.GetRobotCalibTool(0);
-                if (_robotTool == null)
-                    throw new ToolException("旋转检测不存在！");
-            }
-            if (_detectTool == null)
-            {
-                _detectTool = (CenterDetectTool)_station.GetCenterDetectTool(0);
-                if (_detectTool == null)
-                    throw new ToolException("KK机械手标定不存在！");
-            }
-            GetRobotCenterData();
-            PointOut = GetCenterCalibPoint();
         }
 
         public override void RunDebug()
@@ -171,96 +144,6 @@ namespace Vision.Tools.ToolImpls
 
             ImageIn = ((IImageOut)tool).ImageOut;
             return true;
-        }
-
-        /// <summary>
-        /// 计算当机械手旋转后的坐标
-        /// </summary>
-        /// <returns></returns>
-        private PointA GetCenterCalibPoint()
-        {
-            try
-            {
-                if (!IsCalibed)
-                {
-                    LogNet.Log($"[{_station.StationName}]旋转中心未标定！");
-                    return null;
-                }
-
-                #region 带旋转标定
-
-
-                //相当于将机械手从原模板位移动到现在的位置
-                var a1 = PointIn.Angle;
-                var a2 = _station.DataConfig.CalibConfig.ModelOriginPoint.Angle;
-                //if (a2 < -Math.PI / 2)
-                //{
-                //    a2 = a2 + Math.PI;
-                //}
-
-                var deltaAngle = a1 - a2;
-
-
-                //计算模板点的实际坐标绕旋转中心旋转后得到的新的坐标
-                //RotatedAffine.Math_Transfer(PointIn.X, PointIn.Y, deltaAngle,
-                //    CenterPoint.X + CenterRobotDelta.X, CenterPoint.Y + CenterRobotDelta.Y,
-                //    out var rotatedX, out var rotatedY);
-
-                // 旋转后的坐标 - 模板的坐标 = delta
-                //var deltaX = rotatedX - _station.ModelPosition.X ;
-                //var deltaY = rotatedY - _station.ModelPosition.Y ;
-
-
-                RotatedAffine.Math_Transfer(_station.DataConfig.CalibConfig.ModelOriginPoint.X, _station.DataConfig.CalibConfig.ModelOriginPoint.Y, deltaAngle,
-                    _station.DataConfig.CalibConfig.CenterPoint.X + CenterRobotDelta.X, _station.DataConfig.CalibConfig.CenterPoint.Y + CenterRobotDelta.Y,
-                   out var rotatedX, out var rotatedY);
-
-                var deltaX = PointIn.X - rotatedX;
-                var deltaY = PointIn.Y - rotatedY;
-
-
-                //系统补偿
-                var offset = GetOffset();
-
-                PointA point = new PointA();
-
-                //机械手示教位 + 系统补偿 + kk机械手的偏移量+ delta 
-                point.X = (_station.DataConfig.CalibConfig.RobotOriginPosition.X + offset.X) + RobotDelta.X + deltaX;
-                point.Y = (_station.DataConfig.CalibConfig.RobotOriginPosition.Y + offset.Y) + RobotDelta.Y + deltaY;
-                //角度就是当前角度 - 模板角度
-                point.Angle = deltaAngle * 180 / Math.PI + _station.DataConfig.CalibConfig.RobotOriginPosition.Angle;
-
-                LogUI.AddLog($"=>{point}");
-                return point;
-                #endregion
-            }
-            catch (Exception ex)
-            {
-                ex.Message.MsgBox();
-                return null;
-            }
-        }
-
-        /// <summary>
-        /// 获取此前工具的输出数据 和机械手偏差值 
-        /// </summary>
-        private void GetRobotCenterData()
-        {
-            PointIn = _detectTool.ModelPoint ?? new PointA();
-            RobotDelta = _robotTool.RobotDelta ?? new PointD();
-
-            CenterRobotDelta.X = _station.DataConfig.CalibConfig.RobotOriginPosition.X - _station.DataConfig.CalibConfig.CenterCalibRobotPoint.X;
-            CenterRobotDelta.Y = _station.DataConfig.CalibConfig.RobotOriginPosition.Y - _station.DataConfig.CalibConfig.CenterCalibRobotPoint.Y;
-        }
-
-        /// <summary>
-        /// 系统补偿
-        /// </summary>
-        /// <returns></returns>
-        private PointD GetOffset()
-        {
-            var point = _station.DataConfig.OffsetConfig;
-            return new PointD(point.OffsetX, point.OffsetY);
         }
 
         #endregion 

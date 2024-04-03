@@ -12,8 +12,8 @@ using Vision.Tools.Interfaces;
 namespace Vision.Tools.ToolImpls
 {
     [Serializable]
-    [GroupInfo(name: "视觉工具", index: 2)]
-    [ToolName("旋转检测工具", 1)]
+    [GroupInfo(name: "视觉工具",index: 2)]
+    [ToolName("旋转检测",1)]
     [Description("主检测流程,旋转中心使用")]
     public class CenterDetectTool : ToolBase, IVpp, IImageIn
     {
@@ -42,16 +42,16 @@ namespace Vision.Tools.ToolImpls
 
         public override UserControl GetToolControl(Station station)
         {
-            if (UI == null)
+            if(UI == null)
             {
-                UI = new UcCenterDetectTool(station, this);
+                UI = new UcCenterDetectTool(station,this);
             }
             else
             {
                 //刷新图像源
                 UI.GetImageIn();
             }
-            
+
             return UI;
         }
 
@@ -65,39 +65,39 @@ namespace Vision.Tools.ToolImpls
 
         public void CreateVpp()
         {
-            if (!IsLoaded)
+            if(!IsLoaded)
             {
-                var toolPath = Path.Combine(ProjectManager.ProjectDir, _station.StationName, $"{ToolName}.vpp");
-                if (string.IsNullOrEmpty(toolPath))
+                var toolPath = Path.Combine(ProjectManager.ProjectDir,_station.StationName,$"{ToolName}.vpp");
+                if(string.IsNullOrEmpty(toolPath))
                 {
                     throw new Exception("vpp的路径不存在");
                 }
 
                 ToolBlock = new CogToolBlock();
-                ToolBlock.Inputs.Add(new CogToolBlockTerminal("InputImage", typeof(ICogImage)));
+                ToolBlock.Inputs.Add(new CogToolBlockTerminal("InputImage",typeof(ICogImage)));
                 //模板点位
-                ToolBlock.Outputs.Add(new CogToolBlockTerminal("ModelX", typeof(double)));
-                ToolBlock.Outputs.Add(new CogToolBlockTerminal("ModelY", typeof(double)));
-                ToolBlock.Outputs.Add(new CogToolBlockTerminal("ModelAngle", typeof(double)));
+                ToolBlock.Outputs.Add(new CogToolBlockTerminal("ModelX",typeof(double)));
+                ToolBlock.Outputs.Add(new CogToolBlockTerminal("ModelY",typeof(double)));
+                ToolBlock.Outputs.Add(new CogToolBlockTerminal("ModelAngle",typeof(double)));
                 //加上旋转标定计算得到的点位
-                ToolBlock.Outputs.Add(new CogToolBlockTerminal("X", typeof(double)));
-                ToolBlock.Outputs.Add(new CogToolBlockTerminal("Y", typeof(double)));
-                ToolBlock.Outputs.Add(new CogToolBlockTerminal("Angle", typeof(double)));
+                ToolBlock.Outputs.Add(new CogToolBlockTerminal("X",typeof(double)));
+                ToolBlock.Outputs.Add(new CogToolBlockTerminal("Y",typeof(double)));
+                ToolBlock.Outputs.Add(new CogToolBlockTerminal("Angle",typeof(double)));
                 IsLoaded = true;
             }
         }
 
         public void LoadVpp()
         {
-            if (!IsLoaded)
+            if(!IsLoaded)
             {
                 try
                 {
-                    var toolPath = Path.Combine(ProjectManager.ProjectDir, _station.StationName, $"{ToolName}.vpp");
+                    var toolPath = Path.Combine(ProjectManager.ProjectDir,_station.StationName,$"{ToolName}.vpp");
                     ToolBlock = CogSerializer.LoadObjectFromFile(toolPath) as CogToolBlock;
                     IsLoaded = true;
                 }
-                catch (Exception ex)
+                catch(Exception ex)
                 {
                     throw new Exception($"工具vpp加载失败.\r\n{ex.Message}");
                 }
@@ -106,28 +106,28 @@ namespace Vision.Tools.ToolImpls
 
         public void SaveVpp()
         {
-            if (IsLoaded)
+            if(IsLoaded)
             {
-                var toolPath = Path.Combine(ProjectManager.ProjectDir, _station.StationName, $"{ToolName}.vpp");
-                CogSerializer.SaveObjectToFile(ToolBlock, toolPath);
+                var toolPath = Path.Combine(ProjectManager.ProjectDir,_station.StationName,$"{ToolName}.vpp");
+                CogSerializer.SaveObjectToFile(ToolBlock,toolPath);
                 //LogUI.AddLog("vpp保存后需检查结果编辑工具！");
             }
         }
 
         public void RemoveVpp()
         {
-            if (!IsLoaded)
+            if(!IsLoaded)
             {
                 try
                 {
-                    var toolPath = Path.Combine(ProjectManager.ProjectDir, _station.StationName, $"{ToolName}.vpp");
-                    if (File.Exists(toolPath))
+                    var toolPath = Path.Combine(ProjectManager.ProjectDir,_station.StationName,$"{ToolName}.vpp");
+                    if(File.Exists(toolPath))
                     {
                         File.Delete(toolPath);
                         IsLoaded = false;
                     }
                 }
-                catch (Exception ex)
+                catch(Exception ex)
                 {
                     throw new Exception($"工具vpp删除失败.\r\n{ex.Message}");
                 }
@@ -140,11 +140,11 @@ namespace Vision.Tools.ToolImpls
 
         public override void Run()
         {
-            if (!Enable) return;
+            if(!Enable) return;
             GetImageIn();
-            if (ImageIn != null)
+            if(ImageIn != null)
             {
-                if (ToolBlock != null)
+                if(ToolBlock != null)
                 {
                     ToolBlock.Inputs["InputImage"].Value = ImageIn;
 
@@ -153,18 +153,18 @@ namespace Vision.Tools.ToolImpls
 
                     //运行
                     ToolBlock.Run();
-                    if (ToolBlock.RunStatus.Result != CogToolResultConstants.Accept)
+                    if(ToolBlock.RunStatus.Result != CogToolResultConstants.Accept)
                     {
                         throw new ToolException($"[{ToolName}] NG!");
                     }
 
                     //获取运行结果
-                    if (ToolBlock.Outputs["X"].Value != null &&
+                    if(ToolBlock.Outputs["X"].Value != null &&
                         ToolBlock.Outputs["Y"].Value != null &&
                         ToolBlock.Outputs["Angle"].Value != null)
                     {
                         ModelPoint = new PointA((double)ToolBlock.Outputs["X"].Value,
-                            (double)ToolBlock.Outputs["Y"].Value, (double)ToolBlock.Outputs["Angle"].Value);
+                            (double)ToolBlock.Outputs["Y"].Value,(double)ToolBlock.Outputs["Angle"].Value);
                     }
 
                     //计算机械手旋转后的坐标
@@ -206,11 +206,11 @@ namespace Vision.Tools.ToolImpls
         /// </summary>
         private bool GetImageIn()
         {
-            if (_station == null || ImageInName == null) return false;
+            if(_station == null || ImageInName == null) return false;
 
             var tool = _station[ImageInName];
 
-            if (tool == null) return false;
+            if(tool == null) return false;
 
             ImageIn = ((IImageOut)tool).ImageOut;
             return true;
@@ -222,10 +222,10 @@ namespace Vision.Tools.ToolImpls
         private void ResetOutput()
         {
             var terminals = ToolBlock.Outputs;
-            foreach (CogToolBlockTerminal terminal in terminals)
+            foreach(CogToolBlockTerminal terminal in terminals)
             {
                 var type = terminal.ValueType;
-                switch (type.Name)
+                switch(type.Name)
                 {
                     case nameof(Boolean):
                         terminal.Value = false;
@@ -281,9 +281,9 @@ namespace Vision.Tools.ToolImpls
                 _centerDelta.Y = _station.DataConfig.CalibConfig.RobotOriginPosition.Y - _station.DataConfig.CalibConfig.CenterCalibRobotPoint.Y;
 
                 //计算模板点的实际坐标绕旋转中心旋转后得到的新的坐标
-                RotatedAffine.Math_Transfer(_station.DataConfig.CalibConfig.ModelOriginPoint.X, _station.DataConfig.CalibConfig.ModelOriginPoint.Y, deltaAngle,
-                    _station.DataConfig.CalibConfig.CenterPoint.X + _centerDelta.X, _station.DataConfig.CalibConfig.CenterPoint.Y + _centerDelta.Y,
-                   out var rotatedX, out var rotatedY);
+                RotatedAffine.Math_Transfer(_station.DataConfig.CalibConfig.ModelOriginPoint.X,_station.DataConfig.CalibConfig.ModelOriginPoint.Y,deltaAngle,
+                    _station.DataConfig.CalibConfig.CenterPoint.X + _centerDelta.X,_station.DataConfig.CalibConfig.CenterPoint.Y + _centerDelta.Y,
+                   out var rotatedX,out var rotatedY);
 
                 // 模板的坐标 - 旋转后的坐标 = delta
                 var deltaX = ModelPoint.X - rotatedX;
@@ -309,14 +309,14 @@ namespace Vision.Tools.ToolImpls
 
                 LogUI.AddLog($"=>{point}");
                 return point;
-                #endregion
+                
             }
-            catch (Exception ex)
+            catch(Exception ex)
             {
                 ex.Message.MsgBox();
                 return null;
             }
         }
-       
+        #endregion
     }
 }

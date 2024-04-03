@@ -14,7 +14,7 @@ namespace Vision.Tools.ToolImpls
 {
     [Serializable]
     [GroupInfo("标定工具",1)]
-    [ToolName("kk机械手标定",2)]
+    [ToolName("kk标定",2)]
     [Description("kk轴和机械手的标定工具")]
     public class KkRobotCalibTool : ToolBase, IVpp
     {
