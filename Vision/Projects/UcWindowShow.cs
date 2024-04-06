@@ -74,15 +74,28 @@ namespace Vision.Projects
             }
             if (name == "All")
             {
-                GetShowPanel(_projectData.StationList.Count);
-                for (var i = 0; i < _projectData.StationList.Count; i++)
+                var enableStation = _projectData.StationList.FindAll(x => x.Enable == true);
+                GetShowPanel(enableStation.Count);
+                for(var i = 0; i < enableStation.Count; i++)
                 {
-                    var station = _projectData[i];
-                    if (station != null)
+                    var station = enableStation[i];
+                    if(station != null)
                     {
-                        AddControl(_myLayout, station.DisplayView, i + 1);
+                        AddControl(_myLayout,station.DisplayView,i + 1);
                     }
                 }
+
+
+
+                //GetShowPanel(_projectData.StationList.Count);
+                //for (var i = 0; i < _projectData.StationList.Count; i++)
+                //{
+                //    var station = _projectData[i];
+                //    if (station != null)
+                //    {
+                //        AddControl(_myLayout, station.DisplayView, i + 1);
+                //    }
+                //}
             }
             else
             {

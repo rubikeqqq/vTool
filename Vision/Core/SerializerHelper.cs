@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Runtime.Serialization;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
 using System.Xml;
@@ -401,24 +403,35 @@ namespace Vision.Core
         #endregion Json序列化
 
         /// <summary>
-        /// 深拷贝
+        /// 深度拷贝对象集合
         /// </summary>
-        /// <typeparam name="T">对象类型</typeparam>
-        /// <param name="obj">对象</param>
-        /// <returns>拷贝的对象</returns>
-        public static T DeepClone<T>(T obj)
+        /// <typeparam name="T"></typeparam>
+        /// <param name="List"></param>
+        /// <returns></returns>
+        public static List<T> Clone<T>(object List)
         {
-            try
+            using(Stream objectStream = new MemoryStream())
             {
-                var doc = GetXmlDoc(obj);
-                var t = GetObject<T>(doc);
-                return t;
+                IFormatter formatter = new BinaryFormatter();
+                formatter.Serialize(objectStream,List);
+                objectStream.Seek(0,SeekOrigin.Begin);
+                return formatter.Deserialize(objectStream) as List<T>;
             }
-            catch
+        }
+        /// <summary>
+        /// 深度拷贝对象
+        /// </summary>
+        /// <param name="obj"></param>
+        /// <returns></returns>
+        public static T Clone<T>(T obj)
+        {
+            using(Stream objectStream = new MemoryStream())
             {
-                throw;
+                IFormatter formatter = new BinaryFormatter();
+                formatter.Serialize(objectStream,obj);
+                objectStream.Seek(0,SeekOrigin.Begin);
+                return (T)formatter.Deserialize(objectStream);
             }
-           
         }
     }
 }

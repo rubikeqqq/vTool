@@ -20,6 +20,7 @@ namespace Vision.Projects
         private Project _project;
         private static object _lock = new object();
         private bool _imageThreadFlag;
+
         private ProjectManager()
         {
             if (!Directory.Exists(ProjectDir))
@@ -373,6 +374,40 @@ namespace Vision.Projects
             if (index >= _project.StationList.Count - 1) return;
             _project.StationList.RemoveAt(index);
             _project.StationList.Insert(index + 1, station);
+            UpdateTreeNode();
+            SaveProject();
+        }
+
+        /// <summary>
+        /// 复制工位
+        /// </summary>
+        /// <param name="station"></param>
+        /// <returns></returns>
+        public Station CopyStation(Station station)
+        {
+            if(!IsLoaded) return null;
+            if(_project == null) return null;
+            return _project.CopyStation(station);
+        }
+
+        /// <summary>
+        /// 粘贴工位
+        /// </summary>
+        /// <param name="station"></param>
+        public void PasteStation(Station station)
+        {
+            if(!IsLoaded) return;
+            if(_project == null) return;
+            _project.PasteStation(station);
+            foreach(ToolBase tool in station.ToolList)
+            {
+                if(tool is IVpp iTool)
+                {
+                    iTool.RegisterStation(station);
+                    ((IVpp)station[tool.ToolName]).LoadVpp();
+                }
+            }
+            _project[_project.StationList.Count - 1].ShowDisplayChangedEvent += Station_ShowDisplayChangedEvent;
             UpdateTreeNode();
             SaveProject();
         }

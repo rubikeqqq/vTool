@@ -166,6 +166,50 @@ namespace Vision.Projects
         }
 
         /// <summary>
+        /// 拷贝工位
+        /// </summary>
+        /// <param name="station"></param>
+        /// <returns></returns>
+        public Station CopyStation(Station station)
+        {
+            return station.DeepClone();
+        }
+
+        /// <summary>
+        /// 粘贴工位
+        /// </summary>
+        /// <param name="station"></param>
+        /// <returns></returns>
+        public bool PasteStation(Station station)
+        {
+            if(StationList.Count >= 8)
+            {
+                LogUI.AddToolLog("工位已经达到上限！");
+                return false;
+            }
+
+            string oldName = station.StationName;
+            var defaultName = GenDefaultStationName();
+
+            station.StationName = defaultName;  
+            station.RegisterViewDisplay();
+
+            if(!StationExsit(station))
+            {
+                var path = Path.Combine(ProjectManager.ProjectDir,station.StationName);
+                //添加文件夹
+                if(!Directory.Exists(path))
+                {
+                    Local.CopyFolder(Path.Combine(ProjectManager.ProjectDir,oldName),
+                        Path.Combine(ProjectManager.ProjectDir,station.StationName));
+                }
+                StationList.Add(station);
+                return true;
+            }
+            return false;
+        }
+
+        /// <summary>
         /// 关闭项目
         /// </summary>
         public void Close()
@@ -179,6 +223,5 @@ namespace Vision.Projects
                 StationList.Clear();
             }
         }
-
     }
 }

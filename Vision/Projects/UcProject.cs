@@ -4,6 +4,7 @@ using System.Drawing;
 using System.Windows.Forms;
 using Vision.Core;
 using Vision.Frm;
+using Vision.Stations;
 using Vision.Tools;
 
 namespace Vision.Projects
@@ -13,6 +14,7 @@ namespace Vision.Projects
     {
         private UcControlBase _baseUI;
         private int cnt = 0;            // 记录鼠标（左键）点击次数
+        private Station _copyStation;
 
         public UcProject()
         {
@@ -25,50 +27,50 @@ namespace Vision.Projects
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void tvProject_MouseClick(object sender, MouseEventArgs e)
+        private void tvProject_MouseClick(object sender,MouseEventArgs e)
         {
-            if (!ProjectManager.Instance.IsLoaded)
+            if(!ProjectManager.Instance.IsLoaded)
             {
                 return;
             }
-            Point ClickPoint = new Point(e.X, e.Y);
+            Point ClickPoint = new Point(e.X,e.Y);
             TreeNode CurrentNode = this.tvProject.GetNodeAt(ClickPoint);
-            if (MouseButtons.Right == e.Button)
+            if(MouseButtons.Right == e.Button)
             {
                 CurrentNode.ContextMenuStrip = null;
-                if (CurrentNode == null)
+                if(CurrentNode == null)
                 {
-                    tvProject.ContextMenuStrip = null;
+                    tvProject.ContextMenuStrip = cmsPasteStation;
                 }
-                if (CurrentNode.Parent == null)
+                if(CurrentNode.Parent == null)
                 {
                     //判断是顶级节点
                     CurrentNode.ContextMenuStrip = cmsProject;
                 }
                 else
                 {
-                    if (CurrentNode.Name.Contains("组"))
+                    if(CurrentNode.Name.Contains("组"))
                     {
                         CurrentNode.ContextMenuStrip = cmsStation;
                     }
-                    else if (CurrentNode.Name.Contains("子工具"))
+                    else if(CurrentNode.Name.Contains("子工具"))
                     {
                         CurrentNode.ContextMenuStrip = cmsTool;
                     }
                 }
                 this.tvProject.SelectedNode = CurrentNode;
             }
-            else if (e.Button == MouseButtons.Left)
+            else if(e.Button == MouseButtons.Left)
             {
-                if (CurrentNode != null)
+                if(CurrentNode != null)
                 {
-                    if (CurrentNode.Name.Contains("子工具"))
+                    if(CurrentNode.Name.Contains("子工具"))
                     {
                         tvProject.SelectedNode = CurrentNode;
                         //获取被点击的工具
                         ShowTool(CurrentNode.Name);
                     }
-                    else if (CurrentNode.Name.Contains("组"))
+                    else if(CurrentNode.Name.Contains("组"))
                     {
                         this.tvProject.SelectedNode = CurrentNode;
                         //工位被双击
@@ -98,7 +100,7 @@ namespace Vision.Projects
         private void ShowTool(string path)
         {
             var data = ProjectManager.Instance.GetStationAndTool(path);
-            _baseUI.AddToolUI(data.Station, data.Tool);
+            _baseUI.AddToolUI(data.Station,data.Tool);
             _baseUI.ToolEnableEvent += ToolEnableEvent;
             _baseUI.Dock = DockStyle.Fill;
             panelMain.Controls.Clear();
@@ -111,9 +113,9 @@ namespace Vision.Projects
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void ToolEnableEvent(object sender, bool e)
+        private void ToolEnableEvent(object sender,bool e)
         {
-            var toolNode =  tvProject.SelectedNode;
+            var toolNode = tvProject.SelectedNode;
             toolNode.ForeColor = e ? Color.Black : Color.LightGray;
         }
 
@@ -125,7 +127,7 @@ namespace Vision.Projects
             panelMain.Controls.Clear();
         }
 
-        private void UcProject_Load(object sender, System.EventArgs e)
+        private void UcProject_Load(object sender,System.EventArgs e)
         {
             ProjectManager.Instance.TreeChangedEvent += Instance_TreeChangedEvent;
             ProjectManager.Instance.UpdateTreeNode();
@@ -138,7 +140,7 @@ namespace Vision.Projects
         /// <param name="nodes"></param>
         private void InitTreeState(TreeNodeCollection nodes)
         {
-            foreach (TreeNode node in nodes)
+            foreach(TreeNode node in nodes)
             {
                 InitTreeState(node.Nodes);
             }
@@ -149,17 +151,17 @@ namespace Vision.Projects
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void Instance_TreeChangedEvent(object sender, TreeEventArgs e)
+        private void Instance_TreeChangedEvent(object sender,TreeEventArgs e)
         {
-            if (InvokeRequired)
+            if(InvokeRequired)
             {
                 BeginInvoke(new Action(() =>
                 {
-                    Instance_TreeChangedEvent(sender, e);
+                    Instance_TreeChangedEvent(sender,e);
                 }));
                 return;
             }
-            if (e.Node != null)
+            if(e.Node != null)
             {
                 tvProject.Nodes.Clear();
                 tvProject.Nodes.Add(e.Node);
@@ -172,11 +174,11 @@ namespace Vision.Projects
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void cmsProject_ItemClicked(object sender, ToolStripItemClickedEventArgs e)
+        private void cmsProject_ItemClicked(object sender,ToolStripItemClickedEventArgs e)
         {
             var item = e.ClickedItem;
-            if (item == null) return;
-            if (item.Text == "新增工位")
+            if(item == null) return;
+            if(item.Text == "新增工位")
             {
                 Cursor = Cursors.WaitCursor;
                 ProjectManager.Instance.AddStation();
@@ -189,7 +191,7 @@ namespace Vision.Projects
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void cmsTool_ItemClicked(object sender, ToolStripItemClickedEventArgs e)
+        private void cmsTool_ItemClicked(object sender,ToolStripItemClickedEventArgs e)
         {
             var selectNode = tvProject.SelectedNode.Name;
             var data = ProjectManager.Instance.GetStationAndTool(selectNode);
@@ -198,24 +200,24 @@ namespace Vision.Projects
 
 
             var item = e.ClickedItem;
-            if (item == null) return;
-            switch (item.Text)
+            if(item == null) return;
+            switch(item.Text)
             {
                 case "删除工具":
-                    ProjectManager.Instance.DeleteTool(station, tool);
+                    ProjectManager.Instance.DeleteTool(station,tool);
                     ShowNull();
                     break;
 
                 case "重命名":
-                    ProjectManager.Instance.RenameTool(station, tool);
+                    ProjectManager.Instance.RenameTool(station,tool);
                     break;
 
                 case "上移":
-                    ProjectManager.Instance.UpTool(station, tool);
+                    ProjectManager.Instance.UpTool(station,tool);
                     break;
 
                 case "下移":
-                    ProjectManager.Instance.DownTool(station, tool);
+                    ProjectManager.Instance.DownTool(station,tool);
                     break;
             }
         }
@@ -225,14 +227,14 @@ namespace Vision.Projects
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void cmsStation_ItemClicked(object sender, ToolStripItemClickedEventArgs e)
+        private void cmsStation_ItemClicked(object sender,ToolStripItemClickedEventArgs e)
         {
             var selectNode = tvProject.SelectedNode;
             var station = ProjectManager.Instance.Project[selectNode.Text];
 
             var item = e.ClickedItem;
-            if (item == null) return;
-            switch (item.Text)
+            if(item == null) return;
+            switch(item.Text)
             {
                 case "新建工具":
                     FrmToolBox frm = new FrmToolBox();
@@ -266,6 +268,27 @@ namespace Vision.Projects
                     FormStationSet form = new FormStationSet(station);
                     form.ShowDialog();
                     break;
+
+                case "复制工位":
+                    _copyStation = ProjectManager.Instance.CopyStation(station);
+                    break;
+            }
+        }
+
+        /// <summary>
+        /// 工位粘贴
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void cmsPasteStation_ItemClicked(object sender,ToolStripItemClickedEventArgs e)
+        {
+            var item = e.ClickedItem;
+            if(item == null) return;
+            switch(item.Text)
+            {
+                case "粘贴工位":
+                    ProjectManager.Instance.PasteStation(_copyStation);
+                    break;
             }
         }
 
@@ -276,22 +299,28 @@ namespace Vision.Projects
         }
 
         #region treeview双击不折叠
-        private void tvProject_MouseDown(object sender, MouseEventArgs e)
+        private void tvProject_MouseDown(object sender,MouseEventArgs e)
         {
             // 统计左键点击次数
             cnt = e.Clicks;
+            if(e.Button == MouseButtons.Right)
+            {
+                if(_copyStation != null)
+                    tvProject.ContextMenuStrip = cmsPasteStation;
+            }
         }
 
-        private void tvProject_BeforeCollapse(object sender, TreeViewCancelEventArgs e)
+        private void tvProject_BeforeCollapse(object sender,TreeViewCancelEventArgs e)
         {
             e.Cancel = cnt > 1;
         }
 
-        private void tvProject_BeforeExpand(object sender, TreeViewCancelEventArgs e)
+        private void tvProject_BeforeExpand(object sender,TreeViewCancelEventArgs e)
         {
             e.Cancel = cnt > 1;
         }
         #endregion
+
 
     }
 }
