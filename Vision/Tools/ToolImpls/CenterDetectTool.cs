@@ -155,7 +155,7 @@ namespace Vision.Tools.ToolImpls
                     ToolBlock.Run();
                     if(ToolBlock.RunStatus.Result != CogToolResultConstants.Accept)
                     {
-                        throw new ToolException($"[{ToolName}] NG!");
+                        throw new Exception($"[{ToolName}] NG!");
                     }
 
                     //获取运行结果
@@ -169,14 +169,23 @@ namespace Vision.Tools.ToolImpls
 
                     //计算机械手旋转后的坐标
                     ModelPoint = GetRobotPoint();
+
+                    if (ToolBlock.CreateLastRunRecord().SubRecords.Count > 0)
+                    {
+                        if (string.IsNullOrEmpty(_station.LastRecordName))
+                        {
+                            _station.ShowImage = ToolBlock.CreateLastRunRecord().SubRecords[0];
+                        }
+                        else
+                        {
+                            _station.ShowImage = ToolBlock.CreateLastRunRecord().SubRecords[_station.LastRecordName];
+                        }
+                    }
                 }
             }
             else
             {
-                throw new ToolException($"[{ToolName}] 输入图像不存在！")
-                {
-                    ImageInNull = true,
-                };
+                throw new Exception($"[{ToolName}] 输入图像不存在！");
             }
         }
 

@@ -97,7 +97,7 @@ namespace Vision.Tools
                         break;
                 }
             }
-            catch (ToolException ex)
+            catch (Exception ex)
             {
                 LogUI.AddToolLog(ex.Message);
             }

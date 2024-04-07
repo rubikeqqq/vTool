@@ -1,6 +1,4 @@
 ﻿using Cognex.VisionPro;
-using Cognex.VisionPro.Implementation.Internal;
-using Cognex.VisionPro.ToolBlock;
 using System;
 using System.ComponentModel;
 using System.Drawing;
@@ -123,34 +121,14 @@ namespace Vision.Stations
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void Station_StationRan(object sender,ShowWindowEventArgs e)
+        private void Station_StationRan(object sender,ShowDebugWindowEventArgs e)
         {
             if(_station == null) return;
             //清楚之前的显示
             ClearDisplay();
-            foreach(var tool in _station.ToolList)
-            {
-                if(tool is CenterDetectTool cdTool)
-                {
-                    if(!e.IsNullImage)
-                    {
-                        SetResultGraphicOnRecordDisplay(cdTool.ToolBlock,_station.LastRecordName);
-                        GraphicCreateLabel(e.Result);
-                    }
-                    SetTitle(e.Result ? "运行成功" : $"{e.ErrorMsg}",e.Result ? Color.Green : Color.Red);
-                    SetTime(e.Time);
-                }
-                else if(tool is DetectTool dTool)
-                {
-                    if(!e.IsNullImage)
-                    {
-                        SetResultGraphicOnRecordDisplay(dTool.ToolBlock,_station.LastRecordName);
-                        GraphicCreateLabel(e.Result);
-                    }
-                    SetTitle(e.Result ? "运行成功" : $"{e.ErrorMsg}",e.Result ? Color.Green : Color.Red);
-                    SetTime(e.Time);
-                }
-            }
+            SetResultGraphicOnRecordDisplay(e.Image);
+            SetTitle(e.Result ? "运行成功" : $"{e.ErrorMsg}", e.Result ? Color.Green : Color.Red);
+            SetTime(e.Time);
         }
 
         /// <summary>
@@ -164,32 +142,33 @@ namespace Vision.Stations
             rbtnDisable.Checked = !e;
         }
 
-        /// <summary>
-        /// 显示
-        /// </summary>
-        /// <param name="toolBlock"></param>
-        /// <param name="recordName"></param>
-        private void SetResultGraphicOnRecordDisplay(CogToolBlock toolBlock,string recordName)
+        private void SetResultGraphicOnRecordDisplay(object image)
         {
-            if(InvokeRequired)
+            if (InvokeRequired)
             {
-                cogRecordDisplay1.Invoke(new Action<CogToolBlock,string>(SetResultGraphicOnRecordDisplay),
-                    toolBlock,recordName);
+                cogRecordDisplay1.Invoke(new Action<object>(SetResultGraphicOnRecordDisplay),
+                    image);
                 return;
             }
-
-            toolBlock.LastRunRecordEnable = CogUserToolLastRunRecordConstants.CompositeSubToolRecords;
-            var lastRecord = toolBlock.CreateLastRunRecord();
-            if(lastRecord != null && lastRecord.SubRecords.ContainsKey(recordName))
+            try
             {
-                cogRecordDisplay1.Record = lastRecord.SubRecords[recordName];
-                cogRecordDisplay1.Fit();
+                if (cogRecordDisplay1 == null) return;
+                //判断是ICogImage 还是 IRecordImage
+                if (image is ICogImage image1)
+                {
+                    cogRecordDisplay1.Image = image1;
+                    cogRecordDisplay1.AutoFit = true;
+                }
+                else if (image is ICogRecord image2)
+                {
+                    //如果没有设置输出的图像 则显示原图
+                    cogRecordDisplay1.Record = image2;
+                    cogRecordDisplay1.AutoFit = true;
+                }
             }
-            else
+            catch
             {
-                //如果没有设置输出图像 则输出原始图像
-                cogRecordDisplay1.Image = (ICogImage)toolBlock.Inputs["InputImage"].Value;
-                cogRecordDisplay1.Fit();
+                LogUI.AddToolLog("图像显示失败！");
             }
         }
 

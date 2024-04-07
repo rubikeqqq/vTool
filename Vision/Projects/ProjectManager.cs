@@ -399,15 +399,23 @@ namespace Vision.Projects
             if(!IsLoaded) return;
             if(_project == null) return;
             _project.PasteStation(station);
-            foreach(ToolBase tool in station.ToolList)
+
+            //加载station的数据
+            station.Init();
+            station.LoadData();
+            foreach (var tool in station.ToolList)
             {
-                if(tool is IVpp iTool)
+                if (tool is IRegisterStation rTool)
                 {
-                    iTool.RegisterStation(station);
-                    ((IVpp)station[tool.ToolName]).LoadVpp();
+                    rTool.RegisterStation(station);
+                }
+                if (tool is IVpp iTool)
+                {
+                    iTool.LoadVpp();
                 }
             }
-            _project[_project.StationList.Count - 1].ShowDisplayChangedEvent += Station_ShowDisplayChangedEvent;
+            station.RegisterViewDisplay();
+            station.ShowDisplayChangedEvent += Station_ShowDisplayChangedEvent;
             UpdateTreeNode();
             SaveProject();
         }
@@ -567,6 +575,11 @@ namespace Vision.Projects
                     }
                     tnStation.Nodes.Add(tnTool);
                 }
+                if (!station.Enable)
+                {
+                    tnStation.ForeColor = Color.LightGray;
+                }
+                
                 node.Nodes.Add(tnStation);
             }
             OnTreeChanged(new TreeEventArgs(node));

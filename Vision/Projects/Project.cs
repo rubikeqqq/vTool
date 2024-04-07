@@ -192,7 +192,6 @@ namespace Vision.Projects
             var defaultName = GenDefaultStationName();
 
             station.StationName = defaultName;  
-            station.RegisterViewDisplay();
 
             if(!StationExsit(station))
             {

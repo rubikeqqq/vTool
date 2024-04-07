@@ -119,6 +119,7 @@ namespace Vision.Frm
         private void btnSave_Click(object sender, System.EventArgs e)
         {
             _station.SaveData();
+            this.Close();
         }
     }
 }

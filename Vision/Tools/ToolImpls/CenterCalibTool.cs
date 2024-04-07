@@ -101,17 +101,15 @@ namespace Vision.Tools.ToolImpls
                     ToolBlock.Run();
                     if (ToolBlock.RunStatus.Result != CogToolResultConstants.Accept)
                     {
-                        throw new ToolException($"工具[{ToolName}]运行失败！")
-                        {
-                            ToolName = ToolName,
-                        };
+                        throw new Exception($"工具[{ToolName}]运行失败！"); 
                     }
                     ImageOut = (ICogImage)ToolBlock.Outputs["OutputImage"].Value;
+                    _station.ShowImage = ImageOut;
                 }
             }
             else
             {
-                throw new ToolException($"[{ToolName}]没有输入图像");
+                throw new Exception($"[{ToolName}]没有输入图像");
             }
         }
 

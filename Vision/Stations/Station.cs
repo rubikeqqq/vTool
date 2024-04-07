@@ -1,5 +1,4 @@
 ﻿using Cognex.VisionPro;
-using Cognex.VisionPro.ToolBlock;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -34,6 +33,9 @@ namespace Vision.Stations
         [NonSerialized]
         private bool _cycleFlag;
 
+        [field: NonSerialized]
+        public object ShowImage {  get; set; }
+
         /// <summary>
         /// 工位名称
         /// </summary>
@@ -59,6 +61,7 @@ namespace Vision.Stations
                 if(_enabled == value) return;
                 _enabled = value;
                 StationEnableEvent?.Invoke(this,value);
+                ProjectManager.Instance.UpdateTreeNode();
                 LogUI.AddToolLog(value? $"[{StationName}] 工位启用": $"[{StationName}] 工位关闭");
             }
         }
@@ -77,7 +80,7 @@ namespace Vision.Stations
         public UcDebug UcDebug { get; private set; }
 
         [field: NonSerialized]
-        public event EventHandler<ShowWindowEventArgs> StationRanEvent;
+        public event EventHandler<ShowDebugWindowEventArgs> StationRanEvent;
 
         [field: NonSerialized]
         public event EventHandler<bool> StationEnableEvent;
@@ -127,8 +130,8 @@ namespace Vision.Stations
         {
             if(ToolList.Count > 0)
             {
+                ShowImage = null;
                 var result = true;
-                bool nullImage = false;
                 string errMsg = string.Empty;
                 Stopwatch stopwatch = new Stopwatch();
                 stopwatch.Start();
@@ -138,9 +141,8 @@ namespace Vision.Stations
                     {
                         tool.Run();
                     }
-                    catch(ToolException e)
+                    catch(Exception e)
                     {
-                        nullImage = e.ImageInNull;
                         result = false;
 
                         //一个工具NG后还是要发送NG的结果的
@@ -154,7 +156,9 @@ namespace Vision.Stations
                 }
                 stopwatch.Stop();
                 var time = stopwatch.Elapsed;
-                ShowWindow(new ShowWindowEventArgs(result,time,nullImage,errMsg));
+                //显示
+                ShowWindow(new ShowWindowEventArgs(result,time,ShowImage));
+                //存图
                 SaveImage(result);
             }
         }
@@ -166,8 +170,8 @@ namespace Vision.Stations
         {
             if(ToolList.Count > 0)
             {
+                ShowImage = null;
                 var result = true;
-                bool nullImage = false;
                 string errMsg = string.Empty;
                 Stopwatch stopwatch = new Stopwatch();
                 stopwatch.Start();
@@ -182,17 +186,16 @@ namespace Vision.Stations
                         var t = stopwatch1.Elapsed;
                         LogUI.AddToolLog(tool.ToolName + "=> " + t.TotalMilliseconds.ToString("f2") + "ms");
                     }
-                    catch(ToolException ex)
+                    catch(Exception ex)
                     {
                         result = false;
-                        nullImage = ex.ImageInNull;
                         LogUI.AddToolLog($"[{StationName}] => {ex.Message}");
                         break;
                     }
                 }
                 stopwatch.Stop();
                 var time = stopwatch.Elapsed;
-                ShowDebugWindow(new ShowWindowEventArgs(result,time,nullImage,errMsg));
+                ShowDebugWindow(new ShowDebugWindowEventArgs(result,time,ShowImage,errMsg));
             }
         }
 
@@ -254,37 +257,14 @@ namespace Vision.Stations
         private void ShowWindow(ShowWindowEventArgs args)
         {
             //运行视图模式下显示
-            if(DisplayView != null)
+            if (DisplayView != null)
             {
                 //先清除之前的显示
                 DisplayView.ClearDisplay();
 
-                CogToolBlock tb = null;
-                if(ToolList != null && ToolList.Count > 0)
-                {
-                    foreach(ToolBase tool in ToolList)
-                    {
-                        if(tool is CenterDetectTool detectTool)
-                        {
-                            tb = detectTool.ToolBlock;
-                            break;
-                        }
-                        else if(tool is DetectTool dTool)
-                        {
-                            tb = dTool.ToolBlock;
-                            break;
-                        }
-                    }
-                }
-                if(tb != null)
-                {
-                    if(!args.IsNullImage)  //有图像
-                    {
-                        DisplayView.SetResultGraphicOnRecordDisplay(tb,LastRecordName);
-                        DisplayView.SetTime(args.Time);
-                        DisplayView.GraphicCreateLabel(args.Result);
-                    }
-                }
+                DisplayView.SetResultGraphicOnRecordDisplay(args.Image);
+                DisplayView.SetTime(args.Time);
+                DisplayView.GraphicCreateLabel(args.Result);
             }
         }
 
@@ -292,7 +272,7 @@ namespace Vision.Stations
         /// 调试模式显示
         /// </summary>
         /// <param name="args"></param>
-        private void ShowDebugWindow(ShowWindowEventArgs args)
+        private void ShowDebugWindow(ShowDebugWindowEventArgs args)
         {
             //debug模式下
             OnStationRan(args);
@@ -656,7 +636,7 @@ namespace Vision.Stations
         /// 工位运行事件触发器
         /// </summary>
         /// <param name="args"></param>
-        private void OnStationRan(ShowWindowEventArgs args)
+        private void OnStationRan(ShowDebugWindowEventArgs args)
         {
             StationRanEvent?.Invoke(this,args);
         }

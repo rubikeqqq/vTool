@@ -36,19 +36,45 @@ namespace Vision.Core
         /// <summary>
         /// 是否有输入图像
         /// </summary>
-        public bool IsNullImage { get; private set; }
+        public object Image { get; private set; }
+
+
+        public ShowWindowEventArgs(bool res, TimeSpan time, object image)
+        {
+            Time = time;
+            Result = res;
+            Image = image;
+        }
+    }
+
+    public class ShowDebugWindowEventArgs : EventArgs
+    {
+        /// <summary>
+        /// 运行时间
+        /// </summary>
+        public TimeSpan Time { get; private set; }
+
+        /// <summary>
+        /// 运行结果
+        /// </summary>
+        public bool Result { get; private set; }
+
+        /// <summary>
+        /// 是否有输入图像
+        /// </summary>
+        public object Image { get; private set; }
 
         /// <summary>
         /// NG时 错误描述
         /// </summary>
         public string ErrorMsg { get; private set; }
 
-        public ShowWindowEventArgs(bool res, TimeSpan time,bool nullImage,string errMsg)
+        public ShowDebugWindowEventArgs(bool res, TimeSpan time, object image, string errMsg)
         {
             Time = time;
             Result = res;
             ErrorMsg = errMsg;
-            IsNullImage = nullImage;
+            Image = image;
         }
     }
 

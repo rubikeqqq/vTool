@@ -1,7 +1,6 @@
 ﻿using Cognex.VisionPro;
 using Cognex.VisionPro.Display;
 using Cognex.VisionPro.ImageFile;
-using Cognex.VisionPro.Implementation.Internal;
 using Cognex.VisionPro.ToolBlock;
 using System;
 using System.ComponentModel;
@@ -232,34 +231,31 @@ namespace Vision.Stations
         }
 
         /// <summary>
-        /// 显示recordDisplay
+        /// 显示图像结果
         /// </summary>
-        /// <param name="toolBlock"></param>
-        /// <param name="recordName"></param>
-        public void SetResultGraphicOnRecordDisplay(CogToolBlock toolBlock, string recordName)
+        /// <param name="image"></param>
+        public void SetResultGraphicOnRecordDisplay(object image)
         {
             if (InvokeRequired)
             {
                 cogRecordDisplay1
-                    .Invoke(new SetResultGraphicOnRecordDisplayDelegate(SetResultGraphicOnRecordDisplay),
-                    toolBlock, recordName);
+                    .Invoke(new Action<object>(SetResultGraphicOnRecordDisplay),
+                    image);
                 return;
             }
             try
             {
-                toolBlock.LastRunRecordEnable = CogUserToolLastRunRecordConstants.CompositeSubToolRecords;
-                var lastRecord = toolBlock.CreateLastRunRecord();
                 if (cogRecordDisplay1 == null) return;
-                //如果设置了输出的record图像 显示此图像
-                if (lastRecord != null && lastRecord.SubRecords.ContainsKey(recordName))
+                //判断是ICogImage 还是 IRecordImage
+                if (image is ICogImage image1)
                 {
-                    cogRecordDisplay1.Record = lastRecord.SubRecords[recordName];
+                    cogRecordDisplay1.Image = image1;
                     cogRecordDisplay1.AutoFit = true;
                 }
-                else 
+                else if (image is ICogRecord image2) 
                 {
                     //如果没有设置输出的图像 则显示原图
-                    cogRecordDisplay1.Image = (ICogImage)toolBlock.Inputs["InputImage"].Value;
+                    cogRecordDisplay1.Record = image2;
                     cogRecordDisplay1.AutoFit = true;
                 }
             }

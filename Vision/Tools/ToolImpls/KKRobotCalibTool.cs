@@ -57,7 +57,7 @@ namespace Vision.Tools.ToolImpls
             if(!Enable) return;
             if(CalibTool == null)
             {
-                throw new ToolException("CogCalibNPointToNPointTool不存在！");
+                throw new Exception("CogCalibNPointToNPointTool不存在！");
             }
 
             //先获取kk的原始坐标
@@ -66,13 +66,13 @@ namespace Vision.Tools.ToolImpls
             //读取现在的kk坐标
             if(string.IsNullOrEmpty(_station.DataConfig.KKConfig.AddressX) || string.IsNullOrEmpty(_station.DataConfig.KKConfig.AddressY))
             {
-                throw new ToolException("kk坐标的地址不存在！");
+                throw new Exception("kk坐标的地址不存在！");
             }
 
             var plc = MXPlc.GetInstance();
             if (!plc.IsOpened)
             {
-                throw new ToolException("plc未连接！");
+                throw new Exception("plc未连接！");
             }
 
             plc.ReadDouble(_station.DataConfig.KKConfig.AddressX,out double x);

@@ -1,7 +1,6 @@
 ﻿using Cognex.VisionPro;
 using System;
 using System.ComponentModel;
-using System.Drawing;
 using System.IO;
 using System.Windows.Forms;
 using Vision.Core;
@@ -122,16 +121,14 @@ namespace Vision.Tools.ToolImpls
         {
             if (!Enable) return;
             if (AcqFifoTool == null)
-                throw new ToolException("AcqFifoTool为null")
-                {
-                    ImageInNull = true,
-                };
+                throw new Exception("AcqFifoTool为null");
             AcqFifoTool.Run();
             if (AcqFifoTool.RunStatus.Result != CogToolResultConstants.Accept)
             {
-                throw new ToolException("相机取像失败！");
+                throw new Exception("相机取像失败！");
             }
             ImageOut = AcqFifoTool.OutputImage;
+            _station.ShowImage = ImageOut;
         }
 
         public override void RunDebug()

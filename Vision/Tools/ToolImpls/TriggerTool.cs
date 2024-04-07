@@ -51,10 +51,7 @@ namespace Vision.Tools.ToolImpls
             }
             else
             {
-                throw new ToolException("plc未连接！")
-                {
-                    ImageInNull = true
-                };
+                throw new Exception("plc未连接！");
             }
         }
 

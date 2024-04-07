@@ -70,24 +70,4 @@ namespace Vision.Tools.ToolImpls
         public abstract UserControl GetToolControl(Station station);
     }
 
-    /// <summary>
-    /// 工具运行异常类
-    /// </summary>
-    public class ToolException : Exception
-    {
-        /// <summary>
-        /// 图像为空
-        /// </summary>
-        public bool ImageInNull { get; set; }
-
-        /// <summary>
-        /// 工具名称
-        /// </summary>
-        public string ToolName { get; set; }
-
-        public ToolException(string message) : base(message) 
-        {
-        }
-    }
-
 }

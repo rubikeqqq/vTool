@@ -15,13 +15,16 @@ namespace Vision.Tools.ToolImpls
     [GroupInfo("图像工具", 0)]
     [ToolName("图像仿真", 1)]
     [Description("通过读取本地图像进行仿真测试")]
-    public class ImageTool : ToolBase, IImageOut
+    public class ImageTool : ToolBase, IImageOut, IRegisterStation
     {
         /// <summary>
         /// 文件夹时使用的图像计数
         /// </summary>
         [NonSerialized]
         private int _imageIndex;
+
+        [NonSerialized]
+        private Station _station;
 
         /// <summary>
         /// 仿真的格式
@@ -60,12 +63,9 @@ namespace Vision.Tools.ToolImpls
             ImageOut = GetImage();
             if (ImageOut == null)
             {
-                throw new ToolException($"[{ToolName}] 输出图像失败，请检查设置！")
-                {
-                    ImageInNull = true
-                };
+                throw new Exception($"[{ToolName}] 输出图像失败，请检查设置！");
             }
-
+            _station.ShowImage = ImageOut;
             OnImageShowEvent(ImageOut);
         }
 
@@ -132,6 +132,11 @@ namespace Vision.Tools.ToolImpls
                 image = new CogImage8Grey(bmp);
             }
             return image;
+        }
+
+        public void RegisterStation(Station station)
+        {
+            _station = station;
         }
     }
 
