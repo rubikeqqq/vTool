@@ -558,6 +558,17 @@ namespace Vision.Projects
                 tnStation.Name = "组" + station.StationName;
                 tnStation.ImageIndex = 1;
                 tnStation.SelectedImageIndex = 1;
+                //工位node
+                if(!station.Enable)
+                {
+                    tnStation.ForeColor = Color.LightGray;
+                    tnStation.Collapse();
+                }
+                else
+                {
+                    tnStation.Expand();
+                }
+                //工具node
                 foreach (var tool in station.ToolList)
                 {
                     if (tool is null)
@@ -569,18 +580,15 @@ namespace Vision.Projects
                     tnTool.ImageIndex = 2;
                     tnTool.SelectedImageIndex = 2;
                     //当工具未启用状态时 改变其颜色
-                    if (!tool.Enable)
+                    if (!tool.Enable || !station.Enable)
                     {
                         tnTool.ForeColor = Color.LightGray;
                     }
                     tnStation.Nodes.Add(tnTool);
                 }
-                if (!station.Enable)
-                {
-                    tnStation.ForeColor = Color.LightGray;
-                }
                 
                 node.Nodes.Add(tnStation);
+                node.Expand();
             }
             OnTreeChanged(new TreeEventArgs(node));
         }

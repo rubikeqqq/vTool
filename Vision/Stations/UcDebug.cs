@@ -364,13 +364,19 @@ namespace Vision.Stations
         private void rbtnEnable_CheckedChanged(object sender,EventArgs e)
         {
             if(_init)
+            {
                 _station.Enable = rbtnEnable.Checked;
+                ProjectManager.Instance.SaveProject();
+            }
         }
 
         private void rbtnDisable_CheckedChanged(object sender,EventArgs e)
         {
             if(_init)
+            {
                 _station.Enable = !rbtnDisable.Checked;
+                ProjectManager.Instance.SaveProject();
+            }
         }
     }
 }

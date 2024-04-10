@@ -165,7 +165,7 @@ namespace Vision.Projects
             {
                 tvProject.Nodes.Clear();
                 tvProject.Nodes.Add(e.Node);
-                tvProject.ExpandAll();
+                //tvProject.ExpandAll();
             }
         }
 
