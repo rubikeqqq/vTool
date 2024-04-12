@@ -82,7 +82,7 @@ namespace Vision.Stations
         [field: NonSerialized]
         public event EventHandler<ShowDebugWindowEventArgs> StationDebugShowEvent;
 
-        
+        [field: NonSerialized]
         public event EventHandler<bool> StationEnableEvent;
 
         [field: NonSerialized]
