@@ -110,7 +110,7 @@ namespace Vision
         {
             foreach (Station station in ProjectManager.Instance.Project.StationList)
             {
-                station.StartCycle();
+                station.Start();
                 _cycle = true;
             }
             AddControl(_ucWindow);
@@ -124,7 +124,7 @@ namespace Vision
         {
             foreach (Station station in ProjectManager.Instance.Project.StationList)
             {
-                station.StopCycle();
+                station.Stop();
                 _cycle = false;
             }
         }

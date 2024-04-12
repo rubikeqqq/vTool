@@ -32,24 +32,6 @@ namespace Vision.Tools.ToolImpls
         [field: NonSerialized]
         public CogToolBlock ToolBlock { get; set; }
 
-        /// <summary>
-        /// 输入点位
-        /// </summary>
-        [field: NonSerialized]
-        public PointA PointIn { get; set; }
-
-        /// <summary>
-        /// 由KK移动 计算得到的机械手的 偏移量
-        /// </summary>
-        [field: NonSerialized]
-        public PointD RobotDelta { get; set; }
-
-        /// <summary>
-        /// 机械手旋转中心的偏移值
-        /// </summary>
-        [field: NonSerialized]
-        public PointD CenterRobotDelta { get; set; }
-
         public string ImageInName { get; set; }
 
         [field: NonSerialized]

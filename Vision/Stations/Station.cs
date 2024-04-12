@@ -31,7 +31,10 @@ namespace Vision.Stations
         private Thread _cycleThread;
 
         [NonSerialized]
-        private bool _cycleFlag;
+        private bool _threadFlag;
+
+        [NonSerialized]
+        private bool _cycle;
 
         [field: NonSerialized]
         public object ShowImage {  get; set; }
@@ -77,19 +80,13 @@ namespace Vision.Stations
         public List<ToolBase> ToolList { get; set; } = new List<ToolBase>();
 
         [field: NonSerialized]
-        public UcDebug UcDebug { get; private set; }
+        public event EventHandler<ShowDebugWindowEventArgs> StationDebugShowEvent;
 
-        [field: NonSerialized]
-        public event EventHandler<ShowDebugWindowEventArgs> StationRanEvent;
-
-        [field: NonSerialized]
+        
         public event EventHandler<bool> StationEnableEvent;
 
         [field: NonSerialized]
-        public event EventHandler<StationShowChangedEventArgs> ShowDisplayChangedEvent;
-
-        [field: NonSerialized]
-        public bool Cycle { get; private set; }
+        public event EventHandler<StationShowChangedEventArgs> StationDisplayChangedEvent;
 
         [field: NonSerialized]
         public CogDisplayView DisplayView { get; set; }
@@ -203,9 +200,9 @@ namespace Vision.Stations
         /// 如果未开启线程 则开启线程
         /// 如果已经开启 则将线程继续
         /// </summary>
-        public void StartCycle()
+        public void Start()
         {
-            if(!Cycle)
+            if(!_cycle)
             {
                 if(_manualResetEvent == null)
                 {
@@ -216,7 +213,7 @@ namespace Vision.Stations
                 {
                     IsBackground = true
                 };
-                _cycleFlag = true;
+                _threadFlag = true;
                 _cycleThread.Start();
             }
             else
@@ -226,12 +223,20 @@ namespace Vision.Stations
         }
 
         /// <summary>
+        /// 停止循环运行
+        /// </summary>
+        public void Stop()
+        {
+            _manualResetEvent?.Reset();
+        }
+
+        /// <summary>
         /// 循环运行
         /// </summary>
         private void RunCycle()
         {
-            Cycle = true;
-            while(_cycleFlag)
+            _cycle = true;
+            while(_threadFlag)
             {
                 if(Enable)
                 {
@@ -240,14 +245,6 @@ namespace Vision.Stations
                 }
                 Thread.Sleep(1000);
             }
-        }
-
-        /// <summary>
-        /// 停止循环运行
-        /// </summary>
-        public void StopCycle()
-        {
-            _manualResetEvent?.Reset();
         }
 
         /// <summary>
@@ -461,15 +458,6 @@ namespace Vision.Stations
         }
 
         /// <summary>
-        /// 注册debug窗口
-        /// </summary>
-        /// <param name="ucStation"></param>
-        public void RegisterDebugShow(UcDebug ucStation)
-        {
-            UcDebug = ucStation;
-        }
-
-        /// <summary>
         /// 获取所有CenterDetectTool的Tool名称
         /// </summary>
         /// <returns></returns>
@@ -591,9 +579,9 @@ namespace Vision.Stations
             {
                 t.Close();
             }
-            if(_cycleFlag)
+            if(_threadFlag)
             {
-                _cycleFlag = false;
+                _threadFlag = false;
                 _cycleThread.Abort();
                 _cycleThread.Join();
             }
@@ -638,13 +626,13 @@ namespace Vision.Stations
         /// <param name="args"></param>
         private void OnStationRan(ShowDebugWindowEventArgs args)
         {
-            StationRanEvent?.Invoke(this,args);
+            StationDebugShowEvent?.Invoke(this,args);
         }
 
         private void DisplayView_ShowDisplayOne(object sender,StationShowChangedEventArgs e)
         {
             e.StationName = StationName;
-            ShowDisplayChangedEvent?.Invoke(sender,e);
+            StationDisplayChangedEvent?.Invoke(sender,e);
         }
         #endregion
 

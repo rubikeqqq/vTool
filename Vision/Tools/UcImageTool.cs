@@ -130,7 +130,7 @@ namespace Vision.Tools
                 }
             }
             tbPath.Text = _imageTool.Path;
-            ProjectManager.Instance.SaveConfig();
+            ProjectManager.Instance.SaveProject();
         }
 
     }

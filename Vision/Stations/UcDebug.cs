@@ -41,12 +41,11 @@ namespace Vision.Stations
                     StopLive();
                     btnLive.Text = "连续采集";
                 }
-                _station.StationRanEvent -= Station_StationRan;
+                _station.StationDebugShowEvent -= Station_StationRan;
                 _station.StationEnableEvent -= Station_StationEnableEvent;
             }
             _station = station;
-            _station.RegisterDebugShow(this);
-            _station.StationRanEvent += Station_StationRan;
+            _station.StationDebugShowEvent += Station_StationRan;
             _station.StationEnableEvent += Station_StationEnableEvent;
             //更新相机
             UpdateCamera();
@@ -111,7 +110,7 @@ namespace Vision.Stations
         {
             if(_station != null)
             {
-                _station.StationRanEvent -= Station_StationRan;
+                _station.StationDebugShowEvent -= Station_StationRan;
                 _station.StationEnableEvent -= Station_StationEnableEvent;
             }
         }

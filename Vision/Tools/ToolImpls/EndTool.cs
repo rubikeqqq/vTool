@@ -1,9 +1,8 @@
 ﻿using System;
 using System.ComponentModel;
 using System.Windows.Forms;
-using Vision.Hardware;
 using Vision.Core;
-using Vision.Projects;
+using Vision.Hardware;
 using Vision.Stations;
 
 namespace Vision.Tools.ToolImpls

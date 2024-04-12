@@ -180,7 +180,7 @@ namespace Vision.Projects
                             }
                         }
                         station.RegisterViewDisplay();
-                        station.ShowDisplayChangedEvent += Station_ShowDisplayChangedEvent;
+                        station.StationDisplayChangedEvent += Station_ShowDisplayChangedEvent;
                     }
                     IsLoaded = true;
                     LogNet.Log("项目载入成功！");
@@ -238,7 +238,7 @@ namespace Vision.Projects
             if (!IsLoaded) return;
             foreach (var station in _project.StationList)
             {
-                station.ShowDisplayChangedEvent -= Station_ShowDisplayChangedEvent;
+                station.StationDisplayChangedEvent -= Station_ShowDisplayChangedEvent;
             }
             _project.Close();
             _imageThreadFlag = false;
@@ -295,7 +295,7 @@ namespace Vision.Projects
             try
             {
                 //因为不知道station的名称 但是可以确定是最后一个添加的
-                _project[_project.StationList.Count - 1].ShowDisplayChangedEvent += Station_ShowDisplayChangedEvent;
+                _project[_project.StationList.Count - 1].StationDisplayChangedEvent += Station_ShowDisplayChangedEvent;
                 UpdateTreeNode();
                 SaveProject();
                 return true;
@@ -415,7 +415,7 @@ namespace Vision.Projects
                 }
             }
             station.RegisterViewDisplay();
-            station.ShowDisplayChangedEvent += Station_ShowDisplayChangedEvent;
+            station.StationDisplayChangedEvent += Station_ShowDisplayChangedEvent;
             UpdateTreeNode();
             SaveProject();
         }
