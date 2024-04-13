@@ -2,29 +2,25 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
+using System.Runtime.Serialization;
 using Vision.Core;
 using Vision.Stations;
 
 namespace Vision.Projects
 {
     [Serializable]
-    public class Project
+    public class Project:ISerializable
     {
-        private List<Station> _stations;    //工位集合
-
         public Project()
         {
-            
+
         }
 
         /// <summary>
         /// 工位列表
         /// </summary>
-        public List<Station> StationList
-        {
-            get => _stations ?? (_stations = new List<Station>());
-            private set => _stations = value;
-        }
+        public List<Station> StationList { get; set; } = new List<Station>();
 
         public Station this[string name]
         {
@@ -35,6 +31,41 @@ namespace Vision.Projects
         }
 
         public Station this[int index] => StationList[index];
+
+        public Project(SerializationInfo info,StreamingContext context)
+        {
+            string count = "ProjectCount";
+            string station = "Station";
+            StationList = new List<Station>();
+            int n = info.GetInt32(count);
+
+            Station s;
+
+            for(int i = 0;i < n;i++)
+            {
+                var typeName = info.GetString($"{station}.{i}");
+
+                s = (Station)Assembly.GetExecutingAssembly().CreateInstance(typeName);
+                s.LoadFromStream(info,$"{station}.{i}");
+
+                StationList.Add(s);
+            }
+        }
+
+        public void GetObjectData(SerializationInfo info,StreamingContext context)
+        {
+            string count = "ProjectCount";
+            string station = "Station";
+            //添加station的个数
+            info.AddValue(count,StationList.Count);
+            int n = 0;
+            foreach(var s in StationList)
+            {
+                info.AddValue($"{station}.{n}",s.GetType().FullName);
+                s.SaveToStream(info,$"{station}.{n}");
+                n++;
+            }
+        }
 
         /// <summary>
         /// 添加工位
@@ -52,13 +83,14 @@ namespace Vision.Projects
             {
                 StationName = defaultName,
             };
+            station.Init();
             station.RegisterViewDisplay();
 
-            if (!StationExsit(station))
+            if(!StationExsit(station))
             {
-                var path = Path.Combine(ProjectManager.ProjectDir, station.StationName);
+                var path = Path.Combine(ProjectManager.ProjectDir,station.StationName);
                 //添加文件夹
-                if (!Directory.Exists(path))
+                if(!Directory.Exists(path))
                 {
                     Directory.CreateDirectory(path);
                 }
@@ -74,17 +106,17 @@ namespace Vision.Projects
         /// <param name="station"></param>
         /// <param name="newName"></param>
         /// <returns></returns>
-        public bool RenameStation(Station station, string newName)
+        public bool RenameStation(Station station,string newName)
         {
-            if (station == null)
+            if(station == null)
                 return false;
 
-            if (StationExsit(station))
+            if(StationExsit(station))
             {
-                var oldPath = Path.Combine(ProjectManager.ProjectDir, station.StationName);
+                var oldPath = Path.Combine(ProjectManager.ProjectDir,station.StationName);
                 station.StationName = newName;
-                var newPath = Path.Combine(ProjectManager.ProjectDir, newName);
-                Local.RenameDirectory(oldPath, newPath);
+                var newPath = Path.Combine(ProjectManager.ProjectDir,newName);
+                Local.RenameDirectory(oldPath,newPath);
                 return true;
             }
             else
@@ -100,14 +132,14 @@ namespace Vision.Projects
         /// <returns></returns>
         public bool DeleteStation(Station station)
         {
-            if (station == null) return false;
-            if (StationExsit(station))
+            if(station == null) return false;
+            if(StationExsit(station))
             {
-                var path = Path.Combine(ProjectManager.ProjectDir, station.StationName);
+                var path = Path.Combine(ProjectManager.ProjectDir,station.StationName);
                 //删除文件夹
-                if (Directory.Exists(path))
+                if(Directory.Exists(path))
                 {
-                    Directory.Delete(path, true);
+                    Directory.Delete(path,true);
                 }
                 StationList.Remove(station);
                 return true;
@@ -123,7 +155,7 @@ namespace Vision.Projects
         {
             int m = 1;
             string name = "工位" + m.ToString();
-            while (StationExsit(name))
+            while(StationExsit(name))
             {
                 m++;
                 name = "工位" + m.ToString();
@@ -138,10 +170,10 @@ namespace Vision.Projects
         /// <returns></returns>
         public bool StationExsit(Station station)
         {
-            if (StationList == null) { return false; }
-            foreach (Station s in StationList)
+            if(StationList == null) { return false; }
+            foreach(Station s in StationList)
             {
-                if (s.StationName == station.StationName)
+                if(s.StationName == station.StationName)
                 {
                     return true;
                 }
@@ -156,9 +188,9 @@ namespace Vision.Projects
         /// <returns></returns>
         public bool StationExsit(string name)
         {
-            if (StationList == null) { return false; }
+            if(StationList == null) { return false; }
             var station = StationList.Find(s => s.StationName == name);
-            if (station != null)
+            if(station != null)
             {
                 return true;
             }
@@ -172,7 +204,7 @@ namespace Vision.Projects
         /// <returns></returns>
         public Station CopyStation(Station station)
         {
-            return station.DeepClone();
+            return station.Clone();
         }
 
         /// <summary>
@@ -191,7 +223,7 @@ namespace Vision.Projects
             string oldName = station.StationName;
             var defaultName = GenDefaultStationName();
 
-            station.StationName = defaultName;  
+            station.StationName = defaultName;
 
             if(!StationExsit(station))
             {
@@ -213,9 +245,9 @@ namespace Vision.Projects
         /// </summary>
         public void Close()
         {
-            if (StationList != null && StationList.Count > 0)
+            if(StationList != null && StationList.Count > 0)
             {
-                foreach (Station station in StationList)
+                foreach(Station station in StationList)
                 {
                     station.Close();
                 }

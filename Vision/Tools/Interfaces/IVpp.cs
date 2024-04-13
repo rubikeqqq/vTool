@@ -1,6 +1,4 @@
-﻿using Cognex.VisionPro.ToolBlock;
-
-namespace Vision.Tools.Interfaces
+﻿namespace Vision.Tools.Interfaces
 {
     /// <summary>
     /// 康耐视vpp接口，所有需要保存和加载vpp的工具都要继承此接口

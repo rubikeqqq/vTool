@@ -6,7 +6,7 @@ using Vision.Core;
 namespace Vision.Hardware
 
 {
-    public class MXPlc : IPlc
+    public class MXPlc:IPlc
     {
         #region Fields
         private HslCommunication.Profinet.Melsec.MelsecMcNet mPlcMC;
@@ -28,7 +28,14 @@ namespace Vision.Hardware
         public bool IsOpened
         {
             get { return mIsOpened; }
-            set { mIsOpened = value; }
+            set
+            {
+                if(mIsOpened != value)
+                {
+                    mIsOpened = value;
+                    ConnectedStateChanged?.Invoke(this,mIsOpened ? "plc连接成功！" : "plc断开连接！");
+                }
+            }
         }
 
         public string PLCIPAddress
@@ -53,13 +60,15 @@ namespace Vision.Hardware
             set => mHeartBeatAddress = value;
             get => mHeartBeatAddress;
         }
+
+        public event EventHandler<string> ConnectedStateChanged;
         #endregion
 
         #region Implements
 
         public static MXPlc GetInstance()
         {
-            if (mInstance == null)
+            if(mInstance == null)
             {
                 mInstance = new MXPlc();
             }
@@ -69,7 +78,7 @@ namespace Vision.Hardware
         private MXPlc()
         {
             mPlcMC = null;
-            mIsOpened = false;
+            IsOpened = false;
             mDelayTime = 15;
             mAccessMutex = new Mutex();
 
@@ -85,18 +94,16 @@ namespace Vision.Hardware
         public bool OpenPLC()
         {
             OperateResult opres;
-            mPlcMC = new HslCommunication.Profinet.Melsec.MelsecMcNet(mIPAddr, mPort);
+            mPlcMC = new HslCommunication.Profinet.Melsec.MelsecMcNet(mIPAddr,mPort);
             opres = mPlcMC.ConnectServer();
-            if (opres.IsSuccess)
+            if(opres.IsSuccess)
             {
-                mIsOpened = true;
-                LogNet.Log("PLC打开成功！");
+                IsOpened = true;
                 return true;
             }
             else
             {
-                mIsOpened = false;
-                LogNet.Log("PLC打开失败!");
+                IsOpened = false;
                 return false;
             }
         }
@@ -118,30 +125,30 @@ namespace Vision.Hardware
             mConnectThreadFlag = false;
         }
 
-        public bool WriteBool(string DeviceName, bool Value)
+        public bool WriteBool(string DeviceName,bool Value)
         {
             OperateResult res;
             bool ErrFlag = true;
 
-            if (!mIsOpened)
+            if(!mIsOpened)
                 return false;
 
             try
             {
                 mAccessMutex.WaitOne();
-                res = mPlcMC.Write(DeviceName, Value);
-                if (res.IsSuccess)
+                res = mPlcMC.Write(DeviceName,Value);
+                if(res.IsSuccess)
                     ErrFlag = false;
 
                 Thread.Sleep(mDelayTime);
                 mAccessMutex.ReleaseMutex();
 
-                if (!ErrFlag)
+                if(!ErrFlag)
                     return true;
                 else
                     return false;
             }
-            catch (Exception ex)
+            catch(Exception ex)
             {
                 mAccessMutex.ReleaseMutex();
                 LogNet.Log("Write PLC data exception " + ex.Message);
@@ -149,20 +156,20 @@ namespace Vision.Hardware
             }
         }
 
-        public bool ReadBool(string DeviceName, out bool Value)
+        public bool ReadBool(string DeviceName,out bool Value)
         {
             OperateResult<bool> res = null;
             Value = false;
             bool ErrFlag = true;
 
-            if (!mIsOpened)
+            if(!mIsOpened)
                 return false;
 
             try
             {
                 mAccessMutex.WaitOne();
                 res = mPlcMC.ReadBool(DeviceName);
-                if (res.IsSuccess)
+                if(res.IsSuccess)
                 {
                     Value = res.Content;
                     ErrFlag = false;
@@ -171,12 +178,12 @@ namespace Vision.Hardware
                 Thread.Sleep(mDelayTime);
                 mAccessMutex.ReleaseMutex();
 
-                if (!ErrFlag)
+                if(!ErrFlag)
                     return true;
                 else
                     return false;
             }
-            catch (Exception ex)
+            catch(Exception ex)
             {
                 mAccessMutex.ReleaseMutex();
                 LogNet.Log("Write PLC data exception " + ex.Message);
@@ -184,30 +191,30 @@ namespace Vision.Hardware
             }
         }
 
-        public bool WriteBoolArray(string[] DeviceName, int Size, bool[] Value)
+        public bool WriteBoolArray(string[] DeviceName,int Size,bool[] Value)
         {
             OperateResult res;
             bool ErrFlag = true;
 
-            if (!mIsOpened)
+            if(!mIsOpened)
                 return false;
 
             try
             {
                 mAccessMutex.WaitOne();
-                res = mPlcMC.Write(DeviceName[0], Value);
-                if (res.IsSuccess)
+                res = mPlcMC.Write(DeviceName[0],Value);
+                if(res.IsSuccess)
                     ErrFlag = false;
 
                 Thread.Sleep(mDelayTime);
                 mAccessMutex.ReleaseMutex();
 
-                if (!ErrFlag)
+                if(!ErrFlag)
                     return true;
                 else
                     return false;
             }
-            catch (Exception ex)
+            catch(Exception ex)
             {
                 mAccessMutex.ReleaseMutex();
                 LogNet.Log("Write PLC data exception " + ex.Message);
@@ -215,21 +222,21 @@ namespace Vision.Hardware
             }
         }
 
-        public bool ReadBoolArray(string[] DeviceName, int Size, out bool[] Value)
+        public bool ReadBoolArray(string[] DeviceName,int Size,out bool[] Value)
         {
             OperateResult<bool[]> res = null;
             bool ErrFlag = true;
             Value = null;
 
-            if (!mIsOpened)
+            if(!mIsOpened)
                 return false;
 
             try
             {
                 mAccessMutex.WaitOne();
                 Value = new bool[Size];
-                res = mPlcMC.ReadBool(DeviceName[0], (ushort)Size);
-                if (res.IsSuccess)
+                res = mPlcMC.ReadBool(DeviceName[0],(ushort)Size);
+                if(res.IsSuccess)
                 {
                     Value = res.Content;
                     ErrFlag = false;
@@ -238,12 +245,12 @@ namespace Vision.Hardware
                 Thread.Sleep(mDelayTime);
                 mAccessMutex.ReleaseMutex();
 
-                if (!ErrFlag)
+                if(!ErrFlag)
                     return true;
                 else
                     return false;
             }
-            catch (Exception ex)
+            catch(Exception ex)
             {
                 mAccessMutex.ReleaseMutex();
                 LogNet.Log("Write PLC data exception " + ex.Message);
@@ -251,30 +258,30 @@ namespace Vision.Hardware
             }
         }
 
-        public bool WriteShort(string DeviceName, short Value)
+        public bool WriteShort(string DeviceName,short Value)
         {
             OperateResult res;
             bool ErrFlag = true;
 
-            if (!mIsOpened)
+            if(!mIsOpened)
                 return false;
 
             try
             {
                 mAccessMutex.WaitOne();
-                res = mPlcMC.Write(DeviceName, Value);
-                if (res.IsSuccess)
+                res = mPlcMC.Write(DeviceName,Value);
+                if(res.IsSuccess)
                     ErrFlag = false;
 
                 Thread.Sleep(mDelayTime);
                 mAccessMutex.ReleaseMutex();
 
-                if (!ErrFlag)
+                if(!ErrFlag)
                     return true;
                 else
                     return false;
             }
-            catch (Exception ex)
+            catch(Exception ex)
             {
                 mAccessMutex.ReleaseMutex();
                 LogNet.Log("Write PLC data exception " + ex.Message);
@@ -282,19 +289,19 @@ namespace Vision.Hardware
             }
         }
 
-        public bool ReadShort(string DeviceName, out short Value)
+        public bool ReadShort(string DeviceName,out short Value)
         {
             OperateResult<short> read = null;
             bool ErrFlag = true;
             Value = 0;
-            if (!mIsOpened)
+            if(!mIsOpened)
                 return false;
 
             try
             {
                 mAccessMutex.WaitOne();
                 read = mPlcMC.ReadInt16(DeviceName);
-                if (read.IsSuccess)
+                if(read.IsSuccess)
                 {
                     Value = read.Content;
                     ErrFlag = false;
@@ -303,12 +310,12 @@ namespace Vision.Hardware
                 Thread.Sleep(mDelayTime);
                 mAccessMutex.ReleaseMutex();
 
-                if (!ErrFlag)
+                if(!ErrFlag)
                     return true;
                 else
                     return false;
             }
-            catch (Exception ex)
+            catch(Exception ex)
             {
                 mAccessMutex.ReleaseMutex();
                 LogNet.Log("Write PLC data exception " + ex.Message);
@@ -316,30 +323,30 @@ namespace Vision.Hardware
             }
         }
 
-        public bool WriteShrotArray(string[] DeviceName, int Size, short[] Value)
+        public bool WriteShrotArray(string[] DeviceName,int Size,short[] Value)
         {
             OperateResult res;
             bool ErrFlag = true;
 
-            if (!mIsOpened)
+            if(!mIsOpened)
                 return false;
 
             try
             {
                 mAccessMutex.WaitOne();
-                res = mPlcMC.Write(DeviceName[0], Value);
-                if (res.IsSuccess)
+                res = mPlcMC.Write(DeviceName[0],Value);
+                if(res.IsSuccess)
                     ErrFlag = false;
 
                 Thread.Sleep(mDelayTime);
                 mAccessMutex.ReleaseMutex();
 
-                if (!ErrFlag)
+                if(!ErrFlag)
                     return true;
                 else
                     return false;
             }
-            catch (Exception ex)
+            catch(Exception ex)
             {
                 mAccessMutex.ReleaseMutex();
                 LogNet.Log("Write PLC data exception " + ex.Message);
@@ -347,21 +354,21 @@ namespace Vision.Hardware
             }
         }
 
-        public bool ReadShortArray(string[] DeviceName, int Size, out short[] Value)
+        public bool ReadShortArray(string[] DeviceName,int Size,out short[] Value)
         {
             OperateResult<short[]> read = null;
             bool ErrFlag = true;
             Value = null;
 
-            if (!mIsOpened)
+            if(!mIsOpened)
                 return false;
 
             try
             {
                 mAccessMutex.WaitOne();
                 Value = new short[Size];
-                read = mPlcMC.ReadInt16(DeviceName[0], (ushort)Size);
-                if (read.IsSuccess)
+                read = mPlcMC.ReadInt16(DeviceName[0],(ushort)Size);
+                if(read.IsSuccess)
                 {
                     Value = read.Content;
                     ErrFlag = false;
@@ -370,12 +377,12 @@ namespace Vision.Hardware
                 Thread.Sleep(mDelayTime);
                 mAccessMutex.ReleaseMutex();
 
-                if (!ErrFlag)
+                if(!ErrFlag)
                     return true;
                 else
                     return false;
             }
-            catch (Exception ex)
+            catch(Exception ex)
             {
                 mAccessMutex.ReleaseMutex();
                 LogNet.Log("Write PLC data exception " + ex.Message);
@@ -383,30 +390,30 @@ namespace Vision.Hardware
             }
         }
 
-        public bool WriteInt(string DeviceName, int Value)
+        public bool WriteInt(string DeviceName,int Value)
         {
             OperateResult res;
             bool ErrFlag = true;
 
-            if (!mIsOpened)
+            if(!mIsOpened)
                 return false;
 
             try
             {
                 mAccessMutex.WaitOne();
-                res = mPlcMC.Write(DeviceName, Value);
-                if (res.IsSuccess)
+                res = mPlcMC.Write(DeviceName,Value);
+                if(res.IsSuccess)
                     ErrFlag = false;
 
                 Thread.Sleep(mDelayTime);
                 mAccessMutex.ReleaseMutex();
 
-                if (!ErrFlag)
+                if(!ErrFlag)
                     return true;
                 else
                     return false;
             }
-            catch (Exception ex)
+            catch(Exception ex)
             {
                 mAccessMutex.ReleaseMutex();
                 LogNet.Log("Write PLC data exception " + ex.Message);
@@ -414,21 +421,21 @@ namespace Vision.Hardware
             }
         }
 
-        public bool ReadInt(string DeviceName, out int Value)
+        public bool ReadInt(string DeviceName,out int Value)
         {
             OperateResult<int> read = null;
             bool ErrFlag = true;
 
             Value = 0;
 
-            if (!mIsOpened)
+            if(!mIsOpened)
                 return false;
 
             try
             {
                 mAccessMutex.WaitOne();
                 read = mPlcMC.ReadInt32(DeviceName);
-                if (read.IsSuccess)
+                if(read.IsSuccess)
                 {
                     Value = read.Content;
                     ErrFlag = false;
@@ -437,12 +444,12 @@ namespace Vision.Hardware
                 Thread.Sleep(mDelayTime);
                 mAccessMutex.ReleaseMutex();
 
-                if (!ErrFlag)
+                if(!ErrFlag)
                     return true;
                 else
                     return false;
             }
-            catch (Exception ex)
+            catch(Exception ex)
             {
                 mAccessMutex.ReleaseMutex();
                 LogNet.Log("Write PLC data exception " + ex.Message);
@@ -450,30 +457,30 @@ namespace Vision.Hardware
             }
         }
 
-        public bool WriteIntArray(string[] DeviceName, int Size, int[] Value)
+        public bool WriteIntArray(string[] DeviceName,int Size,int[] Value)
         {
             OperateResult res;
             bool ErrFlag = true;
 
-            if (!mIsOpened)
+            if(!mIsOpened)
                 return false;
 
             try
             {
                 mAccessMutex.WaitOne();
-                res = mPlcMC.Write(DeviceName[0], Value);
-                if (res.IsSuccess)
+                res = mPlcMC.Write(DeviceName[0],Value);
+                if(res.IsSuccess)
                     ErrFlag = false;
 
                 Thread.Sleep(mDelayTime);
                 mAccessMutex.ReleaseMutex();
 
-                if (!ErrFlag)
+                if(!ErrFlag)
                     return true;
                 else
                     return false;
             }
-            catch (Exception ex)
+            catch(Exception ex)
             {
                 mAccessMutex.ReleaseMutex();
                 LogNet.Log("Write PLC data exception " + ex.Message);
@@ -481,21 +488,21 @@ namespace Vision.Hardware
             }
         }
 
-        public bool ReadIntArray(string[] DeviceName, int Size, out int[] Value)
+        public bool ReadIntArray(string[] DeviceName,int Size,out int[] Value)
         {
             OperateResult<int[]> read = null;
             bool ErrFlag = true;
             Value = null;
-            if (!mIsOpened)
+            if(!mIsOpened)
                 return false;
 
             try
             {
                 mAccessMutex.WaitOne();
                 Value = new int[Size];
-                read = mPlcMC.ReadInt32(DeviceName[0], (ushort)Size);
+                read = mPlcMC.ReadInt32(DeviceName[0],(ushort)Size);
 
-                if (read.IsSuccess)
+                if(read.IsSuccess)
                 {
                     Value = read.Content;
                     ErrFlag = false;
@@ -504,12 +511,12 @@ namespace Vision.Hardware
                 Thread.Sleep(mDelayTime);
                 mAccessMutex.ReleaseMutex();
 
-                if (!ErrFlag)
+                if(!ErrFlag)
                     return true;
                 else
                     return false;
             }
-            catch (Exception ex)
+            catch(Exception ex)
             {
                 mAccessMutex.ReleaseMutex();
                 LogNet.Log("Write PLC data exception " + ex.Message);
@@ -517,10 +524,10 @@ namespace Vision.Hardware
             }
         }
 
-        public bool WriteDouble(string DeviceName, double Value, int pointNum = 3)
+        public bool WriteDouble(string DeviceName,double Value,int pointNum = 3)
         {
             int temp = 0;
-            switch (pointNum)
+            switch(pointNum)
             {
                 case 0:
                     temp = (int)Value; break;
@@ -531,15 +538,15 @@ namespace Vision.Hardware
                 case 3:
                     temp = (int)(Value * 1000); break;
             }
-            return WriteInt(DeviceName, temp);
+            return WriteInt(DeviceName,temp);
         }
 
-        public bool ReadDouble(string DeviceName, out double Value, int pointNum = 3)
+        public bool ReadDouble(string DeviceName,out double Value,int pointNum = 3)
         {
-            bool res = ReadInt(DeviceName, out int val);
+            bool res = ReadInt(DeviceName,out int val);
             double temp = 0;
 
-            switch (pointNum)
+            switch(pointNum)
             {
                 case 0:
                     temp = val;
@@ -561,30 +568,30 @@ namespace Vision.Hardware
             return res;
         }
 
-        public bool WriteString(string address, string result)
+        public bool WriteString(string address,string result)
         {
             OperateResult res;
             bool ErrFlag = true;
 
-            if (!mIsOpened)
+            if(!mIsOpened)
                 return false;
 
             try
             {
                 mAccessMutex.WaitOne();
-                res = mPlcMC.Write(address, result);
+                res = mPlcMC.Write(address,result);
 
-                if (res.IsSuccess)
+                if(res.IsSuccess)
                     ErrFlag = false;
                 Thread.Sleep(mDelayTime);
                 mAccessMutex.ReleaseMutex();
 
-                if (!ErrFlag)
+                if(!ErrFlag)
                     return true;
                 else
                     return false;
             }
-            catch (Exception ex)
+            catch(Exception ex)
             {
                 mAccessMutex.ReleaseMutex();
                 LogNet.Log("Write PLC data exception " + ex.Message);
@@ -598,11 +605,11 @@ namespace Vision.Hardware
         private void ConnectThread()
         {
             //如果没有设置心跳 直接返回
-            if (string.IsNullOrEmpty(mHeartBeatAddress))
+            if(string.IsNullOrEmpty(mHeartBeatAddress))
             {
                 return;
             }
-            while (mConnectThreadFlag)
+            while(mConnectThreadFlag)
             {
                 //循环次数
                 int LoopCount = 0;
@@ -610,22 +617,22 @@ namespace Vision.Hardware
                 //连接PLC
                 OpenPLC();
                 //已经连接上
-                while (IsOpened && mConnectThreadFlag)
+                while(IsOpened && mConnectThreadFlag)
                 {
                     Thread.Sleep(200);
-                    if (LoopCount < 5)
+                    if(LoopCount < 5)
                     {
-                        if (Index != 1)
+                        if(Index != 1)
                         {
-                            WriteShort(mHeartBeatAddress, 0);
+                            IsOpened = WriteShort(mHeartBeatAddress,0);
                             Index = 1;
                         }
                     }
                     else
                     {
-                        if (Index != 0)
+                        if(Index != 0)
                         {
-                            WriteShort(mHeartBeatAddress, 0);
+                            IsOpened = WriteShort(mHeartBeatAddress,0);
                             Index = 0;
                         }
                     }

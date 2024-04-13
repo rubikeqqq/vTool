@@ -79,28 +79,6 @@ namespace Vision.Tools
         }
 
         /// <summary>
-        /// 获取所有继承IPointOut接口的集合
-        /// </summary>
-        /// <returns></returns>
-        private List<string> GetPointOut()
-        {
-            if (_station == null) return null;
-            List<string> outputs = new List<string>();
-            foreach (var item in _station.ToolList)
-            {
-                if (item == _rTool) { break; }
-
-                if (item is CenterCalibTool)
-                {
-                    outputs.Add($"{item.ToolName}.X");
-                    outputs.Add($"{item.ToolName}.Y");
-                    outputs.Add($"{item.ToolName}.Angle");
-                }
-            }
-            return outputs;
-        }
-
-        /// <summary>
         /// 获取vpp的输出
         /// </summary>
         /// <returns></returns>

@@ -20,10 +20,11 @@ namespace Vision.Projects
         private Project _project;
         private static object _lock = new object();
         private bool _imageThreadFlag;
+        private MXPlc _plc;
 
         private ProjectManager()
         {
-            if (!Directory.Exists(ProjectDir))
+            if(!Directory.Exists(ProjectDir))
             {
                 Directory.CreateDirectory(ProjectDir);
             }
@@ -31,10 +32,14 @@ namespace Vision.Projects
             {
                 OpenProject();
                 LoadConfig();
-                ConnectPlc();
+                if(!ConnectPlc())
+                {
+                    LogNet.Log("plc连接失败！");
+                    LogUI.AddLog("plc连接失败！");
+                }
                 RunThread();
             }
-            catch (Exception ex)
+            catch(Exception ex)
             {
                 ex.MsgBox();
             }
@@ -59,11 +64,11 @@ namespace Vision.Projects
         {
             get
             {
-                if (_instance == null)
+                if(_instance == null)
                 {
-                    lock (_lock)
+                    lock(_lock)
                     {
-                        if (_instance == null)
+                        if(_instance == null)
                         {
                             _instance = new ProjectManager();
                         }
@@ -88,19 +93,28 @@ namespace Vision.Projects
         }
 
         /// <summary>
+        /// 三菱plc
+        /// </summary>
+        public MXPlc Plc
+        {
+            get => _plc;
+            set => _plc = value;
+        }
+
+        /// <summary>
         /// 项目文件路径
         /// </summary>
-        public static string ProjectPath => Path.Combine(Application.StartupPath, "Project", "proj.vpr");
+        public static string ProjectPath => Path.Combine(Application.StartupPath,"Project","proj.vpr");
 
         /// <summary>
         /// 项目文件夹
         /// </summary>
-        public static string ProjectDir => Path.Combine(Application.StartupPath, "Project");
+        public static string ProjectDir => Path.Combine(Application.StartupPath,"Project");
 
         /// <summary>
         /// 配置文件
         /// </summary>
-        public static string ConfigPath => Path.Combine(ProjectDir, "config.ini");
+        public static string ConfigPath => Path.Combine(ProjectDir,"config.ini");
 
         #region 【项目加载保存】
 
@@ -110,13 +124,13 @@ namespace Vision.Projects
         /// <exception cref="Exception">如果保存出现错误 返回exception</exception>
         public bool SaveProject()
         {
-            if (!IsLoaded) return false;
+            if(!IsLoaded) return false;
             try
             {
                 //项目保存前置事
                 OnBeforeSaveProject();
             }
-            catch (Exception ex)
+            catch(Exception ex)
             {
                 LogNet.Log("项目保存失败！\r\n " + ex.Message);
                 return false;
@@ -124,15 +138,15 @@ namespace Vision.Projects
 
             try
             {
-                var res = SerializerHelper.SerializeToBinary(_project, ProjectPath);
+                var res = SerializerHelper.SerializeToBinary(_project,ProjectPath);
                 LogNet.Log($"项目保存成功！");
-                if (!res)
+                if(!res)
                 {
                     return false;
                 }
                 return true;
             }
-            catch (Exception ex)
+            catch(Exception ex)
             {
                 ex.Message.MsgBox();
                 return false;
@@ -144,12 +158,12 @@ namespace Vision.Projects
         /// </summary>
         private void OpenProject()
         {
-            if (IsLoaded)
+            if(IsLoaded)
             {
                 return;
             }
 
-            if (!File.Exists(ProjectPath))
+            if(!File.Exists(ProjectPath))
             {
                 _project = new Project();
                 IsLoaded = true;
@@ -159,22 +173,22 @@ namespace Vision.Projects
             try
             {
                 Project data = SerializerHelper.DeSerializeFromBinary<Project>(ProjectPath);
-                if (data != null)
+                if(data != null)
                 {
                     _project = data;
                     //加载vpp
-                    foreach (var station in _project.StationList)
+                    foreach(var station in _project.StationList)
                     {
                         //加载station的数据
                         station.Init();
                         station.LoadData();
-                        foreach (var tool in station.ToolList)
+                        foreach(var tool in station.ToolList)
                         {
-                            if (tool is IRegisterStation rTool)
+                            if(tool is IRegisterStation rTool)
                             {
                                 rTool.RegisterStation(station);
                             }
-                            if (tool is IVpp iTool)
+                            if(tool is IVpp iTool)
                             {
                                 iTool.LoadVpp();
                             }
@@ -205,22 +219,20 @@ namespace Vision.Projects
         {
             try
             {
-                var plc = MXPlc.GetInstance();
-                plc.PLCIPAddress = Config.PLCConfig.IP;
-                plc.PLCPort = int.Parse(Config.PLCConfig.Port);
-                if (!string.IsNullOrEmpty(Config.SystemConfig.HeartAddress))
+                _plc = MXPlc.GetInstance();
+                _plc.ConnectedStateChanged += _plc_ConnectedStateChanged;
+                _plc.PLCIPAddress = Config.PLCConfig.IP;
+                _plc.PLCPort = int.Parse(Config.PLCConfig.Port);
+                if(!string.IsNullOrEmpty(Config.SystemConfig.HeartAddress))
                 {
-                    plc.HeartBeatAddress = Config.SystemConfig.HeartAddress;
+                    _plc.HeartBeatAddress = Config.SystemConfig.HeartAddress;
                 }
-                if (!plc.IsOpened)
+                if(!_plc.IsOpened)
                 {
-                    plc.OpenPLC();
+                    _plc.OpenPLC();
                 }
 
-                var res = plc.IsOpened;
-                LogUI.AddLog(res ? "plc 连接成功！" : "plc 连接失败！");
-                LogNet.Log(res ? "plc 连接成功！" : "plc 连接失败！");
-                return res;
+                return _plc.IsOpened;
             }
             catch
             {
@@ -235,8 +247,8 @@ namespace Vision.Projects
         /// </summary>
         public void CloseProject()
         {
-            if (!IsLoaded) return;
-            foreach (var station in _project.StationList)
+            if(!IsLoaded) return;
+            foreach(var station in _project.StationList)
             {
                 station.StationDisplayChangedEvent -= Station_ShowDisplayChangedEvent;
             }
@@ -260,7 +272,7 @@ namespace Vision.Projects
         /// <returns></returns>
         public bool SaveConfig()
         {
-            if (!File.Exists(ConfigPath))
+            if(!File.Exists(ConfigPath))
             {
                 File.Create(ConfigPath).Close();
             }
@@ -285,10 +297,10 @@ namespace Vision.Projects
         /// <returns></returns>
         public bool AddStation()
         {
-            if (!IsLoaded) return false;
-            if (_project == null) return false;
+            if(!IsLoaded) return false;
+            if(_project == null) return false;
 
-            if (!_project.AddStation())
+            if(!_project.AddStation())
             {
                 return false;
             }
@@ -300,7 +312,7 @@ namespace Vision.Projects
                 SaveProject();
                 return true;
             }
-            catch (Exception ex)
+            catch(Exception ex)
             {
                 LogUI.AddToolLog(ex.Message);
             }
@@ -313,14 +325,14 @@ namespace Vision.Projects
         /// <param name="station"></param>
         public void DeleteStation(Station station)
         {
-            if (!IsLoaded) return;
-            if (_project == null) return;
+            if(!IsLoaded) return;
+            if(_project == null) return;
 
-            if (MessageBox.Show("是否确定删除此工位，此过程可能导致程序无法正常运行", "重要提示",
-                   MessageBoxButtons.YesNo, MessageBoxIcon.Warning) == DialogResult.No)
+            if(MessageBox.Show("是否确定删除此工位，此过程可能导致程序无法正常运行","重要提示",
+                   MessageBoxButtons.YesNo,MessageBoxIcon.Warning) == DialogResult.No)
                 return;
 
-            if (_project.DeleteStation(station))
+            if(_project.DeleteStation(station))
             {
                 UpdateTreeNode();
                 SaveProject();
@@ -333,14 +345,14 @@ namespace Vision.Projects
         /// <param name="station"></param>
         public void RenameStation(Station station)
         {
-            if (!IsLoaded) return;
-            if (_project == null) return;
+            if(!IsLoaded) return;
+            if(_project == null) return;
             FrmRename frm = new FrmRename();
             frm.OldName = station.StationName;
-            if (frm.ShowDialog() == DialogResult.OK)
+            if(frm.ShowDialog() == DialogResult.OK)
             {
                 var newName = frm.NewName;
-                if (_project.RenameStation(station, newName))
+                if(_project.RenameStation(station,newName))
                 {
                     UpdateTreeNode();
                     SaveProject();
@@ -354,11 +366,11 @@ namespace Vision.Projects
         /// <param name="station"></param>
         public void UpStation(Station station)
         {
-            if (!IsLoaded) return;
+            if(!IsLoaded) return;
             var index = _project.StationList.FindIndex(x => x.StationName == station.StationName);
-            if (index <= 0) return;
+            if(index <= 0) return;
             _project.StationList.RemoveAt(index);
-            _project.StationList.Insert(index - 1, station);
+            _project.StationList.Insert(index - 1,station);
             UpdateTreeNode();
             SaveProject();
         }
@@ -369,11 +381,11 @@ namespace Vision.Projects
         /// <param name="station"></param>
         public void DownStation(Station station)
         {
-            if (!IsLoaded) return;
+            if(!IsLoaded) return;
             var index = _project.StationList.FindIndex(x => x.StationName == station.StationName);
-            if (index >= _project.StationList.Count - 1) return;
+            if(index >= _project.StationList.Count - 1) return;
             _project.StationList.RemoveAt(index);
-            _project.StationList.Insert(index + 1, station);
+            _project.StationList.Insert(index + 1,station);
             UpdateTreeNode();
             SaveProject();
         }
@@ -403,13 +415,13 @@ namespace Vision.Projects
             //加载station的数据
             station.Init();
             station.LoadData();
-            foreach (var tool in station.ToolList)
+            foreach(var tool in station.ToolList)
             {
-                if (tool is IRegisterStation rTool)
+                if(tool is IRegisterStation rTool)
                 {
                     rTool.RegisterStation(station);
                 }
-                if (tool is IVpp iTool)
+                if(tool is IVpp iTool)
                 {
                     iTool.LoadVpp();
                 }
@@ -425,9 +437,9 @@ namespace Vision.Projects
         /// </summary>
         /// <param name="station"></param>
         /// <param name="tool"></param>
-        public void AddTool(Station station, ToolBase tool)
+        public void AddTool(Station station,ToolBase tool)
         {
-            if (!IsLoaded) return;
+            if(!IsLoaded) return;
             station.AddTool(tool);
             UpdateTreeNode();
             SaveProject();
@@ -439,9 +451,9 @@ namespace Vision.Projects
         /// <param name="station"></param>
         /// <param name="tool"></param>
         /// <returns></returns>
-        public void DeleteTool(Station station, ToolBase tool)
+        public void DeleteTool(Station station,ToolBase tool)
         {
-            if (!IsLoaded) return;
+            if(!IsLoaded) return;
             station.DeleteTool(tool);
             UpdateTreeNode();
             SaveProject();
@@ -453,7 +465,7 @@ namespace Vision.Projects
         /// <param name="station"></param>
         public void DeleteAllTool(Station station)
         {
-            if (!IsLoaded) return;
+            if(!IsLoaded) return;
             station.RemoveAllTool();
             UpdateTreeNode();
             SaveProject();
@@ -464,15 +476,15 @@ namespace Vision.Projects
         /// </summary>
         /// <param name="station"></param>
         /// <param name="tool"></param>
-        public void RenameTool(Station station, ToolBase tool)
+        public void RenameTool(Station station,ToolBase tool)
         {
-            if (!IsLoaded) return;
+            if(!IsLoaded) return;
             FrmRename frm = new FrmRename();
             frm.OldName = tool.ToolName;
-            if (frm.ShowDialog() == DialogResult.OK)
+            if(frm.ShowDialog() == DialogResult.OK)
             {
                 var newName = frm.NewName;
-                station.RenameTool(tool, newName);
+                station.RenameTool(tool,newName);
                 UpdateTreeNode();
                 SaveProject();
             }
@@ -483,13 +495,13 @@ namespace Vision.Projects
         /// </summary>
         /// <param name="station"></param>
         /// <param name="tool"></param>
-        public void UpTool(Station station, ToolBase tool)
+        public void UpTool(Station station,ToolBase tool)
         {
-            if (!IsLoaded) return;
+            if(!IsLoaded) return;
             var index = station.ToolList.FindIndex(x => x.ToolName == tool.ToolName);
-            if (index <= 0) return;
+            if(index <= 0) return;
             station.ToolList.RemoveAt(index);
-            station.ToolList.Insert(index - 1, tool);
+            station.ToolList.Insert(index - 1,tool);
             UpdateTreeNode();
             SaveProject();
         }
@@ -499,13 +511,13 @@ namespace Vision.Projects
         /// </summary>
         /// <param name="station"></param>
         /// <param name="tool"></param>
-        public void DownTool(Station station, ToolBase tool)
+        public void DownTool(Station station,ToolBase tool)
         {
-            if (!IsLoaded) return;
+            if(!IsLoaded) return;
             var index = station.ToolList.FindIndex(x => x.ToolName == tool.ToolName);
-            if (index >= station.ToolList.Count - 1) return;
+            if(index >= station.ToolList.Count - 1) return;
             station.ToolList.RemoveAt(index);
-            station.ToolList.Insert(index + 1, tool);
+            station.ToolList.Insert(index + 1,tool);
             UpdateTreeNode();
             SaveProject();
         }
@@ -518,7 +530,7 @@ namespace Vision.Projects
         /// </summary>
         private void OnBeforeSaveProject()
         {
-            BeforeSaveProjectEvent?.Invoke(this, EventArgs.Empty);
+            BeforeSaveProjectEvent?.Invoke(this,EventArgs.Empty);
         }
 
         /// <summary>
@@ -526,9 +538,9 @@ namespace Vision.Projects
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void Station_ShowDisplayChangedEvent(object sender, StationShowChangedEventArgs e)
+        private void Station_ShowDisplayChangedEvent(object sender,StationShowChangedEventArgs e)
         {
-            UcStationChangedEvent?.Invoke(this, e);
+            UcStationChangedEvent?.Invoke(this,e);
         }
 
         /// <summary>
@@ -537,7 +549,7 @@ namespace Vision.Projects
         /// <param name="e"></param>
         private void OnTreeChanged(TreeEventArgs e)
         {
-            TreeChangedEvent?.Invoke(this, e);
+            TreeChangedEvent?.Invoke(this,e);
         }
 
         #endregion
@@ -552,7 +564,7 @@ namespace Vision.Projects
             node.ImageIndex = 0;
             node.SelectedImageIndex = 0;
             node.Name = "项目信息";
-            foreach (var station in Project.StationList)
+            foreach(var station in Project.StationList)
             {
                 TreeNode tnStation = new TreeNode(station.StationName);
                 tnStation.Name = "组" + station.StationName;
@@ -569,9 +581,9 @@ namespace Vision.Projects
                     tnStation.Expand();
                 }
                 //工具node
-                foreach (var tool in station.ToolList)
+                foreach(var tool in station.ToolList)
                 {
-                    if (tool is null)
+                    if(tool is null)
                     {
                         continue;
                     }
@@ -580,13 +592,13 @@ namespace Vision.Projects
                     tnTool.ImageIndex = 2;
                     tnTool.SelectedImageIndex = 2;
                     //当工具未启用状态时 改变其颜色
-                    if (!tool.Enable || !station.Enable)
+                    if(!tool.Enable || !station.Enable)
                     {
                         tnTool.ForeColor = Color.LightGray;
                     }
                     tnStation.Nodes.Add(tnTool);
                 }
-                
+
                 node.Nodes.Add(tnStation);
                 node.Expand();
             }
@@ -603,9 +615,9 @@ namespace Vision.Projects
             int index1 = toolPath.IndexOf("=");
             int index2 = toolPath.IndexOf(">");
             int length = toolPath.Length;
-            string stationName = toolPath.Substring(index1 + 1, index2 - index1 - 1);
-            string toolName = toolPath.Substring(index2 + 1, length - index2 - 1);
-            List<string> list = new List<string>() { stationName, toolName };
+            string stationName = toolPath.Substring(index1 + 1,index2 - index1 - 1);
+            string toolName = toolPath.Substring(index2 + 1,length - index2 - 1);
+            List<string> list = new List<string>() { stationName,toolName };
             return list;
         }
 
@@ -619,40 +631,39 @@ namespace Vision.Projects
             var nameList = GetToolNameList(toolPath);
             var station = _project[nameList[0]];
             var tool = station[nameList[1]];
-            return new StationToolData(station, tool);
+            return new StationToolData(station,tool);
         }
 
         #endregion
-
 
         /// <summary>
         /// 异步循环删除图像文件
         /// </summary>
         private void ImageDelete()
         {
-            while (_imageThreadFlag)
+            while(_imageThreadFlag)
             {
                 //按图像保存的时间进行删除
-                if (Config.ImageConfig.IsDeleteByTime)
+                if(Config.ImageConfig.IsDeleteByTime)
                 {
                     DateTime now = DateTime.Now;
                     string rootDir = Config.ImageConfig.SaveImageDir;
                     //工位 文件夹
                     var dirs = Directory.GetDirectories(rootDir);
-                    foreach (var x in dirs)
+                    foreach(var x in dirs)
                     {
                         //OK NG
                         var stations = Directory.GetDirectories(x);
-                        foreach (var station in stations)
+                        foreach(var station in stations)
                         {
                             //日期文件夹
                             var dates = Directory.GetDirectories(station);
-                            foreach (var date in dates)
+                            foreach(var date in dates)
                             {
                                 //每天文件夹路径 -- 最终判断路径
-                                if ((now - Directory.GetCreationTime(date)).TotalDays >= Config.ImageConfig.DeleteDayTime)
+                                if((now - Directory.GetCreationTime(date)).TotalDays >= Config.ImageConfig.DeleteDayTime)
                                 {
-                                    Directory.Delete(date, true);
+                                    Directory.Delete(date,true);
                                 }
                             }
                         }
@@ -660,28 +671,28 @@ namespace Vision.Projects
                 }
 
                 //按图像文件夹的大小进行删除
-                if (Config.ImageConfig.IsDeleteBySize)
+                if(Config.ImageConfig.IsDeleteBySize)
                 {
                     string rootDir = Config.ImageConfig.SaveImageDir;
                     //获取图像文件夹的大小
                     var size = Local.GetFolderSize(rootDir);
                     int msize = (int)(size / 1024 / 1024);
-                    if (msize >= Config.ImageConfig.DeleteSize)
+                    if(msize >= Config.ImageConfig.DeleteSize)
                     {
                         //工位文件夹
                         var dirs = Directory.GetDirectories(rootDir);
 
-                        foreach (var x in dirs)
+                        foreach(var x in dirs)
                         {
                             //OK NG 文件夹
                             var stations = Directory.GetDirectories(x);
-                            foreach (var station in stations)
+                            foreach(var station in stations)
                             {
                                 //日期文件夹
                                 var dates = Directory.GetDirectories(station);
-                                foreach (var date in dates)
+                                foreach(var date in dates)
                                 {
-                                    Directory.Delete(date, true);
+                                    Directory.Delete(date,true);
                                 }
                             }
                         }
@@ -691,5 +702,17 @@ namespace Vision.Projects
                 Thread.Sleep(1000);
             }
         }
+
+        /// <summary>
+        /// plc状态改变事件
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void _plc_ConnectedStateChanged(object sender,string e)
+        {
+            LogNet.Log(e);
+            LogUI.AddLog(e);
+        }
+
     }
 }

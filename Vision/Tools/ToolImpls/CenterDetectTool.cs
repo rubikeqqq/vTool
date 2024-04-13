@@ -2,7 +2,9 @@
 using Cognex.VisionPro.ToolBlock;
 using System;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.IO;
+using System.Runtime.Serialization;
 using System.Windows.Forms;
 using Vision.Core;
 using Vision.Projects;
@@ -11,33 +13,26 @@ using Vision.Tools.Interfaces;
 
 namespace Vision.Tools.ToolImpls
 {
-    [Serializable]
     [GroupInfo(name: "视觉工具",index: 2)]
     [ToolName("旋转检测",1)]
     [Description("主检测流程,旋转中心使用")]
     public class CenterDetectTool : ToolBase, IVpp, IImageIn
     {
-        [NonSerialized]
         private Station _station;
 
         public string ImageInName { get; set; }
 
-        [field: NonSerialized]
         public CogToolBlock ToolBlock { get; set; }
 
-        [field: NonSerialized]
         public ICogImage ImageIn { get; set; }
 
-        [field: NonSerialized]
         public bool IsLoaded { get; set; }
 
         /// <summary>
         /// 模板输出点位
         /// </summary>
-        [field: NonSerialized]
         public PointA ModelPoint { get; set; }
 
-        [field: NonSerialized]
         public UcCenterDetectTool UI { get; set; }
 
         public override UserControl GetToolControl(Station station)
@@ -140,10 +135,12 @@ namespace Vision.Tools.ToolImpls
 
         public override void Run()
         {
+            RunTime = TimeSpan.Zero;
             if(!Enable) return;
             GetImageIn();
             if(ImageIn != null)
             {
+                Stopwatch sw = Stopwatch.StartNew();
                 if(ToolBlock != null)
                 {
                     ToolBlock.Inputs["InputImage"].Value = ImageIn;
@@ -155,6 +152,7 @@ namespace Vision.Tools.ToolImpls
                     ToolBlock.Run();
                     if(ToolBlock.RunStatus.Result != CogToolResultConstants.Accept)
                     {
+                        LogNet.Log($"[{ToolName}] NG!");
                         throw new Exception($"[{ToolName}] NG!");
                     }
 
@@ -182,9 +180,12 @@ namespace Vision.Tools.ToolImpls
                         }
                     }
                 }
+                sw.Stop();
+                RunTime = sw.Elapsed;
             }
             else
-            {
+            {   
+                LogNet.Log($"[{ToolName}] 输入图像不存在！");
                 throw new Exception($"[{ToolName}] 输入图像不存在！");
             }
         }
@@ -327,5 +328,22 @@ namespace Vision.Tools.ToolImpls
             }
         }
         #endregion
+
+        public override void LoadFromStream(SerializationInfo info,string toolName)
+        {
+            base.LoadFromStream(info,toolName);
+            string imageInName = $"{toolName}.imageInName";
+
+            ImageInName = info.GetString(imageInName);
+        }
+
+        public override void SaveToStream(SerializationInfo info,string toolName)
+        {
+            base.SaveToStream(info,toolName);
+
+            string imageInName = $"{toolName}.imageInName";
+
+            info.AddValue(imageInName,ImageInName);
+        }
     }
 }

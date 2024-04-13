@@ -1,9 +1,10 @@
 ﻿using System;
 using System.ComponentModel;
+using System.Drawing;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using Vision.Hardware;
 using Vision.Core;
+using Vision.Hardware;
 using Vision.Projects;
 using Vision.Stations;
 
@@ -46,9 +47,9 @@ namespace Vision
             {
                 ProjectManager.Instance.CloseProject();
             }
-            if(MXPlc.GetInstance().IsOpened)
+            if(ProjectManager.Instance.Plc.IsOpened)
             {
-                MXPlc.GetInstance().ClosePLC();
+                ProjectManager.Instance.Plc.ClosePLC();
             }
             ProjectManager.Instance.UcStationChangedEvent -= Instance_UcStationChangedEvent;
         }

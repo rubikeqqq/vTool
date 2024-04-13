@@ -4,7 +4,9 @@ using Cognex.VisionPro.ID;
 using Cognex.VisionPro.ToolBlock;
 using System;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.IO;
+using System.Runtime.Serialization;
 using System.Windows.Forms;
 using Vision.Core;
 using Vision.Projects;
@@ -13,40 +15,32 @@ using Vision.Tools.Interfaces;
 
 namespace Vision.Tools.ToolImpls
 {
-    [Serializable]
     [ToolName("旋转标定", 1)]
     [GroupInfo(name: "标定工具", index: 1)]
     [Description("旋转中心标定工具")]
     public class CenterCalibTool : ToolBase, IVpp, IImageIn, IImageOut
     {
         //DetectTool工具完成得到的点位 传入此旋转工具进行计算
-        [NonSerialized]
         private Station _station;
 
-        [field: NonSerialized]
         public bool IsLoaded { get; set; }
 
         /// <summary>
         /// 标定vpp 标定时使用
         /// </summary>
-        [field: NonSerialized]
         public CogToolBlock ToolBlock { get; set; }
 
         public string ImageInName { get; set; }
 
-        [field: NonSerialized]
         public ICogImage ImageIn { get; set; }
 
         /// <summary>
         /// 数据输出的点
         /// </summary>
-        [field: NonSerialized]
         public PointA PointOut { get; set; }
 
-        [field: NonSerialized]
         public UcCenterCalibTool UI { get; set; }
 
-        [field: NonSerialized]
         public ICogImage ImageOut {  get; set; }
 
         public override UserControl GetToolControl(Station station)
@@ -73,24 +67,30 @@ namespace Vision.Tools.ToolImpls
 
         public override void Run()
         {
+            RunTime = TimeSpan.Zero;
             if (!Enable) return;
             GetImageIn();
             if (ImageIn != null)
             {
+                Stopwatch sw = Stopwatch.StartNew();
                 if (ToolBlock != null)
                 {
                     ToolBlock.Inputs["InputImage"].Value = ImageIn;
                     ToolBlock.Run();
                     if (ToolBlock.RunStatus.Result != CogToolResultConstants.Accept)
                     {
+                        LogNet.Log($"工具[{ToolName}]运行失败！");
                         throw new Exception($"工具[{ToolName}]运行失败！"); 
                     }
                     ImageOut = (ICogImage)ToolBlock.Outputs["OutputImage"].Value;
                     _station.ShowImage = ImageOut;
                 }
+                sw.Stop();
+                RunTime = sw.Elapsed;
             }
             else
-            {
+            {   
+                LogNet.Log($"[{ToolName}]没有输入图像"); 
                 throw new Exception($"[{ToolName}]没有输入图像");
             }
         }
@@ -267,5 +267,23 @@ namespace Vision.Tools.ToolImpls
 
         #endregion
 
+        #region ISerializable序列化
+        public override void LoadFromStream(SerializationInfo info,string toolName)
+        {
+            base.LoadFromStream(info,toolName);
+            string imageInName = $"{toolName}.imageInName";
+
+            ImageInName = info.GetString(imageInName);
+        }
+
+        public override void SaveToStream(SerializationInfo info,string toolName)
+        {
+            base.SaveToStream(info,toolName);
+
+            string imageInName = $"{toolName}.imageInName";
+
+            info.AddValue(imageInName,ImageInName);
+        }
+        #endregion
     }
 }

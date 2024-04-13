@@ -2,9 +2,9 @@
 using Cognex.VisionPro.CalibFix;
 using System;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.IO;
 using System.Windows.Forms;
-using Vision.Hardware;
 using Vision.Core;
 using Vision.Projects;
 using Vision.Stations;
@@ -12,31 +12,25 @@ using Vision.Tools.Interfaces;
 
 namespace Vision.Tools.ToolImpls
 {
-    [Serializable]
     [GroupInfo("标定工具",1)]
     [ToolName("kk标定",2)]
     [Description("kk轴和机械手的标定工具")]
     public class KkRobotCalibTool : ToolBase, IVpp
     {
-        [NonSerialized]
         private Station _station;
 
-        [field: NonSerialized]
         public bool IsLoaded { get; private set; }
 
         /// <summary>
         /// 机械手偏移值
         /// </summary>
-        [field: NonSerialized]
         public PointD RobotDelta { get; set; }
 
         /// <summary>
         /// 9点标定vpp
         /// </summary>
-        [field: NonSerialized]
         public CogCalibNPointToNPointTool CalibTool { get; set; }
 
-        [field: NonSerialized]
         public UcKkRobotTool UI {  get; set; }
 
         public override UserControl GetToolControl(Station station)
@@ -54,9 +48,11 @@ namespace Vision.Tools.ToolImpls
 
         public override void Run()
         {
+            RunTime = TimeSpan.Zero;
             if(!Enable) return;
             if(CalibTool == null)
             {
+                LogNet.Log("CogCalibNPointToNPointTool不存在！");
                 throw new Exception("CogCalibNPointToNPointTool不存在！");
             }
 
@@ -66,15 +62,18 @@ namespace Vision.Tools.ToolImpls
             //读取现在的kk坐标
             if(string.IsNullOrEmpty(_station.DataConfig.KKConfig.AddressX) || string.IsNullOrEmpty(_station.DataConfig.KKConfig.AddressY))
             {
+                LogNet.Log("kk坐标的地址不存在！");
                 throw new Exception("kk坐标的地址不存在！");
             }
 
-            var plc = MXPlc.GetInstance();
+            var plc = ProjectManager.Instance.Plc;
             if (!plc.IsOpened)
             {
+                LogNet.Log("plc未连接！");
                 throw new Exception("plc未连接！");
             }
 
+            Stopwatch sw = Stopwatch.StartNew();
             plc.ReadDouble(_station.DataConfig.KKConfig.AddressX,out double x);
             plc.ReadDouble(_station.DataConfig.KKConfig.AddressY,out double y);
 
@@ -94,6 +93,8 @@ namespace Vision.Tools.ToolImpls
             //LogUI.AddLog($"机械手delta值 x:{deltaRx.ToString("f3")} y:{deltaRy.ToString("f3")}");
 
             RobotDelta = new PointD(deltaRx,deltaRy);
+            sw.Stop();
+            RunTime = sw.Elapsed;
         }
 
         public override void RunDebug()
@@ -171,5 +172,7 @@ namespace Vision.Tools.ToolImpls
         }
 
         #endregion
+
+
     }
 }

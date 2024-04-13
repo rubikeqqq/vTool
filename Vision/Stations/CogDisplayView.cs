@@ -278,7 +278,7 @@ namespace Vision.Stations
                 return;
             }
 
-            labelRunTime.Text = $"{time.TotalMilliseconds:f2} ms";
+            labelRunTime.Text = $"Totol Time： {time.TotalMilliseconds:f2} ms";
         }
 
         /// <summary>

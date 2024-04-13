@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Runtime.Serialization;
 using System.Windows.Forms;
 using Vision.Core;
 using Vision.Projects;
@@ -9,7 +10,6 @@ namespace Vision.Tools.ToolImpls
     /// <summary>
     /// 工具基类 所有的工具类都要继承此接口
     /// </summary>
-    [Serializable]
     public abstract class ToolBase
     {
         private bool _enable = true;
@@ -34,8 +34,7 @@ namespace Vision.Tools.ToolImpls
             }
         }
 
-        [field: NonSerialized]
-        public double RunTime {  get; set; }
+        public TimeSpan RunTime {  get; set; }
 
         /// <summary>
         /// 运行工具
@@ -68,6 +67,25 @@ namespace Vision.Tools.ToolImpls
         /// <param name="station"></param>
         /// <returns></returns>
         public abstract UserControl GetToolControl(Station station);
+
+        public virtual void LoadFromStream(SerializationInfo info,string toolName)
+        {
+            string name = $"{toolName}.ToolName";
+            string enable = $"{toolName}.Enable";
+
+            ToolName = info.GetString(name);
+            Enable = info.GetBoolean(enable);
+        }
+
+        public virtual void SaveToStream(SerializationInfo info,string toolName)
+        {
+            string name = $"{toolName}.ToolName";
+            string enable = $"{toolName}.Enable";
+
+            info.AddValue(name,ToolName);
+            info.AddValue(enable,Enable);
+
+        }
     }
 
 }

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Windows.Forms;
 
 namespace Vision.Core
 {
@@ -45,6 +46,14 @@ namespace Vision.Core
             lock (_lock)
             {
                 msgs.Enqueue(DateTime.Now.ToString("HH:mm:ss") + ":" + message + "\r\n");
+            }
+        }
+
+        public static void AddNewLineLog()
+        {
+            lock(_lock)
+            {
+                msgs.Enqueue(Environment.NewLine);
             }
         }
 

@@ -1,11 +1,11 @@
 ﻿using System;
+using System.Runtime.Serialization;
 
 namespace Vision.Core
 {
     /// <summary>
     /// 结果类
     /// </summary>
-    [Serializable]
     public class ResultInfo
     {
         public string Source { get; set; }
@@ -14,7 +14,6 @@ namespace Vision.Core
 
         public string Address { get; set; }
 
-        [field: NonSerialized]
         public object Value { get; set; }
 
         public ResultInfo()
@@ -27,6 +26,28 @@ namespace Vision.Core
             Type = type;
             Source = source;
             Address = address;
+        }
+
+        public void LoadFromStream(SerializationInfo info,string resName)
+        {
+            string source = $"{resName}.Source";
+            string type = $"{resName}.Type";
+            string address = $"{resName}.Address";
+
+            Source = info.GetString(source);
+            Type = (ResultType)Enum.Parse(typeof(ResultType),info.GetString(type));
+            Address = info.GetString(address);
+        }
+
+        public void SaveToStream(SerializationInfo info,string resName)
+        {
+            string source = $"{resName}.Source";
+            string type = $"{resName}.Type";
+            string address = $"{resName}.Address";
+
+            info.AddValue(source,Source);
+            info.AddValue(type,Type.ToString());
+            info.AddValue(address,Address);
         }
     }
 }

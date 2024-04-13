@@ -15,20 +15,12 @@ namespace Vision.Tools
             InitializeComponent();
             _station = station;
             _tool = tool;
-            ProjectManager.Instance.BeforeSaveProjectEvent += Instance_BeforeSaveProjectEvent;
         }
 
         private readonly DetectTool _tool;
         private readonly Station _station;
         private bool _init;
 
-        /// <summary>
-        /// 控件关闭
-        /// </summary>
-        private void Close()
-        {
-            ProjectManager.Instance.BeforeSaveProjectEvent -= Instance_BeforeSaveProjectEvent;
-        }
 
         /// <summary>
         /// 图像源
@@ -63,22 +55,13 @@ namespace Vision.Tools
             {
                 _tool.ImageInName = null;
             }
+            ProjectManager.Instance.SaveProject();
         }
 
         private void UcDetectTool_Load(object sender, System.EventArgs e)
         {
             GetImageIn();
             _init = true;
-        }
-
-        /// <summary>
-        /// 在保存之前强制刷新输入图像源事件
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void Instance_BeforeSaveProjectEvent(object sender, EventArgs e)
-        {
-            comboBox1_SelectedIndexChanged(this, null);
         }
 
         private void cogToolBlockEditV21_Load(object sender, System.EventArgs e)

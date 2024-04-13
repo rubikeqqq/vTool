@@ -1,6 +1,7 @@
 ﻿using Cognex.VisionPro;
 using System;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.IO;
 using System.Windows.Forms;
 using Vision.Core;
@@ -10,28 +11,22 @@ using Vision.Tools.Interfaces;
 
 namespace Vision.Tools.ToolImpls
 {
-    [Serializable]
     [GroupInfo("图像工具", 0)]
     [ToolName("相机采集",0)]
     [Description("通过相机进行采集的康耐视工具")]
     public class ImageAcqTool : ToolBase, IImageOut, IVpp
     {
-        [NonSerialized]
         private Station _station;
 
-        [field: NonSerialized]
         public ICogImage ImageOut { get; private set; }
 
         /// <summary>
         /// 采集工具
         /// </summary>
-        [field: NonSerialized]
         public CogAcqFifoTool AcqFifoTool { get; set; }
 
-        [field: NonSerialized]
         public bool IsLoaded { get;private set; }
 
-        [field: NonSerialized]
         public UcAcqTool UI { get; set; }
 
         public override UserControl GetToolControl(Station station)
@@ -119,14 +114,20 @@ namespace Vision.Tools.ToolImpls
 
         public override void Run()
         {
+            RunTime = TimeSpan.Zero;
             if (!Enable) return;
             if (AcqFifoTool == null)
                 throw new Exception("AcqFifoTool为null");
+            Stopwatch sw = Stopwatch.StartNew();
             AcqFifoTool.Run();
             if (AcqFifoTool.RunStatus.Result != CogToolResultConstants.Accept)
             {
+                LogNet.Log("相机取像失败！");
                 throw new Exception("相机取像失败！");
             }
+            sw.Stop();
+            RunTime = sw.Elapsed;
+
             ImageOut = AcqFifoTool.OutputImage;
             _station.ShowImage = ImageOut;
         }

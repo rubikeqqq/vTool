@@ -1,13 +1,14 @@
 ﻿using System;
 using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.Serialization;
 using System.Windows.Forms;
 using Vision.Core;
-using Vision.Hardware;
+using Vision.Projects;
 using Vision.Stations;
 
 namespace Vision.Tools.ToolImpls
 {
-    [Serializable]
     [ToolName("结束信号", 1)]
     [GroupInfo(name: "通讯工具", index: 4)]
     [Description("相机处理结束信号")]
@@ -18,7 +19,6 @@ namespace Vision.Tools.ToolImpls
         /// </summary>
         public string EndAddress { get; set; }
 
-        [field: NonSerialized]
         public UserControl UI { get; set; }
 
         public override UserControl GetToolControl(Station station)
@@ -32,13 +32,17 @@ namespace Vision.Tools.ToolImpls
 
         public override void Run()
         {
+            RunTime = TimeSpan.Zero;
             if (!Enable) return;
-            if (MXPlc.GetInstance().IsOpened)
+            if (ProjectManager.Instance.Plc.IsOpened)
             {
+                Stopwatch sw = Stopwatch.StartNew();
                 if (!string.IsNullOrEmpty(EndAddress))
                 {
-                    MXPlc.GetInstance().WriteShort(EndAddress, 1);
+                    ProjectManager.Instance.Plc.WriteShort(EndAddress, 1);
                 }
+                sw.Stop();
+                RunTime = sw.Elapsed;
             }
             else
             {
@@ -48,7 +52,25 @@ namespace Vision.Tools.ToolImpls
 
         public override void RunDebug()
         {
+            RunTime = TimeSpan.Zero;
             //调试时不运行
+        }
+
+        public override void LoadFromStream(SerializationInfo info,string toolName)
+        {
+            base.LoadFromStream(info,toolName);
+            string endAddress = $"{toolName}.endAddress";
+
+            EndAddress = info.GetString(endAddress);
+        }
+
+        public override void SaveToStream(SerializationInfo info,string toolName)
+        {
+            base.SaveToStream(info,toolName);
+
+            string endAddress = $"{toolName}.endAddress";
+
+            info.AddValue(endAddress,EndAddress);
         }
     }
 }

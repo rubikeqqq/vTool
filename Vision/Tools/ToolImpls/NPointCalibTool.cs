@@ -4,7 +4,9 @@ using Cognex.VisionPro.ID;
 using Cognex.VisionPro.ToolBlock;
 using System;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.IO;
+using System.Runtime.Serialization;
 using System.Windows.Forms;
 using Vision.Core;
 using Vision.Projects;
@@ -13,7 +15,6 @@ using Vision.Tools.Interfaces;
 
 namespace Vision.Tools.ToolImpls
 {
-    [Serializable]
     [GroupInfo("标定工具", 1)]
     [ToolName("9点标定", 0)]
     [Description("标准9点标定工具")]
@@ -22,24 +23,18 @@ namespace Vision.Tools.ToolImpls
         //vp的9点标定会直接在图像中转换为实际坐标
         //所以输出的坐标为实际机械手标定时的对应的机械坐标
 
-        [NonSerialized]
         private Station _station;
 
         public string ImageInName { get; set; }
 
-        [field: NonSerialized]
         public ICogImage ImageIn { get; set; }
 
-        [field: NonSerialized]
         public CogToolBlock ToolBlock { get; set; }
 
-        [field: NonSerialized]
         public bool IsLoaded { get; set; }
 
-        [field: NonSerialized]
         public ICogImage ImageOut { get; private set; }
 
-        [field: NonSerialized]
         public UcNineCalibTool UI { get; set; }
 
         public override UserControl GetToolControl(Station station)
@@ -133,10 +128,12 @@ namespace Vision.Tools.ToolImpls
 
         public override void Run()
         {
+            RunTime = TimeSpan.Zero;
             if (!Enable) return;
             GetImageIn();
             if (ImageIn != null)
             {
+                Stopwatch stopwatch = Stopwatch.StartNew();
                 if (ToolBlock != null)
                 {
                     ToolBlock.Inputs["InputImage"].Value = ImageIn;
@@ -148,9 +145,12 @@ namespace Vision.Tools.ToolImpls
                     ImageOut = (ICogImage)ToolBlock.Outputs["OutputImage"].Value;
                     _station.ShowImage = ImageOut;
                 }
+                stopwatch.Stop();
+                RunTime = stopwatch.Elapsed;
             }
             else
             {
+                LogNet.Log($"[{ToolName}]没有输入图像");
                 throw new Exception($"[{ToolName}]没有输入图像");
             }
         }
@@ -247,5 +247,22 @@ namespace Vision.Tools.ToolImpls
             base.Close();
         }
         #endregion
+
+        public override void LoadFromStream(SerializationInfo info,string toolName)
+        {
+            base.LoadFromStream(info,toolName);
+            string imageInName = $"{toolName}.imageInName";
+
+            ImageInName = info.GetString(imageInName);
+        }
+
+        public override void SaveToStream(SerializationInfo info,string toolName)
+        {
+            base.SaveToStream(info,toolName);
+
+            string imageInName = $"{toolName}.imageInName";
+
+            info.AddValue(imageInName,ImageInName);
+        }
     }
 }

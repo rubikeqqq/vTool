@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.Serialization;
 using System.Threading;
 using Vision.Core;
 using Vision.Projects;
@@ -13,31 +14,19 @@ using Vision.Tools.ToolImpls;
 
 namespace Vision.Stations
 {
-    /// <summary>
-    /// 工位类
-    /// 每一个工位对应一个工位类
-    /// </summary>
-    [Serializable]
     public class Station
     {
         private string _name;
 
         private bool _enabled = true;
 
-        [NonSerialized]
         private ManualResetEvent _manualResetEvent;
 
-        [NonSerialized]
         private Thread _cycleThread;
 
-        [NonSerialized]
         private bool _threadFlag;
 
-        [NonSerialized]
-        private bool _cycle;
-
-        [field: NonSerialized]
-        public object ShowImage {  get; set; }
+        public object ShowImage { get; set; }
 
         /// <summary>
         /// 工位名称
@@ -65,7 +54,7 @@ namespace Vision.Stations
                 _enabled = value;
                 StationEnableEvent?.Invoke(this,value);
                 ProjectManager.Instance.UpdateTreeNode();
-                LogUI.AddToolLog(value? $"[{StationName}] 工位启用": $"[{StationName}] 工位关闭");
+                LogUI.AddToolLog(value ? $"[{StationName}] 工位启用" : $"[{StationName}] 工位关闭");
             }
         }
 
@@ -79,19 +68,14 @@ namespace Vision.Stations
         /// </summary>
         public List<ToolBase> ToolList { get; set; } = new List<ToolBase>();
 
-        [field: NonSerialized]
         public event EventHandler<ShowDebugWindowEventArgs> StationDebugShowEvent;
 
-        [field: NonSerialized]
         public event EventHandler<bool> StationEnableEvent;
 
-        [field: NonSerialized]
         public event EventHandler<StationShowChangedEventArgs> StationDisplayChangedEvent;
 
-        [field: NonSerialized]
         public CogDisplayView DisplayView { get; set; }
 
-        [field: NonSerialized]
         public StationDataConfig DataConfig { get; set; }
 
         public ToolBase this[string name]
@@ -111,12 +95,20 @@ namespace Vision.Stations
 
         public Station()
         {
-            DataConfig = new StationDataConfig();
         }
 
         public void Init()
         {
             DataConfig = new StationDataConfig();
+
+            //开启检测线程
+            _manualResetEvent = new ManualResetEvent(false);
+            _cycleThread = new Thread(RunCycle)
+            {
+                IsBackground = true
+            };
+            _threadFlag = true;
+            _cycleThread.Start();
         }
 
         #region 运行相关
@@ -130,29 +122,36 @@ namespace Vision.Stations
                 ShowImage = null;
                 var result = true;
                 string errMsg = string.Empty;
-                Stopwatch stopwatch = new Stopwatch();
-                stopwatch.Start();
+                TimeSpan time = TimeSpan.Zero;
                 foreach(ToolBase tool in ToolList)
                 {
                     try
                     {
                         tool.Run();
+                        time += tool.RunTime;
                     }
                     catch(Exception e)
                     {
                         result = false;
 
+                        //打印工具失败
+                        LogUI.AddLog($"{e.Message}");
                         //一个工具NG后还是要发送NG的结果的
                         ToolList.Find(x => x is ResultTool)?.Run();
                         ToolList.Find(x => x is EndTool)?.Run();
-                        //打印工具失败
-                        LogUI.AddLog($"[{StationName}] => {e.Message}");
-
+                       
                         break;
                     }
                 }
-                stopwatch.Stop();
-                var time = stopwatch.Elapsed;
+
+                if(result)
+                {
+                    LogUI.AddLog($"{StationName} 运行成功");
+                }
+                else
+                {
+                    LogUI.AddLog($"{StationName} 运行失败");
+                }
                 //显示
                 ShowWindow(new ShowWindowEventArgs(result,time,ShowImage));
                 //存图
@@ -170,23 +169,20 @@ namespace Vision.Stations
                 ShowImage = null;
                 var result = true;
                 string errMsg = string.Empty;
+                LogUI.AddToolLog($"===============  [{StationName}]   =================");
                 Stopwatch stopwatch = new Stopwatch();
                 stopwatch.Start();
                 foreach(ToolBase tool in ToolList)
                 {
                     try
                     {
-                        Stopwatch stopwatch1 = new Stopwatch();
-                        stopwatch1.Start();
                         tool.RunDebug();
-                        stopwatch1.Stop();
-                        var t = stopwatch1.Elapsed;
-                        LogUI.AddToolLog(tool.ToolName + "=> " + t.TotalMilliseconds.ToString("f2") + "ms");
+                        LogUI.AddToolLog($"[{tool.ToolName}]=> {tool.RunTime.TotalMilliseconds}ms");
                     }
                     catch(Exception ex)
                     {
                         result = false;
-                        LogUI.AddToolLog($"[{StationName}] => {ex.Message}");
+                        LogUI.AddToolLog($"{ex.Message}");
                         break;
                     }
                 }
@@ -202,24 +198,8 @@ namespace Vision.Stations
         /// </summary>
         public void Start()
         {
-            if(!_cycle)
-            {
-                if(_manualResetEvent == null)
-                {
-                    _manualResetEvent = new ManualResetEvent(true);
-                }
-
-                _cycleThread = new Thread(RunCycle)
-                {
-                    IsBackground = true
-                };
-                _threadFlag = true;
-                _cycleThread.Start();
-            }
-            else
-            {
-                _manualResetEvent?.Set();
-            }
+            if(!Enable) return;
+            _manualResetEvent?.Set();
         }
 
         /// <summary>
@@ -235,12 +215,11 @@ namespace Vision.Stations
         /// </summary>
         private void RunCycle()
         {
-            _cycle = true;
             while(_threadFlag)
             {
-                if(Enable)
+                _manualResetEvent?.WaitOne();
+                if(ProjectManager.Instance.Plc != null && ProjectManager.Instance.Plc.IsOpened)
                 {
-                    _manualResetEvent?.WaitOne();
                     Run();
                 }
                 Thread.Sleep(1000);
@@ -254,7 +233,7 @@ namespace Vision.Stations
         private void ShowWindow(ShowWindowEventArgs args)
         {
             //运行视图模式下显示
-            if (DisplayView != null)
+            if(DisplayView != null)
             {
                 //先清除之前的显示
                 DisplayView.ClearDisplay();
@@ -629,6 +608,11 @@ namespace Vision.Stations
             StationDebugShowEvent?.Invoke(this,args);
         }
 
+        /// <summary>
+        /// 界面切换事件
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void DisplayView_ShowDisplayOne(object sender,StationShowChangedEventArgs e)
         {
             e.StationName = StationName;
@@ -669,9 +653,74 @@ namespace Vision.Stations
         /// 深拷贝当前对象
         /// </summary>
         /// <returns></returns>
-        public Station DeepClone()
+        public Station Clone()
         {
             return SerializerHelper.Clone(this);
         }
+
+        /// <summary>
+        /// 将需要保存的数据添加到序列化存储类中
+        /// </summary>
+        /// <param name="info"></param>
+        /// <param name="stationName"></param>
+        public void SaveToStream(SerializationInfo info,string stationName)
+        {
+            string name = "StationName";
+            string enable = "Enable";
+            string lastRecordName = "LastRecordName";
+            string count = "Count";
+
+            info.AddValue($"{stationName}.{name}",StationName);
+            info.AddValue($"{stationName}.{enable}",Enable);
+            info.AddValue($"{stationName}.{lastRecordName}",LastRecordName);
+
+
+            //工具
+            info.AddValue($"{stationName}.{count}",ToolList.Count);
+            int n = 0;
+
+            foreach(var tool in ToolList)
+            {
+                string t = $"{stationName}.Tool.{n}";
+                info.AddValue(t,tool.GetType().FullName);
+                tool.SaveToStream(info,t);
+                n++;
+            }
+
+        }
+
+        /// <summary>
+        /// 从序列化存储类中加载数据
+        /// </summary>
+        /// <param name="info"></param>
+        /// <param name="stationName"></param>
+        public void LoadFromStream(SerializationInfo info,string stationName)
+        {
+            string name = "StationName";
+            string enable = "Enable";
+            string lastRecordName = "LastRecordName";
+            string count = "Count";
+
+            StationName = info.GetString($"{stationName}.{name}");
+            Enable = info.GetBoolean($"{stationName}.{enable}");
+            LastRecordName = info.GetString($"{stationName}.{lastRecordName}");
+
+            //工具
+            int n = info.GetInt32($"{stationName}.{count}");
+
+            ToolList = new List<ToolBase>();
+            for(int i = 0;i < n;i++)
+            {
+                string t = $"{stationName}.Tool.{i}";
+                var typeName = info.GetString(t);
+
+                ToolBase tool = (ToolBase)Assembly.GetExecutingAssembly().CreateInstance(typeName);
+                tool.LoadFromStream(info,t);
+
+                ToolList.Add(tool);
+            }
+
+        }
+        
     }
 }
