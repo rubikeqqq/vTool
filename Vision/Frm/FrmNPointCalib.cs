@@ -54,6 +54,7 @@ namespace Vision.Frm
             {
                 _nPointTool.InputImage = _image;
                 _nPointTool.Calibration.Calibrate();
+                Log("标定完成！");
             }
             catch (Exception ex)
             {
@@ -69,7 +70,7 @@ namespace Vision.Frm
         {
             if (cogRecordDisplay1.LiveDisplayRunning)
             {
-                "请先停止连续相机取图".MsgBox();
+                Log("请先停止连续相机取图");
                 return false;
             }
 
@@ -85,7 +86,7 @@ namespace Vision.Frm
                     }
                     else
                     {
-                        "取图失败".MsgBox();
+                        Log("取图失败");
                         return false;
                     }
                 }
@@ -147,6 +148,7 @@ namespace Vision.Frm
                     {
                         dgv.Rows.Add(i + 1, _centerDataList.CenterList[i].ImageX, _centerDataList.CenterList[i].ImageY,
                        _centerDataList.CenterList[i].RobotX, _centerDataList.CenterList[i].RobotY);
+                        _index++;
                     }
 
                 }
@@ -182,7 +184,7 @@ namespace Vision.Frm
         {
             if (dgv.Rows.Count != 9)
             {
-                "标定的点位不足9个".MsgBox();
+                Log("标定的点位不足9个");
                 return false;
             }
             try
@@ -193,6 +195,7 @@ namespace Vision.Frm
                 {
                     _nPointTool.Calibration.DeletePointPair(0);
                 }
+                _centerDataList.Clear();
 
                 //添加新的点位
                 for (int i = 0; i < 9; i++)
@@ -204,7 +207,7 @@ namespace Vision.Frm
 
                     if (cell1 == null || cell2 == null || cell3 == null || cell4 == null)
                     {
-                        "点位不全，请检查！".MsgBox();
+                        Log("点位不全，请检查！");
                         return false;
                     }
 
@@ -221,7 +224,7 @@ namespace Vision.Frm
             }
             catch (Exception ex)
             {
-                $"点位设置失败，请检查\r\n{ex.Message}".MsgBox();
+                Log($"点位设置失败，请检查\r\n{ex.Message}");
                 return false;
             }
         }
@@ -256,6 +259,14 @@ namespace Vision.Frm
             else
             {
                 cogRecordDisplay1.Image = _image;
+
+                CogGraphicLabel label = new CogGraphicLabel();
+                label.Font = new System.Drawing.Font("宋体", 20);
+                label.Color = CogColorConstants.Red;
+                label.SetXYText(100, 100, "二维码未找到！");
+                label.Alignment = CogGraphicLabelAlignmentConstants.TopLeft;
+                cogRecordDisplay1.StaticGraphics.Add(label, "");
+
                 cogRecordDisplay1.AutoFit = true;
             }
         }
@@ -317,6 +328,21 @@ namespace Vision.Frm
         }
 
         /// <summary>
+        /// 显示log
+        /// </summary>
+        /// <param name="log"></param>
+        private void Log(string log)
+        {
+            if (listBox1.InvokeRequired)
+            {
+                listBox1.Invoke(new Action<string>(Log));
+                return;
+            }
+            listBox1.Items.Add(DateTime.Now.ToString("T") + "   " + log);
+            listBox1.SelectedIndex = listBox1.Items.Count - 1;
+        }
+
+        /// <summary>
         /// 保存标定数据
         /// </summary>
         /// <param name="sender"></param>
@@ -339,7 +365,7 @@ namespace Vision.Frm
             {
                 if (_index >= 9)
                 {
-                    "已经有9个点".MsgBox();
+                    Log("已经有9个点");
                     return;
                 }
 
@@ -359,7 +385,7 @@ namespace Vision.Frm
                             }
                             if (_idResult == null)
                             {
-                                "未设置标准idTool".MsgBox();
+                                Log("未设置标准idTool");
                                 return;
                             }
 
@@ -378,23 +404,28 @@ namespace Vision.Frm
                                     g.Color = CogColorConstants.Green;
                                     g.LineWidthInScreenPixels = 2;
                                     ShowRecord(g);
+
+                                    //log显示数据
+                                    Log($"第{_index}个点：x={x} y={y}");
                                     return;
                                 }
                             }
+
+                            //所有的都不匹配
+                            ShowRecord(null);
+                            Log("二维码未找到！");
                         }
                         else
                         {
                             ShowRecord(null);
-                            string err = "二维码未找到！";
-                            err.MsgBox();
+                            Log("二维码未找到！");
                             return;
                         }
                     }
                     else
                     {
                         ShowRecord(null);
-                        string err = "二维码未找到！";
-                        err.MsgBox();
+                        Log("二维码未找到！");
                     }
                 }
             }
@@ -498,7 +529,10 @@ namespace Vision.Frm
             {
                 File.Create(_path).Close();
             }
-            SerializerHelper.SerializeToXml(_centerDataList, _path);
+            if (SerializerHelper.SerializeToXml(_centerDataList, _path))
+            {
+                Log("标定数据保存成功！");
+            }
         }
     }
 }

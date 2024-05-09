@@ -233,6 +233,11 @@ namespace Vision.Tools.ToolImpls
             idTool.UserData.Add("_ToolOutputTerminals", s2);
             idTool.UserData.Add("_ToolOutputTerminals", s3);
 
+            //设置ID的一些参数
+            idTool.RunParams.NumToFind = 20;
+            idTool.RunParams.DisableAllCodes();
+            idTool.RunParams.DataMatrix.Enabled = true;
+
 
 
             CogCalibNPointToNPointTool nTool = new CogCalibNPointToNPointTool();

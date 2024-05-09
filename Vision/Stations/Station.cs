@@ -218,10 +218,11 @@ namespace Vision.Stations
             while(_threadFlag)
             {
                 _manualResetEvent?.WaitOne();
-                if(ProjectManager.Instance.Plc != null && ProjectManager.Instance.Plc.IsOpened)
-                {
-                    Run();
-                }
+                //if(ProjectManager.Instance.Plc != null && ProjectManager.Instance.Plc.IsOpened)
+                //{
+                //    Run();
+                //}
+                Run();
                 Thread.Sleep(1000);
             }
         }
