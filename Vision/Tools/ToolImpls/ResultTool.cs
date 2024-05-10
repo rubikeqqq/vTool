@@ -6,6 +6,7 @@ using System.Reflection;
 using System.Runtime.Serialization;
 using System.Threading;
 using System.Windows.Forms;
+
 using Vision.Core;
 using Vision.Projects;
 using Vision.Stations;
@@ -177,6 +178,7 @@ namespace Vision.Tools.ToolImpls
             }
         }
 
+        #region ISerializable
         public override void LoadFromStream(SerializationInfo info,string toolName)
         {
             base.LoadFromStream(info,toolName);
@@ -214,5 +216,6 @@ namespace Vision.Tools.ToolImpls
                 n++;
             }
         }
+        #endregion
     }
 }

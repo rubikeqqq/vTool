@@ -1,13 +1,15 @@
-﻿using Cognex.VisionPro;
-using Cognex.VisionPro.CalibFix;
-using Cognex.VisionPro.ID;
-using Cognex.VisionPro.ToolBlock;
-using System;
+﻿using System;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Runtime.Serialization;
 using System.Windows.Forms;
+
+using Cognex.VisionPro;
+using Cognex.VisionPro.CalibFix;
+using Cognex.VisionPro.ID;
+using Cognex.VisionPro.ToolBlock;
+
 using Vision.Core;
 using Vision.Projects;
 using Vision.Stations;
@@ -122,9 +124,56 @@ namespace Vision.Tools.ToolImpls
                 }
             }
         }
+
+        /// <summary>
+        /// 添加vpp工具
+        /// </summary>
+        /// <param name="tb"></param>
+        private void AddTools(CogToolBlock tb)
+        {
+            CogAcqFifoTool acqTool = new CogAcqFifoTool();
+            acqTool.Name = "CogAcqFifoTool1";
+            string[] s1 = new string[1];
+            s1[0] = "|OutputImage|OutputImage";
+
+            acqTool.UserData.Add("_ToolOutputTerminals",s1);
+
+            CogIDTool idTool = new CogIDTool();
+            idTool.Name = "CogIDTool1";
+            string[] s2 = new string[1];
+            s2[0] = "|InputImage|InputImage";
+            string[] s3 = new string[1];
+            s3[0] = "|Result.Count|Result.Count";
+
+            idTool.UserData.Add("_ToolOutputTerminals",s2);
+            idTool.UserData.Add("_ToolOutputTerminals",s3);
+
+            //设置ID的一些参数
+            idTool.RunParams.NumToFind = 20;
+            idTool.RunParams.DisableAllCodes();
+            idTool.RunParams.DataMatrix.Enabled = true;
+
+
+
+            CogCalibNPointToNPointTool nTool = new CogCalibNPointToNPointTool();
+            nTool.Name = "CogCalibNPointToNPointTool1";
+            string[] s4 = new string[1];
+            string[] s5 = new string[1];
+            s4[0] = "|InputImage|InputImage";
+            s5[0] = "|OutputImage|OutputImage";
+
+            nTool.UserData.Add("_ToolInputTerminals",s4);//添加终端-InputImage
+            nTool.UserData.Add("_ToolOutputTerminals",s5);
+
+
+
+            tb.Tools.Add(acqTool);
+            tb.Tools.Add(idTool);
+            tb.Tools.Add(nTool);
+        }
         #endregion
 
-        #region 【工具相关】
+        #region 工具相关
 
         public override void Run()
         {
@@ -180,53 +229,6 @@ namespace Vision.Tools.ToolImpls
             _station = station;
         }
 
-        /// <summary>
-        /// 添加vpp工具
-        /// </summary>
-        /// <param name="tb"></param>
-        private void AddTools(CogToolBlock tb)
-        {
-            CogAcqFifoTool acqTool = new CogAcqFifoTool();
-            acqTool.Name = "CogAcqFifoTool1";
-            string[] s1 = new string[1];
-            s1[0] = "|OutputImage|OutputImage";
-
-            acqTool.UserData.Add("_ToolOutputTerminals", s1);
-
-            CogIDTool idTool = new CogIDTool();
-            idTool.Name = "CogIDTool1";
-            string[] s2 = new string[1];
-            s2[0] = "|InputImage|InputImage";
-            string[] s3 = new string[1];
-            s3[0] = "|Result.Count|Result.Count";
-
-            idTool.UserData.Add("_ToolOutputTerminals", s2);
-            idTool.UserData.Add("_ToolOutputTerminals", s3);
-
-            //设置ID的一些参数
-            idTool.RunParams.NumToFind = 20;
-            idTool.RunParams.DisableAllCodes();
-            idTool.RunParams.DataMatrix.Enabled = true;
-
-
-
-            CogCalibNPointToNPointTool nTool = new CogCalibNPointToNPointTool();
-            nTool.Name = "CogCalibNPointToNPointTool1";
-            string[] s4 = new string[1];
-            string[] s5 = new string[1];
-            s4[0] = "|InputImage|InputImage";
-            s5[0] = "|OutputImage|OutputImage";
-
-            nTool.UserData.Add("_ToolInputTerminals", s4);//添加终端-InputImage
-            nTool.UserData.Add("_ToolOutputTerminals", s5);
-
-            
-
-            tb.Tools.Add(acqTool);
-            tb.Tools.Add(idTool);
-            tb.Tools.Add(nTool);
-        }
-
         public void CloseCam()
         {
             if (ToolBlock.Tools.Contains("CogAcqFifoTool1"))
@@ -253,6 +255,7 @@ namespace Vision.Tools.ToolImpls
         }
         #endregion
 
+        #region ISerializable序列化
         public override void LoadFromStream(SerializationInfo info,string toolName)
         {
             base.LoadFromStream(info,toolName);
@@ -269,5 +272,6 @@ namespace Vision.Tools.ToolImpls
 
             info.AddValue(imageInName,ImageInName);
         }
+        #endregion
     }
 }

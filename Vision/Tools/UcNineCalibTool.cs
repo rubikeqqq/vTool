@@ -1,7 +1,9 @@
-﻿using Cognex.VisionPro.ToolBlock;
-using System;
+﻿using System;
 using System.ComponentModel;
 using System.Windows.Forms;
+
+using Cognex.VisionPro.ToolBlock;
+
 using Vision.Frm;
 using Vision.Projects;
 using Vision.Stations;

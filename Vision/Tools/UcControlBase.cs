@@ -2,6 +2,7 @@
 using System.ComponentModel;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+
 using Vision.Core;
 using Vision.Stations;
 using Vision.Tools.ToolImpls;
@@ -49,7 +50,7 @@ namespace Vision.Tools
             panel1.Controls.Clear();
             panel1.Controls.Add(_ucTool);
             _ucTool.Show();
-            label1.Text = $"{station.StationName} {tool.ToolName}";
+            label1.Text = $"{station.StationName}     {tool.ToolName}";
         }
 
         private void _ucTool_ToolEnableChangedEvent(object sender, bool e)
@@ -73,7 +74,7 @@ namespace Vision.Tools
                                 listBox1.Items.Remove(0);
                             }
                             listBox1.Items.Add(s);
-                            listBox1.TopIndex = listBox1.Items.Count - 1;
+                            listBox1.SelectedIndex = listBox1.Items.Count - 1;
                         }
 
                     }));

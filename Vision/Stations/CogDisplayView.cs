@@ -1,13 +1,15 @@
-﻿using Cognex.VisionPro;
-using Cognex.VisionPro.Display;
-using Cognex.VisionPro.ImageFile;
-using Cognex.VisionPro.ToolBlock;
-using System;
+﻿using System;
 using System.ComponentModel;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
 using System.Windows.Forms;
+
+using Cognex.VisionPro;
+using Cognex.VisionPro.Display;
+using Cognex.VisionPro.ImageFile;
+using Cognex.VisionPro.ToolBlock;
+
 using Vision.Core;
 
 namespace Vision.Stations

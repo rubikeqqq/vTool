@@ -1,6 +1,8 @@
-﻿using HslCommunication;
-using System;
+﻿using System;
 using System.Threading;
+
+using HslCommunication;
+
 using Vision.Core;
 
 namespace Vision.Hardware

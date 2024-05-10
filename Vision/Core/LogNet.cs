@@ -1,4 +1,5 @@
 ﻿using System;
+
 using HslCommunication.LogNet;
 
 namespace Vision.Core

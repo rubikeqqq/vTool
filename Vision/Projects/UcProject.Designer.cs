@@ -35,12 +35,13 @@
             this.新增工位ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.cmsStation = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.新建工具ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.参数设置ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.组重命名ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.工位上移ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.工位下移ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.删除组ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.删除全部工具ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.参数设置ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.复制工位ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.cmsTool = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.删除工具ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.重命名ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -51,7 +52,6 @@
             this.imageList1 = new System.Windows.Forms.ImageList(this.components);
             this.panelMain = new System.Windows.Forms.Panel();
             this.imageList2 = new System.Windows.Forms.ImageList(this.components);
-            this.复制工位ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.cmsPasteStation = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.toolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
             this.cmsProject.SuspendLayout();
@@ -103,6 +103,12 @@
             this.新建工具ToolStripMenuItem.Size = new System.Drawing.Size(188, 28);
             this.新建工具ToolStripMenuItem.Text = "新建工具";
             // 
+            // 参数设置ToolStripMenuItem
+            // 
+            this.参数设置ToolStripMenuItem.Name = "参数设置ToolStripMenuItem";
+            this.参数设置ToolStripMenuItem.Size = new System.Drawing.Size(188, 28);
+            this.参数设置ToolStripMenuItem.Text = "参数设置";
+            // 
             // 组重命名ToolStripMenuItem
             // 
             this.组重命名ToolStripMenuItem.Name = "组重命名ToolStripMenuItem";
@@ -133,11 +139,11 @@
             this.删除全部工具ToolStripMenuItem.Size = new System.Drawing.Size(188, 28);
             this.删除全部工具ToolStripMenuItem.Text = "删除全部工具";
             // 
-            // 参数设置ToolStripMenuItem
+            // 复制工位ToolStripMenuItem
             // 
-            this.参数设置ToolStripMenuItem.Name = "参数设置ToolStripMenuItem";
-            this.参数设置ToolStripMenuItem.Size = new System.Drawing.Size(188, 28);
-            this.参数设置ToolStripMenuItem.Text = "参数设置";
+            this.复制工位ToolStripMenuItem.Name = "复制工位ToolStripMenuItem";
+            this.复制工位ToolStripMenuItem.Size = new System.Drawing.Size(188, 28);
+            this.复制工位ToolStripMenuItem.Text = "复制工位";
             // 
             // cmsTool
             // 
@@ -191,8 +197,8 @@
             // 
             this.splitContainer1.Panel2.Controls.Add(this.panelMain);
             this.splitContainer1.Size = new System.Drawing.Size(917, 654);
-            this.splitContainer1.SplitterDistance = 171;
-            this.splitContainer1.SplitterWidth = 8;
+            this.splitContainer1.SplitterDistance = 120;
+            this.splitContainer1.SplitterWidth = 3;
             this.splitContainer1.TabIndex = 3;
             // 
             // tvProject
@@ -205,7 +211,7 @@
             this.tvProject.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.tvProject.Name = "tvProject";
             this.tvProject.SelectedImageIndex = 2;
-            this.tvProject.Size = new System.Drawing.Size(171, 654);
+            this.tvProject.Size = new System.Drawing.Size(120, 654);
             this.tvProject.TabIndex = 0;
             this.tvProject.BeforeCollapse += new System.Windows.Forms.TreeViewCancelEventHandler(this.tvProject_BeforeCollapse);
             this.tvProject.BeforeExpand += new System.Windows.Forms.TreeViewCancelEventHandler(this.tvProject_BeforeExpand);
@@ -223,12 +229,12 @@
             // panelMain
             // 
             this.panelMain.BackColor = System.Drawing.SystemColors.Window;
-            this.panelMain.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
+            this.panelMain.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.panelMain.Dock = System.Windows.Forms.DockStyle.Fill;
             this.panelMain.Location = new System.Drawing.Point(0, 0);
             this.panelMain.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.panelMain.Name = "panelMain";
-            this.panelMain.Size = new System.Drawing.Size(738, 654);
+            this.panelMain.Size = new System.Drawing.Size(794, 654);
             this.panelMain.TabIndex = 0;
             // 
             // imageList2
@@ -238,12 +244,6 @@
             this.imageList2.Images.SetKeyName(0, "UnStart.png");
             this.imageList2.Images.SetKeyName(1, "OK.png");
             this.imageList2.Images.SetKeyName(2, "NG.png");
-            // 
-            // 复制工位ToolStripMenuItem
-            // 
-            this.复制工位ToolStripMenuItem.Name = "复制工位ToolStripMenuItem";
-            this.复制工位ToolStripMenuItem.Size = new System.Drawing.Size(188, 28);
-            this.复制工位ToolStripMenuItem.Text = "复制工位";
             // 
             // cmsPasteStation
             // 

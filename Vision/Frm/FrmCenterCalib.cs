@@ -1,11 +1,12 @@
-﻿using Cognex.VisionPro;
-using Cognex.VisionPro.CalibFix;
-using Cognex.VisionPro.ID;
-using Cognex.VisionPro.ImageFile;
-using System;
+﻿using System;
 using System.IO;
 using System.Threading;
 using System.Windows.Forms;
+
+using Cognex.VisionPro;
+using Cognex.VisionPro.CalibFix;
+using Cognex.VisionPro.ID;
+
 using Vision.Core;
 using Vision.Projects;
 using Vision.Stations;
@@ -25,7 +26,7 @@ namespace Vision.Frm
             this.WindowState = FormWindowState.Maximized;
             this.BringToFront();
         }
-
+                
         private ICogImage _image;
         private int _index = 0;
 

@@ -10,7 +10,7 @@ namespace Vision.Tools.Interfaces
     public interface IRegisterStation
     {
         /// <summary>
-        /// 将此矩阵注册到station
+        /// 注册station
         /// </summary>
         /// <param name="station"></param>
         void RegisterStation(Station station);

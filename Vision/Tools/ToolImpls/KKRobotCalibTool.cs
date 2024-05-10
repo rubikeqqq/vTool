@@ -1,10 +1,12 @@
-﻿using Cognex.VisionPro;
-using Cognex.VisionPro.CalibFix;
-using System;
+﻿using System;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Windows.Forms;
+
+using Cognex.VisionPro;
+using Cognex.VisionPro.CalibFix;
+
 using Vision.Core;
 using Vision.Projects;
 using Vision.Stations;
@@ -170,9 +172,6 @@ namespace Vision.Tools.ToolImpls
                 }
             }
         }
-
         #endregion
-
-
     }
 }

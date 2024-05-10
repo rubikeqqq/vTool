@@ -1,10 +1,9 @@
 ﻿using System;
 using System.ComponentModel;
-using System.Drawing;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+
 using Vision.Core;
-using Vision.Hardware;
 using Vision.Projects;
 using Vision.Stations;
 

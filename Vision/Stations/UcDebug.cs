@@ -1,8 +1,10 @@
-﻿using Cognex.VisionPro;
-using System;
+﻿using System;
 using System.ComponentModel;
 using System.Drawing;
 using System.Windows.Forms;
+
+using Cognex.VisionPro;
+
 using Vision.Core;
 using Vision.Projects;
 using Vision.Tools.ToolImpls;

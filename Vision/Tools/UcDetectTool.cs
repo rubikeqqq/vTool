@@ -1,6 +1,6 @@
-﻿using System;
-using System.ComponentModel;
+﻿using System.ComponentModel;
 using System.Windows.Forms;
+
 using Vision.Projects;
 using Vision.Stations;
 using Vision.Tools.ToolImpls;

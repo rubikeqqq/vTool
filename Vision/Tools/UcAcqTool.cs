@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel;
 using System.Windows.Forms;
+
 using Vision.Tools.ToolImpls;
 
 namespace Vision.Tools

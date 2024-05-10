@@ -1,6 +1,7 @@
 ﻿using System;
 using System.ComponentModel;
 using System.Windows.Forms;
+
 using Vision.Core;
 using Vision.Properties;
 using Vision.Stations;

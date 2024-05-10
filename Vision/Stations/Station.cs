@@ -1,5 +1,4 @@
-﻿using Cognex.VisionPro;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -7,6 +6,9 @@ using System.Linq;
 using System.Reflection;
 using System.Runtime.Serialization;
 using System.Threading;
+
+using Cognex.VisionPro;
+
 using Vision.Core;
 using Vision.Projects;
 using Vision.Tools.Interfaces;

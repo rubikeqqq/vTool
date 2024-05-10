@@ -1,11 +1,13 @@
-﻿using Cognex.VisionPro;
-using Cognex.VisionPro.ToolBlock;
-using System;
+﻿using System;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Runtime.Serialization;
 using System.Windows.Forms;
+
+using Cognex.VisionPro;
+using Cognex.VisionPro.ToolBlock;
+
 using Vision.Core;
 using Vision.Projects;
 using Vision.Stations;
@@ -56,7 +58,7 @@ namespace Vision.Tools.ToolImpls
             base.Save();
         }
 
-        #region 【Vpp相关】
+        #region Vpp相关
 
         public void CreateVpp()
         {
@@ -70,10 +72,6 @@ namespace Vision.Tools.ToolImpls
 
                 ToolBlock = new CogToolBlock();
                 ToolBlock.Inputs.Add(new CogToolBlockTerminal("InputImage",typeof(ICogImage)));
-                //模板点位
-                ToolBlock.Outputs.Add(new CogToolBlockTerminal("ModelX",typeof(double)));
-                ToolBlock.Outputs.Add(new CogToolBlockTerminal("ModelY",typeof(double)));
-                ToolBlock.Outputs.Add(new CogToolBlockTerminal("ModelAngle",typeof(double)));
                 //加上旋转标定计算得到的点位
                 ToolBlock.Outputs.Add(new CogToolBlockTerminal("X",typeof(double)));
                 ToolBlock.Outputs.Add(new CogToolBlockTerminal("Y",typeof(double)));
@@ -131,7 +129,7 @@ namespace Vision.Tools.ToolImpls
 
         #endregion
 
-        #region 【工具相关】
+        #region 工具相关
 
         public override void Run()
         {
@@ -161,8 +159,10 @@ namespace Vision.Tools.ToolImpls
                         ToolBlock.Outputs["Y"].Value != null &&
                         ToolBlock.Outputs["Angle"].Value != null)
                     {
-                        ModelPoint = new PointA((double)ToolBlock.Outputs["X"].Value,
-                            (double)ToolBlock.Outputs["Y"].Value,(double)ToolBlock.Outputs["Angle"].Value);
+                        ModelPoint = new PointA(
+                            (double)ToolBlock.Outputs["X"].Value,
+                            (double)ToolBlock.Outputs["Y"].Value,
+                            (double)ToolBlock.Outputs["Angle"].Value);
                     }
 
                     //计算机械手旋转后的坐标
@@ -329,6 +329,7 @@ namespace Vision.Tools.ToolImpls
         }
         #endregion
 
+        #region ISerializable
         public override void LoadFromStream(SerializationInfo info,string toolName)
         {
             base.LoadFromStream(info,toolName);
@@ -345,5 +346,6 @@ namespace Vision.Tools.ToolImpls
 
             info.AddValue(imageInName,ImageInName);
         }
+        #endregion
     }
 }

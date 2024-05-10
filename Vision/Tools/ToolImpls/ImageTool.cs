@@ -1,5 +1,4 @@
-﻿using Cognex.VisionPro;
-using System;
+﻿using System;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Drawing;
@@ -7,6 +6,9 @@ using System.IO;
 using System.Linq;
 using System.Runtime.Serialization;
 using System.Windows.Forms;
+
+using Cognex.VisionPro;
+
 using Vision.Core;
 using Vision.Stations;
 using Vision.Tools.Interfaces;
@@ -141,6 +143,7 @@ namespace Vision.Tools.ToolImpls
             _station = station;
         }
 
+        #region ISerializable
         public override void LoadFromStream(SerializationInfo info,string toolName)
         {
             base.LoadFromStream(info,toolName);
@@ -161,6 +164,7 @@ namespace Vision.Tools.ToolImpls
             info.AddValue(emulationType,EmulationType.ToString());
             info.AddValue(path,Path);
         }
+        #endregion
     }
 
     /// <summary>

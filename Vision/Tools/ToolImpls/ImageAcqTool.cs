@@ -1,9 +1,11 @@
-﻿using Cognex.VisionPro;
-using System;
+﻿using System;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Windows.Forms;
+
+using Cognex.VisionPro;
+
 using Vision.Core;
 using Vision.Projects;
 using Vision.Stations;
@@ -40,7 +42,7 @@ namespace Vision.Tools.ToolImpls
             base.Save();
         }
 
-        #region 【vpp相关】
+        #region vpp相关
         
         public void LoadVpp()
         {
@@ -110,7 +112,7 @@ namespace Vision.Tools.ToolImpls
         }
         #endregion
 
-        #region 【工具相关】
+        #region 工具相关
 
         public override void Run()
         {

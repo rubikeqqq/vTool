@@ -3,6 +3,7 @@ using System.ComponentModel;
 using System.Runtime.Serialization;
 using System.Threading;
 using System.Windows.Forms;
+
 using Vision.Core;
 using Vision.Projects;
 using Vision.Stations;
@@ -60,6 +61,7 @@ namespace Vision.Tools.ToolImpls
             RunTime = TimeSpan.Zero;
         }
 
+        #region ISerializable
         public override void LoadFromStream(SerializationInfo info,string toolName)
         {
             base.LoadFromStream(info,toolName);
@@ -76,5 +78,6 @@ namespace Vision.Tools.ToolImpls
 
             info.AddValue(triggerAddress,TriggerAddress);
         }
+        #endregion
     }
 }

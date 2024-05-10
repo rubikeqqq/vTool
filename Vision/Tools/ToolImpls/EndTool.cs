@@ -3,6 +3,7 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.Runtime.Serialization;
 using System.Windows.Forms;
+
 using Vision.Core;
 using Vision.Projects;
 using Vision.Stations;
@@ -56,6 +57,7 @@ namespace Vision.Tools.ToolImpls
             //调试时不运行
         }
 
+        #region ISerializable
         public override void LoadFromStream(SerializationInfo info,string toolName)
         {
             base.LoadFromStream(info,toolName);
@@ -72,5 +74,6 @@ namespace Vision.Tools.ToolImpls
 
             info.AddValue(endAddress,EndAddress);
         }
+        #endregion
     }
 }

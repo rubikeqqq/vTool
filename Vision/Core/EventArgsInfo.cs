@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Windows.Forms;
-using Cognex.VisionPro;
+
 using Vision.Stations;
 
 namespace Vision.Core

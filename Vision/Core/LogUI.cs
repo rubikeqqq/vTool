@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using System.Windows.Forms;
 
 namespace Vision.Core
 {
@@ -65,7 +64,7 @@ namespace Vision.Core
         {
             lock (_lock)
             {
-                toolMsg.Enqueue(DateTime.Now.ToString("HH:mm:ss") + "   ==>  " + message + "\r\n");
+                toolMsg.Enqueue(DateTime.Now.ToString("HH:mm:ss") + "     " + message + "\r\n");
             }
         }
 

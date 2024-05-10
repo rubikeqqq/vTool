@@ -1,13 +1,15 @@
-﻿using Cognex.VisionPro;
-using Cognex.VisionPro.CalibFix;
-using Cognex.VisionPro.ID;
-using Cognex.VisionPro.ToolBlock;
-using System;
+﻿using System;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Runtime.Serialization;
 using System.Windows.Forms;
+
+using Cognex.VisionPro;
+using Cognex.VisionPro.CalibFix;
+using Cognex.VisionPro.ID;
+using Cognex.VisionPro.ToolBlock;
+
 using Vision.Core;
 using Vision.Projects;
 using Vision.Stations;
@@ -25,9 +27,6 @@ namespace Vision.Tools.ToolImpls
 
         public bool IsLoaded { get; set; }
 
-        /// <summary>
-        /// 标定vpp 标定时使用
-        /// </summary>
         public CogToolBlock ToolBlock { get; set; }
 
         public string ImageInName { get; set; }

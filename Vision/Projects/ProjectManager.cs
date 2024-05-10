@@ -5,6 +5,7 @@ using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+
 using Vision.Core;
 using Vision.Frm;
 using Vision.Hardware;

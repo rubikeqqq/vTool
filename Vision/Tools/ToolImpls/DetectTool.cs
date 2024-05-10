@@ -1,11 +1,13 @@
-﻿using Cognex.VisionPro;
-using Cognex.VisionPro.ToolBlock;
-using System;
+﻿using System;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Runtime.Serialization;
 using System.Windows.Forms;
+
+using Cognex.VisionPro;
+using Cognex.VisionPro.ToolBlock;
+
 using Vision.Core;
 using Vision.Projects;
 using Vision.Stations;
@@ -50,7 +52,7 @@ namespace Vision.Tools.ToolImpls
             base.Save();
         }
 
-        #region 【Vpp相关】
+        #region Vpp相关
         public void CreateVpp()
         {
             if (!IsLoaded)
@@ -114,7 +116,7 @@ namespace Vision.Tools.ToolImpls
         }
         #endregion
 
-        #region 【工具相关】
+        #region 工具相关
         
         public override void Run()
         {
@@ -225,6 +227,7 @@ namespace Vision.Tools.ToolImpls
         }
         #endregion
 
+        #region ISerializable
         public override void LoadFromStream(SerializationInfo info,string toolName)
         {
             base.LoadFromStream(info,toolName);
@@ -241,5 +244,6 @@ namespace Vision.Tools.ToolImpls
 
             info.AddValue(imageInName,ImageInName);
         }
+        #endregion
     }
 }
