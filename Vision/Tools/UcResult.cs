@@ -3,9 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Windows.Forms;
-
 using Cognex.VisionPro.ToolBlock;
-
 using Vision.Core;
 using Vision.Projects;
 using Vision.Stations;
@@ -51,7 +49,8 @@ namespace Vision.Tools
         /// <returns></returns>
         private List<string> GetTerminals()
         {
-            if (_station == null) return null;
+            if (_station == null)
+                return null;
             List<string> outputs = new List<string>();
             foreach (var item in _station.ToolList)
             {
@@ -108,12 +107,16 @@ namespace Vision.Tools
             if (detectTool != null)
             {
                 //resultTool中的detect工具结果
-                toolResList = _rTool.ResultData.FindAll(r => r.Source.Split('.')[0] == detectTool.ToolName);
+                toolResList = _rTool.ResultData.FindAll(r =>
+                    r.Source.Split('.')[0] == detectTool.ToolName
+                );
             }
             else if (centerDetectTool != null)
             {
                 //resultTool中的centerdetect工具结果
-                toolResList = _rTool.ResultData.FindAll(r => r.Source.Split('.')[0] == centerDetectTool.ToolName);
+                toolResList = _rTool.ResultData.FindAll(r =>
+                    r.Source.Split('.')[0] == centerDetectTool.ToolName
+                );
             }
 
             //遍历上一步中的结果
@@ -150,28 +153,31 @@ namespace Vision.Tools
                     foreach (var data in _rTool.ResultData)
                     {
                         DataGridViewRow row = new DataGridViewRow();
-                        row.Cells.Add(new DataGridViewComboBoxCell()
-                        {
-                            DataSource = GetToolSources(),
-                            Value = data.Source
-                        });
-                        //如果ToolBlock的输出中不存在list中的数据 
+                        row.Cells.Add(
+                            new DataGridViewComboBoxCell()
+                            {
+                                DataSource = GetToolSources(),
+                                Value = data.Source
+                            }
+                        );
+                        //如果ToolBlock的输出中不存在list中的数据
                         //那么将删除list中的数据 并且dgv中会跳过生成这一项
                         if (!GetToolSources().Contains(data.Source))
                         {
-                            _rTool.ResultData = _rTool.ResultData.SkipWhile<ResultInfo>(x => x.Source == data.Source).ToList();
+                            _rTool.ResultData = _rTool
+                                .ResultData.SkipWhile<ResultInfo>(x => x.Source == data.Source)
+                                .ToList();
                             continue;
                         }
 
-                        row.Cells.Add(new DataGridViewComboBoxCell()
-                        {
-                            DataSource = Enum.GetNames(typeof(ResultType)),
-                            Value = data.Type.ToString()
-                        });
-                        row.Cells.Add(new DataGridViewTextBoxCell()
-                        {
-                            Value = data.Address,
-                        });
+                        row.Cells.Add(
+                            new DataGridViewComboBoxCell()
+                            {
+                                DataSource = Enum.GetNames(typeof(ResultType)),
+                                Value = data.Type.ToString()
+                            }
+                        );
+                        row.Cells.Add(new DataGridViewTextBoxCell() { Value = data.Address, });
                         dgv.Rows.Add(row);
                     }
                 }
@@ -192,7 +198,11 @@ namespace Vision.Tools
             foreach (DataGridViewRow row in dgv.Rows)
             {
                 //表格没有数据时
-                if (row.Cells[0].Value == null || row.Cells[1].Value == null || row.Cells[2].Value == null)
+                if (
+                    row.Cells[0].Value == null
+                    || row.Cells[1].Value == null
+                    || row.Cells[2].Value == null
+                )
                 {
                     continue;
                 }
@@ -205,11 +215,15 @@ namespace Vision.Tools
                     throw new Exception(message);
                 }
                 _addedToolData.Add(row.Cells[0].Value.ToString());
-                _rTool.ResultData.Add(new ResultInfo(
-                    row.Cells[0].FormattedValue.ToString(),
-                    (ResultType)(Enum.Parse(typeof(ResultType),
-                        row.Cells[1].FormattedValue.ToString())),
-                    row.Cells[2].FormattedValue.ToString()));
+                _rTool.ResultData.Add(
+                    new ResultInfo(
+                        row.Cells[0].FormattedValue.ToString(),
+                        (ResultType)(
+                            Enum.Parse(typeof(ResultType), row.Cells[1].FormattedValue.ToString())
+                        ),
+                        row.Cells[2].FormattedValue.ToString()
+                    )
+                );
             }
         }
 
@@ -242,9 +256,6 @@ namespace Vision.Tools
             dgv.Rows.RemoveAt(0);
         }
 
-        private void dgv_DataError(object sender, DataGridViewDataErrorEventArgs e)
-        {
-
-        }
+        private void dgv_DataError(object sender, DataGridViewDataErrorEventArgs e) { }
     }
 }

@@ -1,7 +1,6 @@
 ﻿using System;
 using System.ComponentModel;
 using System.Windows.Forms;
-
 using Vision.Core;
 
 namespace Vision.Projects
@@ -13,7 +12,6 @@ namespace Vision.Projects
         {
             InitializeComponent();
         }
-
 
         private bool _init;
         private ImageConfig _imageImageConfig;
@@ -27,7 +25,7 @@ namespace Vision.Projects
                 if (_init)
                     return;
                 //初始化读取参数
-                _imageImageConfig =Config.ImageConfig;
+                _imageImageConfig = Config.ImageConfig;
                 _systemConfig = Config.SystemConfig;
                 _plcConfig = Config.PLCConfig;
 
@@ -51,14 +49,12 @@ namespace Vision.Projects
                 //保存图像路径
                 tbPath.Text = _imageImageConfig.SaveImageDir;
 
-
                 _init = true;
             }
             catch (Exception ex)
             {
                 LogNet.Log(ex.ToString());
             }
-
         }
 
         private void UcSet_Load(object sender, System.EventArgs e)

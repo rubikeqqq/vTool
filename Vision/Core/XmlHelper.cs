@@ -109,7 +109,13 @@ namespace Vision.Core
         /// <param name="AttribName">节点的Attribute</param>
         /// <param name="Attrib">Attribute的值</param>
         /// <returns></returns>
-        public bool AddNode(string ParentNode, string NodeName, string Value, string AttribName, string Attrib)
+        public bool AddNode(
+            string ParentNode,
+            string NodeName,
+            string Value,
+            string AttribName,
+            string Attrib
+        )
         {
             if (!mHasFile)
             {

@@ -63,15 +63,31 @@ namespace Vision.Core
 
         public bool Load(string path)
         {
-            if (!File.Exists(path)) return false;
+            if (!File.Exists(path))
+                return false;
             string section = nameof(CalibConfig);
 
             try
             {
-                CenterCalibRobotPoint = IniHelper.ReadPointD(section, nameof(CenterCalibRobotPoint), default, path);
+                CenterCalibRobotPoint = IniHelper.ReadPointD(
+                    section,
+                    nameof(CenterCalibRobotPoint),
+                    default,
+                    path
+                );
                 CenterPoint = IniHelper.ReadPointD(section, nameof(CenterPoint), default, path);
-                RobotOriginPosition = IniHelper.ReadPointA(section, nameof(RobotOriginPosition), default, path);
-                ModelOriginPoint = IniHelper.ReadPointA(section, nameof(ModelOriginPoint), default, path);
+                RobotOriginPosition = IniHelper.ReadPointA(
+                    section,
+                    nameof(RobotOriginPosition),
+                    default,
+                    path
+                );
+                ModelOriginPoint = IniHelper.ReadPointA(
+                    section,
+                    nameof(ModelOriginPoint),
+                    default,
+                    path
+                );
 
                 return true;
             }
@@ -83,11 +99,16 @@ namespace Vision.Core
 
         public bool Save(string path)
         {
-            if (!File.Exists(path)) return false;
+            if (!File.Exists(path))
+                return false;
             string section = nameof(CalibConfig);
 
-
-            IniHelper.WritePointD(section, nameof(CenterCalibRobotPoint), CenterCalibRobotPoint, path);
+            IniHelper.WritePointD(
+                section,
+                nameof(CenterCalibRobotPoint),
+                CenterCalibRobotPoint,
+                path
+            );
             IniHelper.WritePointD(section, nameof(CenterPoint), CenterPoint, path);
             IniHelper.WritePointA(section, nameof(RobotOriginPosition), RobotOriginPosition, path);
             IniHelper.WritePointA(section, nameof(ModelOriginPoint), ModelOriginPoint, path);
@@ -112,13 +133,18 @@ namespace Vision.Core
 
         public bool Load(string path)
         {
-            if (!File.Exists(path)) return false;
+            if (!File.Exists(path))
+                return false;
             string section = nameof(OffsetConfig);
 
             try
             {
-                OffsetX = Convert.ToDouble(IniHelper.ReadString(section, nameof(OffsetX), default, path));
-                OffsetY = Convert.ToDouble(IniHelper.ReadString(section, nameof(OffsetY), default, path));
+                OffsetX = Convert.ToDouble(
+                    IniHelper.ReadString(section, nameof(OffsetX), default, path)
+                );
+                OffsetY = Convert.ToDouble(
+                    IniHelper.ReadString(section, nameof(OffsetY), default, path)
+                );
                 return true;
             }
             catch
@@ -129,9 +155,9 @@ namespace Vision.Core
 
         public bool Save(string path)
         {
-            if (!File.Exists(path)) return false;
+            if (!File.Exists(path))
+                return false;
             string section = nameof(OffsetConfig);
-
 
             IniHelper.WriteString(section, nameof(OffsetX), OffsetX.ToString(), path);
             IniHelper.WriteString(section, nameof(OffsetY), OffsetY.ToString(), path);
@@ -161,12 +187,18 @@ namespace Vision.Core
 
         public bool Load(string path)
         {
-            if (!File.Exists(path)) return false;
+            if (!File.Exists(path))
+                return false;
             string section = nameof(KKConfig);
 
             try
             {
-                KKOriginPosition = IniHelper.ReadPointD(section, nameof(KKOriginPosition), default, path);
+                KKOriginPosition = IniHelper.ReadPointD(
+                    section,
+                    nameof(KKOriginPosition),
+                    default,
+                    path
+                );
                 AddressX = IniHelper.ReadString(section, nameof(AddressX), default, path);
                 AddressY = IniHelper.ReadString(section, nameof(AddressY), default, path);
                 return true;
@@ -175,14 +207,13 @@ namespace Vision.Core
             {
                 return false;
             }
-            
         }
 
         public bool Save(string path)
         {
-            if (!File.Exists(path)) return false;
+            if (!File.Exists(path))
+                return false;
             string section = nameof(KKConfig);
-
 
             IniHelper.WritePointD(section, nameof(KKOriginPosition), KKOriginPosition, path);
             IniHelper.WriteString(section, nameof(AddressX), AddressX, path);
@@ -193,13 +224,13 @@ namespace Vision.Core
 
     public class StationDataConfig
     {
-        public  CalibConfig CalibConfig { get; set; } = new CalibConfig();
+        public CalibConfig CalibConfig { get; set; } = new CalibConfig();
 
-        public  OffsetConfig OffsetConfig { get; set; } = new OffsetConfig();
+        public OffsetConfig OffsetConfig { get; set; } = new OffsetConfig();
 
-        public  KKConfig KKConfig { get; set; } = new KKConfig();
+        public KKConfig KKConfig { get; set; } = new KKConfig();
 
-        public  bool LoadConfig(string path)
+        public bool LoadConfig(string path)
         {
             var b1 = CalibConfig.Load(path);
             var b2 = OffsetConfig.Load(path);
@@ -207,7 +238,7 @@ namespace Vision.Core
             return b1 & b2 & b3;
         }
 
-        public  bool SaveConfig(string path)
+        public bool SaveConfig(string path)
         {
             var b1 = CalibConfig.Save(path);
             var b2 = OffsetConfig.Save(path);

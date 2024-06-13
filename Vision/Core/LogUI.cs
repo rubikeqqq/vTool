@@ -23,7 +23,9 @@ namespace Vision.Core
             lock (_lock)
             {
                 StringBuilder sb = new StringBuilder();
-                sb.Append("**************************** [ Exception ] ****************************");
+                sb.Append(
+                    "**************************** [ Exception ] ****************************"
+                );
                 sb.Append(Environment.NewLine);
                 sb.Append(ex.Message);
                 sb.Append(Environment.NewLine);
@@ -31,7 +33,9 @@ namespace Vision.Core
                 sb.Append(Environment.NewLine);
                 sb.Append(ex.StackTrace);
                 sb.Append(Environment.NewLine);
-                sb.Append("**************************** [ Exception ] ****************************");
+                sb.Append(
+                    "**************************** [ Exception ] ****************************"
+                );
                 msgs.Enqueue(sb.ToString());
             }
         }
@@ -50,7 +54,7 @@ namespace Vision.Core
 
         public static void AddNewLineLog()
         {
-            lock(_lock)
+            lock (_lock)
             {
                 msgs.Enqueue(Environment.NewLine);
             }

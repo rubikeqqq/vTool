@@ -1,7 +1,6 @@
 ﻿using System;
 using System.ComponentModel;
 using System.Windows.Forms;
-
 using Vision.Core;
 using Vision.Properties;
 using Vision.Stations;
@@ -26,7 +25,7 @@ namespace Vision.Tools
         {
             _station = station;
             _baseTool = tool;
-            ChangeToolUI(station,tool);
+            ChangeToolUI(station, tool);
         }
 
         /// <summary>
@@ -103,6 +102,5 @@ namespace Vision.Tools
                 LogUI.AddToolLog(ex.Message);
             }
         }
-
     }
 }

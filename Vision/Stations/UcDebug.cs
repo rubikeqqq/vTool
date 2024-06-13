@@ -2,9 +2,7 @@
 using System.ComponentModel;
 using System.Drawing;
 using System.Windows.Forms;
-
 using Cognex.VisionPro;
-
 using Vision.Core;
 using Vision.Projects;
 using Vision.Tools.ToolImpls;
@@ -29,16 +27,16 @@ namespace Vision.Stations
 
         public void ChangeStation(Station station)
         {
-            if(station == _station)
+            if (station == _station)
             {
                 //combox还是要刷新一下 以防toolblock中更新了record图像
                 UpdateComBox();
                 return;
             }
-            if(_station != null)
+            if (_station != null)
             {
                 //关闭之前的相机
-                if(_living)
+                if (_living)
                 {
                     StopLive();
                     btnLive.Text = "连续采集";
@@ -64,8 +62,9 @@ namespace Vision.Stations
         /// </summary>
         public void StartLive()
         {
-            if(_acqTool == null || cogRecordDisplay1.LiveDisplayRunning) return;
-            if(_acqTool.Operator != null)
+            if (_acqTool == null || cogRecordDisplay1.LiveDisplayRunning)
+                return;
+            if (_acqTool.Operator != null)
             {
                 cogRecordDisplay1.AutoFit = true;
                 cogRecordDisplay1.StaticGraphics.Clear();
@@ -80,8 +79,9 @@ namespace Vision.Stations
         /// </summary>
         public void StopLive()
         {
-            if(_acqTool == null || !cogRecordDisplay1.LiveDisplayRunning) return;
-            if(_acqTool.Operator != null)
+            if (_acqTool == null || !cogRecordDisplay1.LiveDisplayRunning)
+                return;
+            if (_acqTool.Operator != null)
             {
                 cogRecordDisplay1.StaticGraphics.Clear();
                 cogRecordDisplay1.InteractiveGraphics.Clear();
@@ -95,12 +95,13 @@ namespace Vision.Stations
         /// </summary>
         private void UpdateCamera()
         {
-            if(_station == null) return;
-            if(_acqTool == null)
+            if (_station == null)
+                return;
+            if (_acqTool == null)
             {
-                foreach(ToolBase tool in _station.ToolList)
+                foreach (ToolBase tool in _station.ToolList)
                 {
-                    if(tool is ImageAcqTool aTool)
+                    if (tool is ImageAcqTool aTool)
                     {
                         _acqTool = aTool.AcqFifoTool;
                     }
@@ -110,7 +111,7 @@ namespace Vision.Stations
 
         private void Close()
         {
-            if(_station != null)
+            if (_station != null)
             {
                 _station.StationDebugShowEvent -= Station_StationRan;
                 _station.StationEnableEvent -= Station_StationEnableEvent;
@@ -122,9 +123,10 @@ namespace Vision.Stations
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void Station_StationRan(object sender,ShowDebugWindowEventArgs e)
+        private void Station_StationRan(object sender, ShowDebugWindowEventArgs e)
         {
-            if(_station == null) return;
+            if (_station == null)
+                return;
             //清楚之前的显示
             ClearDisplay();
             SetResultGraphicOnRecordDisplay(e.Image);
@@ -137,7 +139,7 @@ namespace Vision.Stations
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void Station_StationEnableEvent(object sender,bool e)
+        private void Station_StationEnableEvent(object sender, bool e)
         {
             rbtnEnable.Checked = e;
             rbtnDisable.Checked = !e;
@@ -147,13 +149,16 @@ namespace Vision.Stations
         {
             if (InvokeRequired)
             {
-                cogRecordDisplay1.Invoke(new Action<object>(SetResultGraphicOnRecordDisplay),
-                    image);
+                cogRecordDisplay1.Invoke(
+                    new Action<object>(SetResultGraphicOnRecordDisplay),
+                    image
+                );
                 return;
             }
             try
             {
-                if (cogRecordDisplay1 == null) return;
+                if (cogRecordDisplay1 == null)
+                    return;
                 //判断是ICogImage 还是 IRecordImage
                 if (image is ICogImage image1)
                 {
@@ -183,26 +188,49 @@ namespace Vision.Stations
         /// <param name="color"></param>
         /// <param name="alignment"></param>
         /// <param name="selectedNameSpace"></param>
-        private void GraphicCreateLabel(string label,double x,double y,int size,
-            CogColorConstants color,CogGraphicLabelAlignmentConstants alignment,string selectedNameSpace)
+        private void GraphicCreateLabel(
+            string label,
+            double x,
+            double y,
+            int size,
+            CogColorConstants color,
+            CogGraphicLabelAlignmentConstants alignment,
+            string selectedNameSpace
+        )
         {
-            if(InvokeRequired)
+            if (InvokeRequired)
             {
-                cogRecordDisplay1.Invoke(new Action<string,double,double,int,CogColorConstants,CogGraphicLabelAlignmentConstants,string>(GraphicCreateLabel),
-                    label,x,y,size,color,alignment,selectedNameSpace);
+                cogRecordDisplay1.Invoke(
+                    new Action<
+                        string,
+                        double,
+                        double,
+                        int,
+                        CogColorConstants,
+                        CogGraphicLabelAlignmentConstants,
+                        string
+                    >(GraphicCreateLabel),
+                    label,
+                    x,
+                    y,
+                    size,
+                    color,
+                    alignment,
+                    selectedNameSpace
+                );
                 return;
             }
             var myLabel = new CogGraphicLabel();
-            var font = new Font("微软雅黑",size,FontStyle.Bold);
+            var font = new Font("微软雅黑", size, FontStyle.Bold);
             myLabel.GraphicDOFEnable = CogGraphicLabelDOFConstants.None;
             myLabel.Interactive = false;
             myLabel.Font = font;
             myLabel.Alignment = alignment;
             myLabel.Color = color;
-            myLabel.SetXYText(x,y,label);
+            myLabel.SetXYText(x, y, label);
             myLabel.SelectedSpaceName = selectedNameSpace;
 
-            cogRecordDisplay1.StaticGraphics.Add(myLabel,"");
+            cogRecordDisplay1.StaticGraphics.Add(myLabel, "");
         }
 
         /// <summary>
@@ -211,9 +239,9 @@ namespace Vision.Stations
         /// <param name="ok"></param>
         private void GraphicCreateLabel(bool ok)
         {
-            if(InvokeRequired)
+            if (InvokeRequired)
             {
-                cogRecordDisplay1.Invoke(new Action<bool>(GraphicCreateLabel),ok);
+                cogRecordDisplay1.Invoke(new Action<bool>(GraphicCreateLabel), ok);
                 return;
             }
             double x = 20;
@@ -222,25 +250,24 @@ namespace Vision.Stations
             var size = cogRecordDisplay1.Width / 30;
 
             var myLabel = new CogGraphicLabel();
-            var font = new Font("微软雅黑",size,FontStyle.Bold);
+            var font = new Font("微软雅黑", size, FontStyle.Bold);
             myLabel.GraphicDOFEnable = CogGraphicLabelDOFConstants.None;
             myLabel.Interactive = false;
             myLabel.Font = font;
             myLabel.Alignment = CogGraphicLabelAlignmentConstants.TopLeft;
             myLabel.Color = ok ? CogColorConstants.Green : CogColorConstants.Red;
-            myLabel.SetXYText(x,y,ok ? "OK" : "NG");
+            myLabel.SetXYText(x, y, ok ? "OK" : "NG");
             myLabel.SelectedSpaceName = "@";
 
-            cogRecordDisplay1.StaticGraphics.Add(myLabel,"");
+            cogRecordDisplay1.StaticGraphics.Add(myLabel, "");
         }
-
 
         /// <summary>
         /// 清除显示界面
         /// </summary>
         public void ClearDisplay()
         {
-            if(InvokeRequired)
+            if (InvokeRequired)
             {
                 Invoke(new Action(ClearDisplay));
                 return;
@@ -256,11 +283,11 @@ namespace Vision.Stations
         /// </summary>
         /// <param name="title"></param>
         /// <param name="color"></param>
-        public void SetTitle(string title,Color color)
+        public void SetTitle(string title, Color color)
         {
-            if(InvokeRequired)
+            if (InvokeRequired)
             {
-                Invoke(new Action<string,Color>(SetTitle),title,color);
+                Invoke(new Action<string, Color>(SetTitle), title, color);
                 return;
             }
 
@@ -274,16 +301,16 @@ namespace Vision.Stations
         /// <param name="time"></param>
         public void SetTime(TimeSpan time)
         {
-            if(InvokeRequired)
+            if (InvokeRequired)
             {
-                Invoke(new Action<TimeSpan>(SetTime),time);
+                Invoke(new Action<TimeSpan>(SetTime), time);
                 return;
             }
 
             labelTime.Text = $@"运行时间:{time.TotalMilliseconds:f2} ms";
         }
 
-        private void UcStationShow_Load(object sender,System.EventArgs e)
+        private void UcStationShow_Load(object sender, System.EventArgs e)
         {
             //UpdateComBox();
             _init = true;
@@ -296,11 +323,11 @@ namespace Vision.Stations
         {
             var names = _station.GetLastRunRecordName();
             comboBox1.Items.Clear();
-            foreach(var name in names)
+            foreach (var name in names)
             {
                 comboBox1.Items.Add(name);
             }
-            if(names.Contains(_station.LastRecordName))
+            if (names.Contains(_station.LastRecordName))
             {
                 comboBox1.SelectedItem = _station.LastRecordName;
             }
@@ -321,11 +348,12 @@ namespace Vision.Stations
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void comboBox1_SelectedIndexChanged(object sender,EventArgs e)
+        private void comboBox1_SelectedIndexChanged(object sender, EventArgs e)
         {
-            if(_init)
+            if (_init)
             {
-                if(comboBox1.SelectedIndex == -1) return;
+                if (comboBox1.SelectedIndex == -1)
+                    return;
                 _station.LastRecordName = comboBox1.Text;
                 ProjectManager.Instance.SaveProject();
             }
@@ -336,7 +364,7 @@ namespace Vision.Stations
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void btnRun_Click(object sender,EventArgs e)
+        private void btnRun_Click(object sender, EventArgs e)
         {
             _station.DebugRun();
         }
@@ -346,34 +374,34 @@ namespace Vision.Stations
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void btnLive_Click(object sender,EventArgs e)
+        private void btnLive_Click(object sender, EventArgs e)
         {
-            if(btnLive.Text == "连续采集" && !_living)
+            if (btnLive.Text == "连续采集" && !_living)
             {
                 StartLive();
-                if(_living)
+                if (_living)
                     btnLive.Text = "停止采集";
             }
-            else if(btnLive.Text == "停止采集" && _living)
+            else if (btnLive.Text == "停止采集" && _living)
             {
                 StopLive();
-                if(!_living)
+                if (!_living)
                     btnLive.Text = "连续采集";
             }
         }
 
-        private void rbtnEnable_CheckedChanged(object sender,EventArgs e)
+        private void rbtnEnable_CheckedChanged(object sender, EventArgs e)
         {
-            if(_init)
+            if (_init)
             {
                 _station.Enable = rbtnEnable.Checked;
                 ProjectManager.Instance.SaveProject();
             }
         }
 
-        private void rbtnDisable_CheckedChanged(object sender,EventArgs e)
+        private void rbtnDisable_CheckedChanged(object sender, EventArgs e)
         {
-            if(_init)
+            if (_init)
             {
                 _station.Enable = !rbtnDisable.Checked;
                 ProjectManager.Instance.SaveProject();

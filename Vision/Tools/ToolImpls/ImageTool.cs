@@ -4,17 +4,15 @@ using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Linq;
-using System.Runtime.Serialization;
 using System.Windows.Forms;
-
 using Cognex.VisionPro;
-
 using Vision.Core;
 using Vision.Stations;
 using Vision.Tools.Interfaces;
 
 namespace Vision.Tools.ToolImpls
 {
+    [Serializable]
     [GroupInfo("图像工具", 0)]
     [ToolName("图像仿真", 1)]
     [Description("通过读取本地图像进行仿真测试")]
@@ -23,8 +21,10 @@ namespace Vision.Tools.ToolImpls
         /// <summary>
         /// 文件夹时使用的图像计数
         /// </summary>
+        [NonSerialized]
         private int _imageIndex;
 
+        [NonSerialized]
         private Station _station;
 
         /// <summary>
@@ -37,10 +37,13 @@ namespace Vision.Tools.ToolImpls
         /// </summary>
         public string Path { get; set; }
 
+        [field: NonSerialized]
         public ICogImage ImageOut { get; private set; }
 
+        [field: NonSerialized]
         public UcImageTool UI { get; set; }
 
+        [field: NonSerialized]
         /// <summary>
         /// 图像显示事件
         /// </summary>
@@ -58,7 +61,8 @@ namespace Vision.Tools.ToolImpls
         public override void Run()
         {
             RunTime = TimeSpan.Zero;
-            if (!Enable) return;
+            if (!Enable)
+                return;
             Stopwatch sw = Stopwatch.StartNew();
             ImageOut = GetImage();
             if (ImageOut == null)
@@ -107,8 +111,11 @@ namespace Vision.Tools.ToolImpls
                 {
                     var fileInfo = dirInfo.GetFiles();
 
-                    var imageList = fileInfo.ToList()
-                        .Where(x => x.Extension.ToLower() == ".bmp" /*|| x.Extension.ToLower() == ".jpg"*/)
+                    var imageList = fileInfo
+                        .ToList()
+                        .Where(x =>
+                            x.Extension.ToLower() == ".bmp" /*|| x.Extension.ToLower() == ".jpg"*/
+                        )
                         .ToList()
                         .Select(x => x.FullName)
                         .ToList();
@@ -142,34 +149,12 @@ namespace Vision.Tools.ToolImpls
         {
             _station = station;
         }
-
-        #region ISerializable
-        public override void LoadFromStream(SerializationInfo info,string toolName)
-        {
-            base.LoadFromStream(info,toolName);
-            string emulationType = $"{toolName}.emulationType";
-            string path = $"{toolName}.path";
-
-            EmulationType = (EmulationType)Enum.Parse(typeof(EmulationType),info.GetString(emulationType));
-            Path = info.GetString(path);
-        }
-
-        public override void SaveToStream(SerializationInfo info,string toolName)
-        {
-            base.SaveToStream(info,toolName);
-
-            string emulationType = $"{toolName}.emulationType";
-            string path = $"{toolName}.path";
-
-            info.AddValue(emulationType,EmulationType.ToString());
-            info.AddValue(path,Path);
-        }
-        #endregion
     }
 
     /// <summary>
     /// 仿真的类型
     /// </summary>
+    [Serializable]
     public enum EmulationType
     {
         Dir,

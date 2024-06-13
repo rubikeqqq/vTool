@@ -1,7 +1,6 @@
 ﻿using System;
 using System.ComponentModel;
 using System.Windows.Forms;
-
 using Vision.Core;
 using Vision.Projects;
 using Vision.Tools.ToolImpls;
@@ -41,7 +40,7 @@ namespace Vision.Tools
             }
             catch (Exception ex)
             {
-               LogUI.AddToolLog(ex.Message);
+                LogUI.AddToolLog(ex.Message);
             }
         }
 
@@ -50,7 +49,7 @@ namespace Vision.Tools
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void Instance_BeforeSaveProjectEvent(object sender,EventArgs e)
+        private void Instance_BeforeSaveProjectEvent(object sender, EventArgs e)
         {
             if (_tTool != null)
             {

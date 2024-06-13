@@ -2,12 +2,9 @@
 using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
-using System.Runtime.Serialization;
 using System.Windows.Forms;
-
 using Cognex.VisionPro;
 using Cognex.VisionPro.ToolBlock;
-
 using Vision.Core;
 using Vision.Projects;
 using Vision.Stations;
@@ -15,21 +12,27 @@ using Vision.Tools.Interfaces;
 
 namespace Vision.Tools.ToolImpls
 {
+    [Serializable]
     [GroupInfo(name: "视觉工具", index: 2)]
     [ToolName("检测工具", 0)]
     [Description("主检测流程")]
     public class DetectTool : ToolBase, IVpp, IImageIn
     {
+        [NonSerialized]
         private Station _station;
 
         public string ImageInName { get; set; }
 
+        [field: NonSerialized]
         public CogToolBlock ToolBlock { get; set; }
 
+        [field: NonSerialized]
         public ICogImage ImageIn { get; set; }
 
+        [field: NonSerialized]
         public bool IsLoaded { get; set; }
 
+        [field: NonSerialized]
         public UcDetectTool UI { get; set; }
 
         public override UserControl GetToolControl(Station station)
@@ -42,7 +45,7 @@ namespace Vision.Tools.ToolImpls
             {
                 UI.GetImageIn();
             }
-            
+
             return UI;
         }
 
@@ -57,7 +60,11 @@ namespace Vision.Tools.ToolImpls
         {
             if (!IsLoaded)
             {
-                var toolPath = Path.Combine(ProjectManager.ProjectDir, _station.StationName, $"{ToolName}.vpp");
+                var toolPath = Path.Combine(
+                    ProjectManager.ProjectDir,
+                    _station.StationName,
+                    $"{ToolName}.vpp"
+                );
                 if (string.IsNullOrEmpty(toolPath))
                 {
                     throw new Exception("vpp的路径不存在");
@@ -75,7 +82,11 @@ namespace Vision.Tools.ToolImpls
             {
                 try
                 {
-                    var toolPath = Path.Combine(ProjectManager.ProjectDir, _station.StationName, $"{ToolName}.vpp");
+                    var toolPath = Path.Combine(
+                        ProjectManager.ProjectDir,
+                        _station.StationName,
+                        $"{ToolName}.vpp"
+                    );
                     ToolBlock = CogSerializer.LoadObjectFromFile(toolPath) as CogToolBlock;
                     IsLoaded = true;
                 }
@@ -90,7 +101,11 @@ namespace Vision.Tools.ToolImpls
         {
             if (IsLoaded)
             {
-                var toolPath = Path.Combine(ProjectManager.ProjectDir, _station.StationName, $"{ToolName}.vpp");
+                var toolPath = Path.Combine(
+                    ProjectManager.ProjectDir,
+                    _station.StationName,
+                    $"{ToolName}.vpp"
+                );
                 CogSerializer.SaveObjectToFile(ToolBlock, toolPath);
             }
         }
@@ -101,7 +116,11 @@ namespace Vision.Tools.ToolImpls
             {
                 try
                 {
-                    var toolPath = Path.Combine(ProjectManager.ProjectDir, _station.StationName, $"{ToolName}.vpp");
+                    var toolPath = Path.Combine(
+                        ProjectManager.ProjectDir,
+                        _station.StationName,
+                        $"{ToolName}.vpp"
+                    );
                     if (File.Exists(toolPath))
                     {
                         File.Delete(toolPath);
@@ -117,11 +136,12 @@ namespace Vision.Tools.ToolImpls
         #endregion
 
         #region 工具相关
-        
+
         public override void Run()
         {
             RunTime = TimeSpan.Zero;
-            if (!Enable) return;
+            if (!Enable)
+                return;
             GetImageIn();
             if (ImageIn != null)
             {
@@ -140,7 +160,7 @@ namespace Vision.Tools.ToolImpls
                         throw new Exception($"[{ToolName}] NG!");
                     }
 
-                    if(ToolBlock.CreateLastRunRecord().SubRecords.Count > 0)
+                    if (ToolBlock.CreateLastRunRecord().SubRecords.Count > 0)
                     {
                         if (string.IsNullOrEmpty(_station.LastRecordName))
                         {
@@ -148,7 +168,9 @@ namespace Vision.Tools.ToolImpls
                         }
                         else
                         {
-                            _station.ShowImage = ToolBlock.CreateLastRunRecord().SubRecords[_station.LastRecordName];
+                            _station.ShowImage = ToolBlock.CreateLastRunRecord().SubRecords[
+                                _station.LastRecordName
+                            ];
                         }
                     }
                 }
@@ -188,11 +210,13 @@ namespace Vision.Tools.ToolImpls
         /// </summary>
         private bool GetImageIn()
         {
-            if (_station == null || ImageInName == null) return false;
+            if (_station == null || ImageInName == null)
+                return false;
 
             var tool = _station[ImageInName];
 
-            if (tool == null) return false;
+            if (tool == null)
+                return false;
 
             ImageIn = ((IImageOut)tool).ImageOut;
             return true;
@@ -224,25 +248,6 @@ namespace Vision.Tools.ToolImpls
                         break;
                 }
             }
-        }
-        #endregion
-
-        #region ISerializable
-        public override void LoadFromStream(SerializationInfo info,string toolName)
-        {
-            base.LoadFromStream(info,toolName);
-            string imageInName = $"{toolName}.imageInName";
-
-            ImageInName = info.GetString(imageInName);
-        }
-
-        public override void SaveToStream(SerializationInfo info,string toolName)
-        {
-            base.SaveToStream(info,toolName);
-
-            string imageInName = $"{toolName}.imageInName";
-
-            info.AddValue(imageInName,ImageInName);
         }
         #endregion
     }

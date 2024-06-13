@@ -1,7 +1,6 @@
 ﻿using System;
 using System.ComponentModel;
 using System.Windows.Forms;
-
 using Vision.Core;
 using Vision.Projects;
 using Vision.Tools.ToolImpls;

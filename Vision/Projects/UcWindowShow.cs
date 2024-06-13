@@ -76,16 +76,14 @@ namespace Vision.Projects
             {
                 var enableStation = _projectData.StationList.FindAll(x => x.Enable == true);
                 GetShowPanel(enableStation.Count);
-                for(var i = 0; i < enableStation.Count; i++)
+                for (var i = 0; i < enableStation.Count; i++)
                 {
                     var station = enableStation[i];
-                    if(station != null)
+                    if (station != null)
                     {
-                        AddControl(_myLayout,station.DisplayView,i + 1);
+                        AddControl(_myLayout, station.DisplayView, i + 1);
                     }
                 }
-
-
 
                 //GetShowPanel(_projectData.StationList.Count);
                 //for (var i = 0; i < _projectData.StationList.Count; i++)
@@ -101,7 +99,11 @@ namespace Vision.Projects
             {
                 GetShowPanel(1);
 
-                AddControl(_myLayout, _projectData.StationList.Find(x => x.StationName == name).DisplayView, 1);
+                AddControl(
+                    _myLayout,
+                    _projectData.StationList.Find(x => x.StationName == name).DisplayView,
+                    1
+                );
             }
         }
 
@@ -113,7 +115,8 @@ namespace Vision.Projects
         /// <param name="index"></param>
         private void AddControl(TableLayoutPanel panel, UserControl control, int index)
         {
-            int row, col;
+            int row,
+                col;
             switch (index)
             {
                 case 1:

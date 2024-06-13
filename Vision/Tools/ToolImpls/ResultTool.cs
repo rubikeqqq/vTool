@@ -2,11 +2,8 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
-using System.Reflection;
-using System.Runtime.Serialization;
 using System.Threading;
 using System.Windows.Forms;
-
 using Vision.Core;
 using Vision.Projects;
 using Vision.Stations;
@@ -14,12 +11,13 @@ using Vision.Tools.Interfaces;
 
 namespace Vision.Tools.ToolImpls
 {
-
+    [Serializable]
     [GroupInfo("结果工具", 3)]
     [ToolName("结果编辑", 0)]
     [Description("编辑结果和其他控制系统进行交互")]
     public class ResultTool : ToolBase, IRegisterStation
     {
+        [NonSerialized]
         private Station _station;
 
         /// <summary>
@@ -27,6 +25,7 @@ namespace Vision.Tools.ToolImpls
         /// </summary>
         public List<ResultInfo> ResultData { get; set; } = new List<ResultInfo>();
 
+        [field: NonSerialized]
         public UcResult UI { get; set; }
 
         public override UserControl GetToolControl(Station station)
@@ -47,10 +46,11 @@ namespace Vision.Tools.ToolImpls
             _station = station;
         }
 
-        public override void Run() 
+        public override void Run()
         {
             RunTime = TimeSpan.Zero;
-            if (!Enable) return;
+            if (!Enable)
+                return;
             Stopwatch sw = Stopwatch.StartNew();
             GetResult();
             SendData();
@@ -177,45 +177,5 @@ namespace Vision.Tools.ToolImpls
                 LogUI.AddLog("发送PLC结果失败：" + ex.Message);
             }
         }
-
-        #region ISerializable
-        public override void LoadFromStream(SerializationInfo info,string toolName)
-        {
-            base.LoadFromStream(info,toolName);
-
-            int n = info.GetInt32($"{toolName}.Count");
-            //添加结果类
-            ResultData = new List<ResultInfo>();
-
-            ResultInfo result = null;
-
-            for (int i = 0;i < n;i++)
-            {
-                string r = $"{toolName}.Result.{i}";
-                var typeName = info.GetString(r);
-                result = (ResultInfo)Assembly.GetExecutingAssembly().CreateInstance(typeName);
-                result.LoadFromStream(info,r);
-
-                ResultData.Add(result);
-            }
-        }
-
-        public override void SaveToStream(SerializationInfo info,string toolName)
-        {
-            base.SaveToStream(info,toolName);
-
-           //添加结果类
-           info.AddValue($"{toolName}.Count",ResultData.Count);
-
-            int n = 0;
-            foreach(var res in ResultData)
-            {
-                string r = $"{toolName}.Result.{n}";
-                info.AddValue(r,res.GetType().FullName);
-                res.SaveToStream(info,r);
-                n++;
-            }
-        }
-        #endregion
     }
 }

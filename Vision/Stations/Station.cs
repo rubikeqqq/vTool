@@ -4,11 +4,8 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Runtime.Serialization;
 using System.Threading;
-
 using Cognex.VisionPro;
-
 using Vision.Core;
 using Vision.Projects;
 using Vision.Tools.Interfaces;
@@ -16,18 +13,23 @@ using Vision.Tools.ToolImpls;
 
 namespace Vision.Stations
 {
+    [Serializable]
     public class Station
     {
         private string _name;
 
         private bool _enabled = true;
 
+        [NonSerialized]
         private ManualResetEvent _manualResetEvent;
 
+        [NonSerialized]
         private Thread _cycleThread;
 
+        [NonSerialized]
         private bool _threadFlag;
 
+        [field:NonSerialized]
         public object ShowImage { get; set; }
 
         /// <summary>
@@ -38,7 +40,8 @@ namespace Vision.Stations
             get => _name;
             set
             {
-                if(_name == value) return;
+                if (_name == value)
+                    return;
                 _name = value;
                 DisplayView?.SetTitle(value);
             }
@@ -52,9 +55,10 @@ namespace Vision.Stations
             get { return _enabled; }
             set
             {
-                if(_enabled == value) return;
+                if (_enabled == value)
+                    return;
                 _enabled = value;
-                StationEnableEvent?.Invoke(this,value);
+                StationEnableEvent?.Invoke(this, value);
                 ProjectManager.Instance.UpdateTreeNode();
                 LogUI.AddToolLog(value ? $"[{StationName}] 工位启用" : $"[{StationName}] 工位关闭");
             }
@@ -70,21 +74,26 @@ namespace Vision.Stations
         /// </summary>
         public List<ToolBase> ToolList { get; set; } = new List<ToolBase>();
 
+        [field:NonSerialized]
         public event EventHandler<ShowDebugWindowEventArgs> StationDebugShowEvent;
 
+        [field: NonSerialized]
         public event EventHandler<bool> StationEnableEvent;
 
+        [field: NonSerialized]
         public event EventHandler<StationShowChangedEventArgs> StationDisplayChangedEvent;
 
+        [field: NonSerialized]
         public CogDisplayView DisplayView { get; set; }
 
+        [field: NonSerialized]
         public StationDataConfig DataConfig { get; set; }
 
         public ToolBase this[string name]
         {
             get
             {
-                if(this.ToolList != null)
+                if (this.ToolList != null)
                 {
                     return this.ToolList.FirstOrDefault(tool => tool.ToolName == name);
                 }
@@ -95,9 +104,7 @@ namespace Vision.Stations
             }
         }
 
-        public Station()
-        {
-        }
+        public Station() { }
 
         public void Init()
         {
@@ -105,10 +112,7 @@ namespace Vision.Stations
 
             //开启检测线程
             _manualResetEvent = new ManualResetEvent(false);
-            _cycleThread = new Thread(RunCycle)
-            {
-                IsBackground = true
-            };
+            _cycleThread = new Thread(RunCycle) { IsBackground = true };
             _threadFlag = true;
             _cycleThread.Start();
         }
@@ -119,20 +123,20 @@ namespace Vision.Stations
         /// </summary>
         public void Run()
         {
-            if(ToolList.Count > 0)
+            if (ToolList.Count > 0)
             {
                 ShowImage = null;
                 var result = true;
                 string errMsg = string.Empty;
                 TimeSpan time = TimeSpan.Zero;
-                foreach(ToolBase tool in ToolList)
+                foreach (ToolBase tool in ToolList)
                 {
                     try
                     {
                         tool.Run();
                         time += tool.RunTime;
                     }
-                    catch(Exception e)
+                    catch (Exception e)
                     {
                         result = false;
 
@@ -141,12 +145,12 @@ namespace Vision.Stations
                         //一个工具NG后还是要发送NG的结果的
                         ToolList.Find(x => x is ResultTool)?.Run();
                         ToolList.Find(x => x is EndTool)?.Run();
-                       
+
                         break;
                     }
                 }
 
-                if(result)
+                if (result)
                 {
                     LogUI.AddLog($"{StationName} 运行成功");
                 }
@@ -155,7 +159,7 @@ namespace Vision.Stations
                     LogUI.AddLog($"{StationName} 运行失败");
                 }
                 //显示
-                ShowWindow(new ShowWindowEventArgs(result,time,ShowImage));
+                ShowWindow(new ShowWindowEventArgs(result, time, ShowImage));
                 //存图
                 SaveImage(result);
             }
@@ -166,7 +170,7 @@ namespace Vision.Stations
         /// </summary>
         public void DebugRun()
         {
-            if(ToolList.Count > 0)
+            if (ToolList.Count > 0)
             {
                 ShowImage = null;
                 var result = true;
@@ -174,14 +178,14 @@ namespace Vision.Stations
                 LogUI.AddToolLog($"===============  [{StationName}]   =================");
                 Stopwatch stopwatch = new Stopwatch();
                 stopwatch.Start();
-                foreach(ToolBase tool in ToolList)
+                foreach (ToolBase tool in ToolList)
                 {
                     try
                     {
                         tool.RunDebug();
                         LogUI.AddToolLog($"[{tool.ToolName}]=> {tool.RunTime.TotalMilliseconds}ms");
                     }
-                    catch(Exception ex)
+                    catch (Exception ex)
                     {
                         result = false;
                         LogUI.AddToolLog($"{ex.Message}");
@@ -190,7 +194,7 @@ namespace Vision.Stations
                 }
                 stopwatch.Stop();
                 var time = stopwatch.Elapsed;
-                ShowDebugWindow(new ShowDebugWindowEventArgs(result,time,ShowImage,errMsg));
+                ShowDebugWindow(new ShowDebugWindowEventArgs(result, time, ShowImage, errMsg));
             }
         }
 
@@ -200,7 +204,8 @@ namespace Vision.Stations
         /// </summary>
         public void Start()
         {
-            if(!Enable) return;
+            if (!Enable)
+                return;
             _manualResetEvent?.Set();
         }
 
@@ -217,14 +222,14 @@ namespace Vision.Stations
         /// </summary>
         private void RunCycle()
         {
-            while(_threadFlag)
+            while (_threadFlag)
             {
                 _manualResetEvent?.WaitOne();
-                //if(ProjectManager.Instance.Plc != null && ProjectManager.Instance.Plc.IsOpened)
-                //{
-                //    Run();
-                //}
-                Run();
+                if(ProjectManager.Instance.Plc != null && ProjectManager.Instance.Plc.IsOpened)
+                {
+                    Run();
+                }
+                //Run();
                 Thread.Sleep(1000);
             }
         }
@@ -236,7 +241,7 @@ namespace Vision.Stations
         private void ShowWindow(ShowWindowEventArgs args)
         {
             //运行视图模式下显示
-            if(DisplayView != null)
+            if (DisplayView != null)
             {
                 //先清除之前的显示
                 DisplayView.ClearDisplay();
@@ -265,8 +270,7 @@ namespace Vision.Stations
         {
             try
             {
-
-                if(string.IsNullOrEmpty(Config.ImageConfig.SaveImageDir))
+                if (string.IsNullOrEmpty(Config.ImageConfig.SaveImageDir))
                 {
                     string err = "未设置图像的保存路径！";
                     LogNet.Log(err);
@@ -276,19 +280,28 @@ namespace Vision.Stations
                 string fileName = DateTime.Now.ToString("HH_mm_ss_fff");
 
                 //按配置进行OK,NG存储
-                if(Config.ImageConfig.IsSaveOKImage && result)    //OK
+                if (Config.ImageConfig.IsSaveOKImage && result) //OK
                 {
-                    DisplayView?.SaveOriginImage(Config.ImageConfig.SaveImageDir + $"\\{StationName}\\OK\\",fileName);
+                    DisplayView?.SaveOriginImage(
+                        Config.ImageConfig.SaveImageDir + $"\\{StationName}\\OK\\",
+                        fileName
+                    );
                 }
-                if(Config.ImageConfig.IsSaveNGImage && !result)   //NG
+                if (Config.ImageConfig.IsSaveNGImage && !result) //NG
                 {
                     //保存原图
-                    DisplayView?.SaveOriginImage(Config.ImageConfig.SaveImageDir + $"\\{StationName}\\NG\\",fileName);
+                    DisplayView?.SaveOriginImage(
+                        Config.ImageConfig.SaveImageDir + $"\\{StationName}\\NG\\",
+                        fileName
+                    );
                     //保存截屏
-                    DisplayView?.SaveScreenImage(Config.ImageConfig.SaveImageDir + $"\\{StationName}\\NG\\",fileName + "_");
+                    DisplayView?.SaveScreenImage(
+                        Config.ImageConfig.SaveImageDir + $"\\{StationName}\\NG\\",
+                        fileName + "_"
+                    );
                 }
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 LogNet.Log(ex.Message);
             }
@@ -307,18 +320,18 @@ namespace Vision.Stations
             tool.ToolName = name;
             try
             {
-                if(tool is IRegisterStation rTool)
+                if (tool is IRegisterStation rTool)
                 {
                     rTool.RegisterStation(this);
                 }
-                if(tool is IVpp iTool)
+                if (tool is IVpp iTool)
                 {
                     iTool.CreateVpp();
                     iTool.SaveVpp();
                 }
                 LogUI.AddToolLog($"[{tool.ToolName}]新建成功");
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 LogUI.AddToolLog($"工具新建失败  " + ex.Message);
             }
@@ -332,9 +345,9 @@ namespace Vision.Stations
         public void DeleteTool(ToolBase tool)
         {
             //先判断存在
-            if(this[tool.ToolName] != null)
+            if (this[tool.ToolName] != null)
             {
-                if(tool is IVpp iTool)
+                if (tool is IVpp iTool)
                 {
                     iTool.RemoveVpp();
                 }
@@ -349,29 +362,39 @@ namespace Vision.Stations
         /// <param name="tool"></param>
         /// <param name="newName"></param>
         /// <exception cref="Exception"></exception>
-        public void RenameTool(ToolBase tool,string newName)
+        public void RenameTool(ToolBase tool, string newName)
         {
-            if(tool == null) return;
+            if (tool == null)
+                return;
 
             //判断新的名称工具是否已经存在
-            if(this[newName] != null)
+            if (this[newName] != null)
             {
                 LogUI.AddToolLog("新的名称已经存在！");
             }
 
             string oldName = tool.ToolName;
             //判断旧的工具是否存在
-            if(this[tool.ToolName] == null) return;
-            foreach(var t in ToolList)
+            if (this[tool.ToolName] == null)
+                return;
+            foreach (var t in ToolList)
             {
-                if(t.ToolName == tool.ToolName)
+                if (t.ToolName == tool.ToolName)
                 {
                     t.ToolName = newName;
-                    if(t is IVpp)
+                    if (t is IVpp)
                     {
-                        var oldPath = Path.Combine(ProjectManager.ProjectDir,StationName,$"{oldName}.vpp");
-                        var newPath = Path.Combine(ProjectManager.ProjectDir,StationName,$"{newName}.vpp");
-                        Local.MoveFile(oldPath,newPath);
+                        var oldPath = Path.Combine(
+                            ProjectManager.ProjectDir,
+                            StationName,
+                            $"{oldName}.vpp"
+                        );
+                        var newPath = Path.Combine(
+                            ProjectManager.ProjectDir,
+                            StationName,
+                            $"{newName}.vpp"
+                        );
+                        Local.MoveFile(oldPath, newPath);
                     }
                 }
             }
@@ -383,13 +406,19 @@ namespace Vision.Stations
         /// </summary>
         public void RemoveAllTool()
         {
-            if(ToolList != null)
+            if (ToolList != null)
             {
-                foreach(var t in ToolList)
+                foreach (var t in ToolList)
                 {
-                    if(t is IVpp)
+                    if (t is IVpp)
                     {
-                        File.Delete(Path.Combine(ProjectManager.ProjectDir,StationName,$"{t.ToolName}.vpp"));
+                        File.Delete(
+                            Path.Combine(
+                                ProjectManager.ProjectDir,
+                                StationName,
+                                $"{t.ToolName}.vpp"
+                            )
+                        );
                     }
                 }
                 ToolList.Clear();
@@ -406,14 +435,14 @@ namespace Vision.Stations
             List<string> lists = new List<string>();
 
             //遍历所有CenterDetectTool
-            foreach(var tool in ToolList)
+            foreach (var tool in ToolList)
             {
-                if(tool is CenterDetectTool dTool)
+                if (tool is CenterDetectTool dTool)
                 {
                     var lastRecord = dTool.ToolBlock.CreateLastRunRecord();
-                    if(lastRecord != null)
+                    if (lastRecord != null)
                     {
-                        foreach(ICogRecord r in lastRecord.SubRecords)
+                        foreach (ICogRecord r in lastRecord.SubRecords)
                         {
                             lists.Add(r.RecordKey);
                         }
@@ -421,14 +450,14 @@ namespace Vision.Stations
                 }
             }
             //遍历所有CenterDetectTool
-            foreach(var tool in ToolList)
+            foreach (var tool in ToolList)
             {
-                if(tool is DetectTool dTool)
+                if (tool is DetectTool dTool)
                 {
                     var lastRecord = dTool.ToolBlock.CreateLastRunRecord();
-                    if(lastRecord != null)
+                    if (lastRecord != null)
                     {
-                        foreach(ICogRecord r in lastRecord.SubRecords)
+                        foreach (ICogRecord r in lastRecord.SubRecords)
                         {
                             lists.Add(r.RecordKey);
                         }
@@ -446,12 +475,12 @@ namespace Vision.Stations
         private List<string> GetCenterDetectToolName()
         {
             List<string> inputs = new List<string>();
-            foreach(var tool in ToolList)
+            foreach (var tool in ToolList)
             {
-                if(tool is CenterDetectTool)
+                if (tool is CenterDetectTool)
                 {
                     //只添加之前的工具
-                    if(tool.ToolName == StationName)
+                    if (tool.ToolName == StationName)
                         break;
                     inputs.Add(tool.ToolName);
                 }
@@ -475,12 +504,12 @@ namespace Vision.Stations
         public List<string> GetKkRobotCalibToolNames()
         {
             List<string> inputs = new List<string>();
-            foreach(var tool in ToolList)
+            foreach (var tool in ToolList)
             {
-                if(tool is KkRobotCalibTool)
+                if (tool is KkRobotCalibTool)
                 {
                     //只添加之前的工具
-                    if(tool.ToolName == StationName)
+                    if (tool.ToolName == StationName)
                         break;
                     inputs.Add(tool.ToolName);
                 }
@@ -504,9 +533,9 @@ namespace Vision.Stations
         /// <returns></returns>
         public NPointCalibTool GetNPointTool()
         {
-            foreach(var tool in ToolList)
+            foreach (var tool in ToolList)
             {
-                if(tool is NPointCalibTool nTool)
+                if (tool is NPointCalibTool nTool)
                 {
                     return nTool;
                 }
@@ -520,7 +549,7 @@ namespace Vision.Stations
         /// <returns></returns>
         public CogDisplayView RegisterViewDisplay()
         {
-            if(DisplayView == null)
+            if (DisplayView == null)
             {
                 DisplayView = new CogDisplayView();
                 DisplayView.SetTitle(StationName);
@@ -537,17 +566,17 @@ namespace Vision.Stations
         public string[] GetImageInToolNames(ToolBase tool)
         {
             List<string> list = new List<string>();
-            if(ToolList.Count > 0)
+            if (ToolList.Count > 0)
             {
-                foreach(var toolBase in ToolList)
+                foreach (var toolBase in ToolList)
                 {
-                    if(toolBase == tool)
+                    if (toolBase == tool)
                     {
                         break;
                     }
-                    if(toolBase is IImageOut)
+                    if (toolBase is IImageOut)
                     {
-                        if(toolBase.Enable)
+                        if (toolBase.Enable)
                             list.Add(toolBase.ToolName);
                     }
                 }
@@ -557,17 +586,17 @@ namespace Vision.Stations
 
         public void Close()
         {
-            foreach(var t in ToolList)
+            foreach (var t in ToolList)
             {
                 t.Close();
             }
-            if(_threadFlag)
+            if (_threadFlag)
             {
                 _threadFlag = false;
                 _cycleThread.Abort();
                 _cycleThread.Join();
             }
-            if(DisplayView == null)
+            if (DisplayView == null)
             {
                 DisplayView.ShowDisplay -= DisplayView_ShowDisplayOne;
             }
@@ -584,7 +613,7 @@ namespace Vision.Stations
 
             var defaultName = tool.GetType().GetCustomAttribute<ToolNameAttribute>()?.Name;
             string name = defaultName + m.ToString();
-            while(ToolExsit(name))
+            while (ToolExsit(name))
             {
                 m++;
                 name = defaultName + m.ToString();
@@ -608,7 +637,7 @@ namespace Vision.Stations
         /// <param name="args"></param>
         private void OnStationRan(ShowDebugWindowEventArgs args)
         {
-            StationDebugShowEvent?.Invoke(this,args);
+            StationDebugShowEvent?.Invoke(this, args);
         }
 
         /// <summary>
@@ -616,10 +645,10 @@ namespace Vision.Stations
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void DisplayView_ShowDisplayOne(object sender,StationShowChangedEventArgs e)
+        private void DisplayView_ShowDisplayOne(object sender, StationShowChangedEventArgs e)
         {
             e.StationName = StationName;
-            StationDisplayChangedEvent?.Invoke(sender,e);
+            StationDisplayChangedEvent?.Invoke(sender, e);
         }
         #endregion
 
@@ -628,10 +657,10 @@ namespace Vision.Stations
         /// </summary>
         public void LoadData()
         {
-            string path = Path.Combine(ProjectManager.ProjectDir,StationName,"Data.ini");
-            if(File.Exists(path))
+            string path = Path.Combine(ProjectManager.ProjectDir, StationName, "Data.ini");
+            if (File.Exists(path))
             {
-                if(!DataConfig.LoadConfig(path))
+                if (!DataConfig.LoadConfig(path))
                 {
                     ($"[{StationName}] 参数加载失败！").MsgBox();
                 }
@@ -643,8 +672,8 @@ namespace Vision.Stations
         /// </summary>
         public void SaveData()
         {
-            string path = Path.Combine(ProjectManager.ProjectDir,StationName,"Data.ini");
-            if(!File.Exists(path))
+            string path = Path.Combine(ProjectManager.ProjectDir, StationName, "Data.ini");
+            if (!File.Exists(path))
             {
                 File.Create(path).Close();
             }
@@ -660,70 +689,5 @@ namespace Vision.Stations
         {
             return SerializerHelper.Clone(this);
         }
-
-        /// <summary>
-        /// 将需要保存的数据添加到序列化存储类中
-        /// </summary>
-        /// <param name="info"></param>
-        /// <param name="stationName"></param>
-        public void SaveToStream(SerializationInfo info,string stationName)
-        {
-            string name = "StationName";
-            string enable = "Enable";
-            string lastRecordName = "LastRecordName";
-            string count = "Count";
-
-            info.AddValue($"{stationName}.{name}",StationName);
-            info.AddValue($"{stationName}.{enable}",Enable);
-            info.AddValue($"{stationName}.{lastRecordName}",LastRecordName);
-
-
-            //工具
-            info.AddValue($"{stationName}.{count}",ToolList.Count);
-            int n = 0;
-
-            foreach(var tool in ToolList)
-            {
-                string t = $"{stationName}.Tool.{n}";
-                info.AddValue(t,tool.GetType().FullName);
-                tool.SaveToStream(info,t);
-                n++;
-            }
-
-        }
-
-        /// <summary>
-        /// 从序列化存储类中加载数据
-        /// </summary>
-        /// <param name="info"></param>
-        /// <param name="stationName"></param>
-        public void LoadFromStream(SerializationInfo info,string stationName)
-        {
-            string name = "StationName";
-            string enable = "Enable";
-            string lastRecordName = "LastRecordName";
-            string count = "Count";
-
-            StationName = info.GetString($"{stationName}.{name}");
-            Enable = info.GetBoolean($"{stationName}.{enable}");
-            LastRecordName = info.GetString($"{stationName}.{lastRecordName}");
-
-            //工具
-            int n = info.GetInt32($"{stationName}.{count}");
-
-            ToolList = new List<ToolBase>();
-            for(int i = 0;i < n;i++)
-            {
-                string t = $"{stationName}.Tool.{i}";
-                var typeName = info.GetString(t);
-
-                ToolBase tool = (ToolBase)Assembly.GetExecutingAssembly().CreateInstance(typeName);
-                tool.LoadFromStream(info,t);
-
-                ToolList.Add(tool);
-            }
-
-        }
-        
     }
 }

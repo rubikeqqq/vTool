@@ -1,6 +1,5 @@
 ﻿using System.ComponentModel;
 using System.Windows.Forms;
-
 using Vision.Projects;
 using Vision.Tools.ToolImpls;
 
@@ -27,7 +26,7 @@ namespace Vision.Tools
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void _imageTool_ImageShowEvent(object sender,Cognex.VisionPro.ICogImage e)
+        private void _imageTool_ImageShowEvent(object sender, Cognex.VisionPro.ICogImage e)
         {
             cogDisplay1.StaticGraphics.Clear();
             cogDisplay1.InteractiveGraphics.Clear();
@@ -46,7 +45,7 @@ namespace Vision.Tools
         private void InitControl()
         {
             this.SuspendLayout();
-            if(_imageTool == null)
+            if (_imageTool == null)
             {
                 return;
             }
@@ -57,7 +56,7 @@ namespace Vision.Tools
             this.ResumeLayout(false);
         }
 
-        private void UcLocalImageTool_Load(object sender,System.EventArgs e)
+        private void UcLocalImageTool_Load(object sender, System.EventArgs e)
         {
             _init = false;
             InitControl();
@@ -69,10 +68,11 @@ namespace Vision.Tools
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void radDir_CheckedChanged(object sender,System.EventArgs e)
+        private void radDir_CheckedChanged(object sender, System.EventArgs e)
         {
-            if(!_init) return;
-            if(radDir.Checked)
+            if (!_init)
+                return;
+            if (radDir.Checked)
             {
                 _imageTool.EmulationType = EmulationType.Dir;
                 _imageTool.Path = null;
@@ -86,10 +86,11 @@ namespace Vision.Tools
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void radFile_CheckedChanged(object sender,System.EventArgs e)
+        private void radFile_CheckedChanged(object sender, System.EventArgs e)
         {
-            if(!_init) return;
-            if(radFile.Checked)
+            if (!_init)
+                return;
+            if (radFile.Checked)
             {
                 _imageTool.EmulationType = EmulationType.File;
                 _imageTool.Path = null;
@@ -103,29 +104,30 @@ namespace Vision.Tools
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void btnSelect_Click(object sender,System.EventArgs e)
+        private void btnSelect_Click(object sender, System.EventArgs e)
         {
-            if(!_init) return;
-            if(_select == 1) //文件夹
+            if (!_init)
+                return;
+            if (_select == 1) //文件夹
             {
                 FolderBrowserDialog dialog = new FolderBrowserDialog();
                 dialog.SelectedPath = _imageTool.Path;
                 dialog.Description = "请选择加载的文件夹";
                 var f = dialog.ShowDialog();
 
-                if(f == DialogResult.OK)
+                if (f == DialogResult.OK)
                 {
                     _imageTool.Path = dialog.SelectedPath;
                 }
             }
-            else if(_select == 2)  //文件
+            else if (_select == 2) //文件
             {
                 OpenFileDialog dialog = new OpenFileDialog();
                 dialog.Filter = "bmp文件;|*.bmp;";
                 dialog.Title = "请选择加载的图片";
                 dialog.Multiselect = false;
                 var o = dialog.ShowDialog();
-                if(o == DialogResult.OK)
+                if (o == DialogResult.OK)
                 {
                     _imageTool.Path = dialog.FileName;
                 }
@@ -133,6 +135,5 @@ namespace Vision.Tools
             tbPath.Text = _imageTool.Path;
             ProjectManager.Instance.SaveProject();
         }
-
     }
 }

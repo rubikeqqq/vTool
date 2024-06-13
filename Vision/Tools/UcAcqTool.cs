@@ -1,6 +1,5 @@
 ﻿using System.ComponentModel;
 using System.Windows.Forms;
-
 using Vision.Tools.ToolImpls;
 
 namespace Vision.Tools
@@ -16,7 +15,7 @@ namespace Vision.Tools
 
         private readonly ImageAcqTool _acqTool;
 
-        private void UcAcqTool_Load(object sender,System.EventArgs e)
+        private void UcAcqTool_Load(object sender, System.EventArgs e)
         {
             if (_acqTool != null)
             {

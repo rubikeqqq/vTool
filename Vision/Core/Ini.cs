@@ -8,23 +8,59 @@ namespace Vision.Core
 {
     public static class IniHelper
     {
-
         #region 读写INI文件相关
-        [DllImport("kernel32.dll", EntryPoint = "WritePrivateProfileString", CharSet = CharSet.Ansi)]
-        private static extern long WritePrivateProfileString(string section, string key, string val, string filePath);
+        [DllImport(
+            "kernel32.dll",
+            EntryPoint = "WritePrivateProfileString",
+            CharSet = CharSet.Ansi
+        )]
+        private static extern long WritePrivateProfileString(
+            string section,
+            string key,
+            string val,
+            string filePath
+        );
 
         [DllImport("kernel32.dll", EntryPoint = "GetPrivateProfileString", CharSet = CharSet.Ansi)]
-        private static extern int GetPrivateProfileString(string section, string key, string def, StringBuilder retVal, int size, string filePath);
+        private static extern int GetPrivateProfileString(
+            string section,
+            string key,
+            string def,
+            StringBuilder retVal,
+            int size,
+            string filePath
+        );
 
         [DllImport("kernel32")]
-        private static extern int GetPrivateProfileInt(string lpApplicationName, string lpKeyName, int nDefault, string lpFileName);
+        private static extern int GetPrivateProfileInt(
+            string lpApplicationName,
+            string lpKeyName,
+            int nDefault,
+            string lpFileName
+        );
 
+        [DllImport(
+            "kernel32.dll",
+            EntryPoint = "GetPrivateProfileSectionNames",
+            CharSet = CharSet.Ansi
+        )]
+        private static extern int GetPrivateProfileSectionNames(
+            IntPtr lpszReturnBuffer,
+            int nSize,
+            string filePath
+        );
 
-        [DllImport("kernel32.dll", EntryPoint = "GetPrivateProfileSectionNames", CharSet = CharSet.Ansi)]
-        private static extern int GetPrivateProfileSectionNames(IntPtr lpszReturnBuffer, int nSize, string filePath);
-
-        [DllImport("KERNEL32.DLL ", EntryPoint = "GetPrivateProfileSection", CharSet = CharSet.Ansi)]
-        private static extern int GetPrivateProfileSection(string lpAppName, byte[] lpReturnedString, int nSize, string filePath);
+        [DllImport(
+            "KERNEL32.DLL ",
+            EntryPoint = "GetPrivateProfileSection",
+            CharSet = CharSet.Ansi
+        )]
+        private static extern int GetPrivateProfileSection(
+            string lpAppName,
+            byte[] lpReturnedString,
+            int nSize,
+            string filePath
+        );
         #endregion
 
         #region 读写操作（字符串）
@@ -38,6 +74,7 @@ namespace Vision.Core
         {
             WritePrivateProfileString(Section, Key, Value, path);
         }
+
         /// <summary>
         /// 读取INI数据
         /// </summary>
@@ -76,6 +113,7 @@ namespace Vision.Core
             sections = local.Substring(0, local.Length - 1).Split('\0');
             return 0;
         }
+
         /// <summary>
         /// 返回指定配置文件下的节名称列表
         /// </summary>
@@ -89,7 +127,9 @@ namespace Vision.Core
             int bytesReturned = GetPrivateProfileSectionNames(pReturnedString, MAX_BUFFER, path);
             if (bytesReturned != 0)
             {
-                string local = Marshal.PtrToStringAnsi(pReturnedString, (int)bytesReturned).ToString();
+                string local = Marshal
+                    .PtrToStringAnsi(pReturnedString, (int)bytesReturned)
+                    .ToString();
                 Marshal.FreeCoTaskMem(pReturnedString);
                 sectionList.AddRange(local.Substring(0, local.Length - 1).Split('\0'));
             }
@@ -104,12 +144,17 @@ namespace Vision.Core
         /// <param name="values">Value数组</param>
         /// <param name="path">INI文件路径</param>
         /// <returns></returns>
-        public static int GetAllKeyValues(string section, out string[] keys, out string[] values, string path)
+        public static int GetAllKeyValues(
+            string section,
+            out string[] keys,
+            out string[] values,
+            string path
+        )
         {
-            byte[] b = new byte[65535];//配置节下的所有信息
+            byte[] b = new byte[65535]; //配置节下的所有信息
             GetPrivateProfileSection(section, b, b.Length, path);
-            string s = System.Text.Encoding.Default.GetString(b);//配置信息
-            string[] tmp = s.Split((char)0);//Key\Value信息
+            string s = System.Text.Encoding.Default.GetString(b); //配置信息
+            string[] tmp = s.Split((char)0); //Key\Value信息
             List<string> result = new List<string>();
             foreach (string r in tmp)
             {
@@ -120,7 +165,7 @@ namespace Vision.Core
             values = new string[result.Count];
             for (int i = 0; i < result.Count; i++)
             {
-                string[] item = result[i].Split(new char[] { '=' });//Key=Value格式的配置信息
+                string[] item = result[i].Split(new char[] { '=' }); //Key=Value格式的配置信息
                 //Value字符串中含有=的处理，
                 //一、Value加""，先对""处理
                 //二、Key后续的都为Value
@@ -129,12 +174,12 @@ namespace Vision.Core
                     keys[i] = item[0].Trim();
                     values[i] = result[i].Substring(keys[i].Length + 1);
                 }
-                if (item.Length == 2)//Key=Value
+                if (item.Length == 2) //Key=Value
                 {
                     keys[i] = item[0].Trim();
                     values[i] = item[1].Trim();
                 }
-                else if (item.Length == 1)//Key=
+                else if (item.Length == 1) //Key=
                 {
                     keys[i] = item[0].Trim();
                     values[i] = "";
@@ -147,6 +192,7 @@ namespace Vision.Core
             }
             return 0;
         }
+
         /// <summary>
         /// 得到某个节点下面所有的key
         /// </summary>
@@ -186,6 +232,7 @@ namespace Vision.Core
             }
             return 0;
         }
+
         /// <summary>
         /// 获取指定节下的Key列表
         /// </summary>
@@ -219,6 +266,7 @@ namespace Vision.Core
             }
             return keyList;
         }
+
         /// <summary>
         /// 获取值
         /// </summary>
@@ -275,6 +323,7 @@ namespace Vision.Core
             }
             return string.Empty;
         }
+
         /// <summary>
         /// 所有键
         /// </summary>
@@ -300,14 +349,19 @@ namespace Vision.Core
 
         #region string
         /// <summary>
-        /// 
+        ///
         /// </summary>
         /// <param name="sectionName"></param>
         /// <param name="keyName"></param>
         /// <param name="defaultValue" />
         /// <param name="path"></param>
         /// <returns></returns>
-        public static string ReadString(string sectionName, string keyName, string defaultValue, string path)
+        public static string ReadString(
+            string sectionName,
+            string keyName,
+            string defaultValue,
+            string path
+        )
         {
             try
             {
@@ -316,21 +370,25 @@ namespace Vision.Core
                 GetPrivateProfileString(sectionName, keyName, defaultValue, temp, 255, path);
                 return temp.ToString();
             }
-            catch 
+            catch
             {
                 return default;
             }
-
         }
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         /// <param name="sectionName"></param>
         /// <param name="keyName"></param>
         /// <param name="value"></param>
         /// <param name="path"></param>
-        public static void WriteString(string sectionName, string keyName, string value, string path)
+        public static void WriteString(
+            string sectionName,
+            string keyName,
+            string value,
+            string path
+        )
         {
             WritePrivateProfileString(sectionName, keyName, value, path);
         }
@@ -339,60 +397,82 @@ namespace Vision.Core
 
         #region PointD
 
-        public static PointD ReadPointD(string sectionName, string keyName, PointD defaultValue, string path)
+        public static PointD ReadPointD(
+            string sectionName,
+            string keyName,
+            PointD defaultValue,
+            string path
+        )
         {
             var x = Convert.ToDouble(ReadString(sectionName, $"{keyName}.X", "0", path));
             var y = Convert.ToDouble(ReadString(sectionName, $"{keyName}.Y", "0", path));
 
-            return new PointD(x,y);
+            return new PointD(x, y);
         }
 
-        public static void WritePointD(string sectionName, string keyName, PointD value, string path)
+        public static void WritePointD(
+            string sectionName,
+            string keyName,
+            PointD value,
+            string path
+        )
         {
             WriteString(sectionName, $"{keyName}.X", value.X.ToString(), path);
             WriteString(sectionName, $"{keyName}.Y", value.Y.ToString(), path);
         }
 
-
         #endregion
 
         #region PointD
 
-        public static PointA ReadPointA(string sectionName, string keyName, PointA defaultValue, string path)
+        public static PointA ReadPointA(
+            string sectionName,
+            string keyName,
+            PointA defaultValue,
+            string path
+        )
         {
-            var x = Convert.ToDouble( ReadString(sectionName, $"{keyName}.X", "0", path));
+            var x = Convert.ToDouble(ReadString(sectionName, $"{keyName}.X", "0", path));
             var y = Convert.ToDouble(ReadString(sectionName, $"{keyName}.Y", "0", path));
             var angle = Convert.ToDouble(ReadString(sectionName, $"{keyName}.Angle", "0", path));
-            return new PointA(x,y,angle);
+            return new PointA(x, y, angle);
         }
 
-        public static void WritePointA(string sectionName, string keyName, PointA value, string path)
+        public static void WritePointA(
+            string sectionName,
+            string keyName,
+            PointA value,
+            string path
+        )
         {
             WriteString(sectionName, $"{keyName}.X", value.X.ToString(), path);
             WriteString(sectionName, $"{keyName}.Y", value.Y.ToString(), path);
             WriteString(sectionName, $"{keyName}.Angle", value.Angle.ToString(), path);
         }
 
-
         #endregion
 
         #region Int
         /// <summary>
-        /// 
+        ///
         /// </summary>
         /// <param name="sectionName"></param>
         /// <param name="keyName"></param>
         /// <param name="defaultValue"></param>
         /// <param name="path"></param>
         /// <returns></returns>
-        public static int ReadInteger(string sectionName, string keyName, int defaultValue, string path)
+        public static int ReadInteger(
+            string sectionName,
+            string keyName,
+            int defaultValue,
+            string path
+        )
         {
-
             return GetPrivateProfileInt(sectionName, keyName, defaultValue, path);
-
         }
+
         /// <summary>
-        /// 
+        ///
         /// </summary>
         /// <param name="sectionName"></param>
         /// <param name="keyName"></param>
@@ -400,9 +480,7 @@ namespace Vision.Core
         /// <param name="path"></param>
         public static void WriteInteger(string sectionName, string keyName, int value, string path)
         {
-
             WritePrivateProfileString(sectionName, keyName, value.ToString(), path);
-
         }
         #endregion
 
@@ -415,16 +493,20 @@ namespace Vision.Core
         /// <param name="defaultValue"></param>
         /// <param name="path"></param>
         /// <returns></returns>
-        public static bool ReadBoolean(string sectionName, string keyName, bool defaultValue, string path)
+        public static bool ReadBoolean(
+            string sectionName,
+            string keyName,
+            bool defaultValue,
+            string path
+        )
         {
-
             int temp = defaultValue ? 1 : 0;
 
             int result = GetPrivateProfileInt(sectionName, keyName, temp, path);
 
             return (result == 0 ? false : true);
-
         }
+
         /// <summary>
         /// 写入布尔值
         /// </summary>
@@ -487,6 +569,7 @@ namespace Vision.Core
             }
             return false;
         }
+
         /// <summary>
         /// 指定节下的键是否存在
         /// </summary>
@@ -514,14 +597,19 @@ namespace Vision.Core
 
         #region 同一Section下添加多个Key\Value
         /// <summary>
-        /// 
+        ///
         /// </summary>
         /// <param name="section"></param>
         /// <param name="keyList"></param>
         /// <param name="valueList"></param>
         /// <param name="path"></param>
         /// <returns></returns>
-        public static bool AddSectionWithKeyValues(string section, List<string> keyList, List<string> valueList, string path)
+        public static bool AddSectionWithKeyValues(
+            string section,
+            List<string> keyList,
+            List<string> valueList,
+            string path
+        )
         {
             bool bRst = true;
             //判断Section是否已经存在，如果存在，返回false
@@ -540,6 +628,5 @@ namespace Vision.Core
             return bRst;
         }
         #endregion
-
     }
 }

@@ -8,8 +8,8 @@ namespace Vision.Projects
     /// </summary>
     public class StationToolData
     {
-        public StationToolData(Station station,ToolBase tool)
-        { 
+        public StationToolData(Station station, ToolBase tool)
+        {
             Station = station;
             Tool = tool;
         }

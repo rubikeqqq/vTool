@@ -4,12 +4,10 @@ using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
 using System.Windows.Forms;
-
 using Cognex.VisionPro;
 using Cognex.VisionPro.Display;
 using Cognex.VisionPro.ImageFile;
 using Cognex.VisionPro.ToolBlock;
-
 using Vision.Core;
 
 namespace Vision.Stations
@@ -30,14 +28,24 @@ namespace Vision.Stations
 
         private delegate void ClearDisplayDelegate();
 
-        private delegate void GraphicCreateLabelDelegate(string label, double x, double y, int size,
-            CogColorConstants color, CogGraphicLabelAlignmentConstants alignment, string selectedNameSpace);
+        private delegate void GraphicCreateLabelDelegate(
+            string label,
+            double x,
+            double y,
+            int size,
+            CogColorConstants color,
+            CogGraphicLabelAlignmentConstants alignment,
+            string selectedNameSpace
+        );
 
         private delegate void GraphicCreateLabelSimpleDelegate(bool ok);
 
         private delegate void SaveImageDelegate(string filePath, string name, ImageType imageType);
 
-        private delegate void SetResultGraphicOnRecordDisplayDelegate(CogToolBlock toolBlock, string recordName);
+        private delegate void SetResultGraphicOnRecordDisplayDelegate(
+            CogToolBlock toolBlock,
+            string recordName
+        );
 
         private delegate void SetTimeDelegate(TimeSpan time);
 
@@ -83,12 +91,28 @@ namespace Vision.Stations
         /// <param name="color"></param>
         /// <param name="alignment"></param>
         /// <param name="selectedNameSpace"></param>
-        public void GraphicCreateLabel(string label, double x, double y, int size,
-            CogColorConstants color, CogGraphicLabelAlignmentConstants alignment, string selectedNameSpace)
+        public void GraphicCreateLabel(
+            string label,
+            double x,
+            double y,
+            int size,
+            CogColorConstants color,
+            CogGraphicLabelAlignmentConstants alignment,
+            string selectedNameSpace
+        )
         {
             if (InvokeRequired)
             {
-                cogRecordDisplay1.Invoke(new GraphicCreateLabelDelegate(GraphicCreateLabel), label, x, y, size, color, alignment, selectedNameSpace);
+                cogRecordDisplay1.Invoke(
+                    new GraphicCreateLabelDelegate(GraphicCreateLabel),
+                    label,
+                    x,
+                    y,
+                    size,
+                    color,
+                    alignment,
+                    selectedNameSpace
+                );
                 return;
             }
             var myLabel = new CogGraphicLabel();
@@ -112,7 +136,10 @@ namespace Vision.Stations
         {
             if (InvokeRequired)
             {
-                cogRecordDisplay1.Invoke(new GraphicCreateLabelSimpleDelegate(GraphicCreateLabel), ok);
+                cogRecordDisplay1.Invoke(
+                    new GraphicCreateLabelSimpleDelegate(GraphicCreateLabel),
+                    ok
+                );
                 return;
             }
 
@@ -143,7 +170,11 @@ namespace Vision.Stations
         /// <param name="dirPath"></param>
         /// <param name="name"></param>
         /// <param name="imageType"></param>
-        public void SaveScreenImage(string dirPath, string name, ImageType imageType = ImageType.JPG)
+        public void SaveScreenImage(
+            string dirPath,
+            string name,
+            ImageType imageType = ImageType.JPG
+        )
         {
             if (InvokeRequired)
             {
@@ -151,7 +182,8 @@ namespace Vision.Stations
                 return;
             }
 
-            if (!Directory.Exists(dirPath)) Directory.CreateDirectory(dirPath);
+            if (!Directory.Exists(dirPath))
+                Directory.CreateDirectory(dirPath);
 
             //按天进行保存
             dirPath = Path.Combine(dirPath, DateTime.Now.ToString("yy_MM_dd"));
@@ -165,18 +197,21 @@ namespace Vision.Stations
                 switch (imageType)
                 {
                     case ImageType.JPG:
-                        cogRecordDisplay1.CreateContentBitmap(CogDisplayContentBitmapConstants.Image)
-                   .Save(file, ImageFormat.Jpeg);
+                        cogRecordDisplay1
+                            .CreateContentBitmap(CogDisplayContentBitmapConstants.Image)
+                            .Save(file, ImageFormat.Jpeg);
 
                         break;
 
                     case ImageType.BMP:
 
-                        cogRecordDisplay1.CreateContentBitmap(CogDisplayContentBitmapConstants.Image)
-                   .Save(file, ImageFormat.Bmp);
+                        cogRecordDisplay1
+                            .CreateContentBitmap(CogDisplayContentBitmapConstants.Image)
+                            .Save(file, ImageFormat.Bmp);
                         break;
 
-                    default: break;
+                    default:
+                        break;
                 }
             }
             catch (Exception ex)
@@ -191,7 +226,11 @@ namespace Vision.Stations
         /// <param name="dirPath"></param>
         /// <param name="name"></param>
         /// <param name="imageType"></param>
-        public void SaveOriginImage(string dirPath, string name, ImageType imageType = ImageType.BMP)
+        public void SaveOriginImage(
+            string dirPath,
+            string name,
+            ImageType imageType = ImageType.BMP
+        )
         {
             if (InvokeRequired)
             {
@@ -207,7 +246,8 @@ namespace Vision.Stations
                 ICogImage orignalImage = cogRecordDisplay1.Image;
 
                 //图像不存在 直接退出
-                if (orignalImage == null) return;
+                if (orignalImage == null)
+                    return;
 
                 if (!Directory.Exists(dirPath))
                 {
@@ -240,21 +280,23 @@ namespace Vision.Stations
         {
             if (InvokeRequired)
             {
-                cogRecordDisplay1
-                    .Invoke(new Action<object>(SetResultGraphicOnRecordDisplay),
-                    image);
+                cogRecordDisplay1.Invoke(
+                    new Action<object>(SetResultGraphicOnRecordDisplay),
+                    image
+                );
                 return;
             }
             try
             {
-                if (cogRecordDisplay1 == null) return;
+                if (cogRecordDisplay1 == null)
+                    return;
                 //判断是ICogImage 还是 IRecordImage
                 if (image is ICogImage image1)
                 {
                     cogRecordDisplay1.Image = image1;
                     cogRecordDisplay1.AutoFit = true;
                 }
-                else if (image is ICogRecord image2) 
+                else if (image is ICogRecord image2)
                 {
                     //如果没有设置输出的图像 则显示原图
                     cogRecordDisplay1.Record = image2;

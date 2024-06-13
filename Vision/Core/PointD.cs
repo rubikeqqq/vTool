@@ -17,10 +17,7 @@ namespace Vision.Core
             Y = y;
         }
 
-        public PointD()
-        {
-
-        }
+        public PointD() { }
 
         public override string ToString()
         {
@@ -38,17 +35,14 @@ namespace Vision.Core
         public double Y { get; set; }
         public double Angle { get; set; }
 
-        public PointA(double x, double y,double a)
+        public PointA(double x, double y, double a)
         {
             X = x;
             Y = y;
             Angle = a;
         }
 
-        public PointA()
-        {
-
-        }
+        public PointA() { }
 
         public override string ToString()
         {

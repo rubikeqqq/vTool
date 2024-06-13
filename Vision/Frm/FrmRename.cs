@@ -16,16 +16,16 @@ namespace Vision.Frm
 
         public string OldName { get; set; }
 
-        private void btnOk_Click(object sender,EventArgs e)
+        private void btnOk_Click(object sender, EventArgs e)
         {
-            if(string.IsNullOrEmpty(tbNew.Text))
+            if (string.IsNullOrEmpty(tbNew.Text))
             {
                 MessageBox.Show("名称不正确，请重新输入");
                 tbNew.Clear();
                 return;
             }
 
-            if(NewName == OldName)
+            if (NewName == OldName)
             {
                 MessageBox.Show("名称不能和旧名称相同，请重新输入");
                 tbNew.Clear();
@@ -37,13 +37,13 @@ namespace Vision.Frm
             this.Close();
         }
 
-        private void FormNewName_Load(object sender,EventArgs e)
+        private void FormNewName_Load(object sender, EventArgs e)
         {
             tbOld.Text = OldName;
             this.Focus();
         }
 
-        private void btnCancel_Click(object sender,EventArgs e)
+        private void btnCancel_Click(object sender, EventArgs e)
         {
             this.DialogResult = DialogResult.Cancel;
             this.Close();

@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Windows.Forms;
-
 using Vision.Stations;
 
 namespace Vision.Core
@@ -37,7 +36,6 @@ namespace Vision.Core
         /// 是否有输入图像
         /// </summary>
         public object Image { get; private set; }
-
 
         public ShowWindowEventArgs(bool res, TimeSpan time, object image)
         {

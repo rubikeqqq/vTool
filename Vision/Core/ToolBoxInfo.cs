@@ -29,5 +29,5 @@
         /// 工具ID
         /// </summary>
         public int ToolIndex { get; set; }
-    }  
+    }
 }

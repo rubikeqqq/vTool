@@ -2,14 +2,11 @@
 using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
-using System.Runtime.Serialization;
 using System.Windows.Forms;
-
 using Cognex.VisionPro;
 using Cognex.VisionPro.CalibFix;
 using Cognex.VisionPro.ID;
 using Cognex.VisionPro.ToolBlock;
-
 using Vision.Core;
 using Vision.Projects;
 using Vision.Stations;
@@ -17,6 +14,7 @@ using Vision.Tools.Interfaces;
 
 namespace Vision.Tools.ToolImpls
 {
+    [Serializable]
     [GroupInfo("标定工具", 1)]
     [ToolName("9点标定", 0)]
     [Description("标准9点标定工具")]
@@ -24,19 +22,24 @@ namespace Vision.Tools.ToolImpls
     {
         //vp的9点标定会直接在图像中转换为实际坐标
         //所以输出的坐标为实际机械手标定时的对应的机械坐标
-
+        [NonSerialized]
         private Station _station;
 
         public string ImageInName { get; set; }
 
+        [field: NonSerialized]
         public ICogImage ImageIn { get; set; }
 
+        [field: NonSerialized]
         public CogToolBlock ToolBlock { get; set; }
 
+        [field: NonSerialized]
         public bool IsLoaded { get; set; }
 
+        [field: NonSerialized]
         public ICogImage ImageOut { get; private set; }
 
+        [field: NonSerialized]
         public UcNineCalibTool UI { get; set; }
 
         public override UserControl GetToolControl(Station station)
@@ -59,12 +62,16 @@ namespace Vision.Tools.ToolImpls
         }
 
         #region 【vpp相关】
-        
+
         public void CreateVpp()
         {
             if (!IsLoaded)
             {
-                var toolPath = Path.Combine(ProjectManager.ProjectDir, _station.StationName, $"{ToolName}.vpp");
+                var toolPath = Path.Combine(
+                    ProjectManager.ProjectDir,
+                    _station.StationName,
+                    $"{ToolName}.vpp"
+                );
                 if (string.IsNullOrEmpty(toolPath))
                 {
                     throw new Exception("vpp的路径不存在");
@@ -85,7 +92,11 @@ namespace Vision.Tools.ToolImpls
             {
                 try
                 {
-                    var toolPath = Path.Combine(ProjectManager.ProjectDir, _station.StationName, $"{ToolName}.vpp");
+                    var toolPath = Path.Combine(
+                        ProjectManager.ProjectDir,
+                        _station.StationName,
+                        $"{ToolName}.vpp"
+                    );
                     ToolBlock = CogSerializer.LoadObjectFromFile(toolPath) as CogToolBlock;
                     IsLoaded = true;
                 }
@@ -100,7 +111,11 @@ namespace Vision.Tools.ToolImpls
         {
             if (IsLoaded)
             {
-                var toolPath = Path.Combine(ProjectManager.ProjectDir, _station.StationName, $"{ToolName}.vpp");
+                var toolPath = Path.Combine(
+                    ProjectManager.ProjectDir,
+                    _station.StationName,
+                    $"{ToolName}.vpp"
+                );
                 CogSerializer.SaveObjectToFile(ToolBlock, toolPath);
             }
         }
@@ -111,7 +126,11 @@ namespace Vision.Tools.ToolImpls
             {
                 try
                 {
-                    var toolPath = Path.Combine(ProjectManager.ProjectDir, _station.StationName, $"{ToolName}.vpp");
+                    var toolPath = Path.Combine(
+                        ProjectManager.ProjectDir,
+                        _station.StationName,
+                        $"{ToolName}.vpp"
+                    );
                     if (File.Exists(toolPath))
                     {
                         File.Delete(toolPath);
@@ -136,7 +155,7 @@ namespace Vision.Tools.ToolImpls
             string[] s1 = new string[1];
             s1[0] = "|OutputImage|OutputImage";
 
-            acqTool.UserData.Add("_ToolOutputTerminals",s1);
+            acqTool.UserData.Add("_ToolOutputTerminals", s1);
 
             CogIDTool idTool = new CogIDTool();
             idTool.Name = "CogIDTool1";
@@ -145,15 +164,13 @@ namespace Vision.Tools.ToolImpls
             string[] s3 = new string[1];
             s3[0] = "|Result.Count|Result.Count";
 
-            idTool.UserData.Add("_ToolOutputTerminals",s2);
-            idTool.UserData.Add("_ToolOutputTerminals",s3);
+            idTool.UserData.Add("_ToolOutputTerminals", s2);
+            idTool.UserData.Add("_ToolOutputTerminals", s3);
 
             //设置ID的一些参数
             idTool.RunParams.NumToFind = 20;
             idTool.RunParams.DisableAllCodes();
             idTool.RunParams.DataMatrix.Enabled = true;
-
-
 
             CogCalibNPointToNPointTool nTool = new CogCalibNPointToNPointTool();
             nTool.Name = "CogCalibNPointToNPointTool1";
@@ -162,10 +179,8 @@ namespace Vision.Tools.ToolImpls
             s4[0] = "|InputImage|InputImage";
             s5[0] = "|OutputImage|OutputImage";
 
-            nTool.UserData.Add("_ToolInputTerminals",s4);//添加终端-InputImage
-            nTool.UserData.Add("_ToolOutputTerminals",s5);
-
-
+            nTool.UserData.Add("_ToolInputTerminals", s4); //添加终端-InputImage
+            nTool.UserData.Add("_ToolOutputTerminals", s5);
 
             tb.Tools.Add(acqTool);
             tb.Tools.Add(idTool);
@@ -178,7 +193,8 @@ namespace Vision.Tools.ToolImpls
         public override void Run()
         {
             RunTime = TimeSpan.Zero;
-            if (!Enable) return;
+            if (!Enable)
+                return;
             GetImageIn();
             if (ImageIn != null)
             {
@@ -214,11 +230,13 @@ namespace Vision.Tools.ToolImpls
         /// </summary>
         private bool GetImageIn()
         {
-            if (_station == null || ImageInName == null) return false;
+            if (_station == null || ImageInName == null)
+                return false;
 
             var tool = _station[ImageInName];
 
-            if (tool == null) return false;
+            if (tool == null)
+                return false;
 
             ImageIn = ((IImageOut)tool).ImageOut;
             return true;
@@ -240,7 +258,11 @@ namespace Vision.Tools.ToolImpls
                     return;
                 }
 
-                if (acqTool != null && acqTool.Operator != null && acqTool.Operator.FrameGrabber != null)
+                if (
+                    acqTool != null
+                    && acqTool.Operator != null
+                    && acqTool.Operator.FrameGrabber != null
+                )
                 {
                     acqTool.Operator.FrameGrabber.Disconnect(true);
                     acqTool.Dispose();
@@ -252,25 +274,6 @@ namespace Vision.Tools.ToolImpls
         {
             CloseCam();
             base.Close();
-        }
-        #endregion
-
-        #region ISerializable序列化
-        public override void LoadFromStream(SerializationInfo info,string toolName)
-        {
-            base.LoadFromStream(info,toolName);
-            string imageInName = $"{toolName}.imageInName";
-
-            ImageInName = info.GetString(imageInName);
-        }
-
-        public override void SaveToStream(SerializationInfo info,string toolName)
-        {
-            base.SaveToStream(info,toolName);
-
-            string imageInName = $"{toolName}.imageInName";
-
-            info.AddValue(imageInName,ImageInName);
         }
         #endregion
     }

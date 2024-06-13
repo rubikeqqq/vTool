@@ -55,7 +55,8 @@ namespace Vision.Core
             MemberInfo[] member = type.GetMember(emun.ToString());
             if (member.Length != 0)
             {
-                object[] customAttributes = member[0].GetCustomAttributes(typeof(DescriptionAttribute), inherit: false);
+                object[] customAttributes = member[0]
+                    .GetCustomAttributes(typeof(DescriptionAttribute), inherit: false);
                 if (customAttributes.Length != 0)
                 {
                     return ((DescriptionAttribute)customAttributes[0]).Description;

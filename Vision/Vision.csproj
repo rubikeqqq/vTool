@@ -337,6 +337,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Core\CalibInfo.cs" />
+    <Compile Include="Core\MachineStart.cs" />
+    <Compile Include="Core\SingleTon.cs" />
     <Compile Include="Frm\FormStationSet.cs">
       <SubType>Form</SubType>
     </Compile>

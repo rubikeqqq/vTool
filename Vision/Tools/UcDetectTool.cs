@@ -1,6 +1,5 @@
 ﻿using System.ComponentModel;
 using System.Windows.Forms;
-
 using Vision.Projects;
 using Vision.Stations;
 using Vision.Tools.ToolImpls;
@@ -10,7 +9,7 @@ namespace Vision.Tools
     [ToolboxItem(false)]
     public partial class UcDetectTool : UserControl
     {
-        public UcDetectTool(Station station,DetectTool tool)
+        public UcDetectTool(Station station, DetectTool tool)
         {
             InitializeComponent();
             _station = station;
@@ -20,7 +19,6 @@ namespace Vision.Tools
         private readonly DetectTool _tool;
         private readonly Station _station;
         private bool _init;
-
 
         /// <summary>
         /// 图像源
@@ -45,7 +43,8 @@ namespace Vision.Tools
         /// <param name="e"></param>
         private void comboBox1_SelectedIndexChanged(object sender, System.EventArgs e)
         {
-            if (!_init) return;
+            if (!_init)
+                return;
             if (comboBox1.SelectedIndex != -1)
             {
                 string imageToolName = comboBox1.Text;

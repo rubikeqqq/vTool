@@ -1,16 +1,21 @@
 ﻿using System;
-
 using HslCommunication.LogNet;
 
 namespace Vision.Core
 {
     /// <summary>
-    /// 日志的静态类 
+    /// 日志的静态类
     /// </summary>
     public class LogNet
     {
-        private static readonly ILogNet logNetDay = new LogNetDateTime(AppDomain.CurrentDomain.BaseDirectory + "Logs\\", GenerateMode.ByEveryDay);
-        private static readonly ILogNet logNetOne = new LogNetSingle(AppDomain.CurrentDomain.BaseDirectory + "Logs\\log.txt");
+        private static readonly ILogNet logNetDay = new LogNetDateTime(
+            AppDomain.CurrentDomain.BaseDirectory + "Logs\\",
+            GenerateMode.ByEveryDay
+        );
+
+        private static readonly ILogNet logNetOne = new LogNetSingle(
+            AppDomain.CurrentDomain.BaseDirectory + "Logs\\log.txt"
+        );
 
         /// <summary>
         /// 写入一条调试日志
@@ -22,7 +27,6 @@ namespace Vision.Core
         /// </param>
         public static void Log(string msg, bool isOneFile = false)
         {
-
             if (isOneFile)
                 logNetOne.WriteDebug(msg);
             else

@@ -50,29 +50,29 @@ namespace Vision.Core
                 {
                     Directory.CreateDirectory(destPath);
                     List<string> list = new List<string>(Directory.GetFiles(sourcePath));
-                    list.ForEach(delegate (string file)
-                    {
-                        string destFileName = Path.Combine(new string[2]
+                    list.ForEach(
+                        delegate(string file)
                         {
-                            destPath,
-                            Path.GetFileName(file)
-                        });
-                        File.Copy(file, destFileName, overwrite: true);
-                    });
+                            string destFileName = Path.Combine(
+                                new string[2] { destPath, Path.GetFileName(file) }
+                            );
+                            File.Copy(file, destFileName, overwrite: true);
+                        }
+                    );
                     bool status = true;
                     List<string> list2 = new List<string>(Directory.GetDirectories(sourcePath));
-                    list2.ForEach(delegate (string folder)
-                    {
-                        string destPath2 = Path.Combine(new string[2]
+                    list2.ForEach(
+                        delegate(string folder)
                         {
-                            destPath,
-                            Path.GetFileName(folder)
-                        });
-                        if (!CopyFolder(folder, destPath2))
-                        {
-                            status = false;
+                            string destPath2 = Path.Combine(
+                                new string[2] { destPath, Path.GetFileName(folder) }
+                            );
+                            if (!CopyFolder(folder, destPath2))
+                            {
+                                status = false;
+                            }
                         }
-                    });
+                    );
                     return status;
                 }
 
@@ -190,13 +190,15 @@ namespace Vision.Core
                 }
 
                 var files = directoryInfo.GetFiles();
-                files.ToList().ForEach(f =>
-                {
-                    if ((DateTime.Now - f.CreationTime).Days > maxDays)
+                files
+                    .ToList()
+                    .ForEach(f =>
                     {
-                        File.Delete(f.FullName);
-                    }
-                });
+                        if ((DateTime.Now - f.CreationTime).Days > maxDays)
+                        {
+                            File.Delete(f.FullName);
+                        }
+                    });
                 return true;
             }
             catch (Exception ex)
@@ -212,18 +214,26 @@ namespace Vision.Core
         /// <param name="pattern">筛选器</param>
         /// <param name="withoutExtension">包含扩展名</param>
         /// <returns>文件名称集合</returns>
-        public static string[] GetFileNames(string dirPath, string pattern = "*", bool withoutExtension = false)
+        public static string[] GetFileNames(
+            string dirPath,
+            string pattern = "*",
+            bool withoutExtension = false
+        )
         {
             try
             {
                 if (withoutExtension)
                 {
-                    return (from f in Directory.GetFiles(dirPath, pattern)
-                            select Path.GetFileNameWithoutExtension(f)).ToArray();
+                    return (
+                        from f in Directory.GetFiles(dirPath, pattern)
+                        select Path.GetFileNameWithoutExtension(f)
+                    ).ToArray();
                 }
 
-                return (from f in Directory.GetFiles(dirPath, pattern)
-                        select Path.GetFileName(f)).ToArray();
+                return (
+                    from f in Directory.GetFiles(dirPath, pattern)
+                    select Path.GetFileName(f)
+                ).ToArray();
             }
             catch (Exception ex)
             {
@@ -240,8 +250,10 @@ namespace Vision.Core
         {
             try
             {
-                return (from f in Directory.GetDirectories(dirPath)
-                        select Path.GetFileName(f)).ToArray();
+                return (
+                    from f in Directory.GetDirectories(dirPath)
+                    select Path.GetFileName(f)
+                ).ToArray();
             }
             catch (Exception ex)
             {
@@ -357,7 +369,6 @@ namespace Vision.Core
                 }
             }
             return len;
-
         }
 
         /// <summary>
@@ -368,16 +379,32 @@ namespace Vision.Core
         static uint GetClusterSize(string rootPath)
         {
             //提前声明各项参数
-            uint sectorsPerCluster = 0, bytesPerSector = 0, numberOfFreeClusters = 0, totalNumberOfClusters = 0;
-            GetDiskFreeSpace(rootPath, ref sectorsPerCluster, ref bytesPerSector, ref numberOfFreeClusters, ref totalNumberOfClusters);
+            uint sectorsPerCluster = 0,
+                bytesPerSector = 0,
+                numberOfFreeClusters = 0,
+                totalNumberOfClusters = 0;
+            GetDiskFreeSpace(
+                rootPath,
+                ref sectorsPerCluster,
+                ref bytesPerSector,
+                ref numberOfFreeClusters,
+                ref totalNumberOfClusters
+            );
             return bytesPerSector * sectorsPerCluster;
         }
 
         //用于获取文件实际大小的api
         [DllImport("Kernel32.dll", CharSet = CharSet.Auto, SetLastError = true)]
         static extern uint GetCompressedFileSize(string fileName, ref uint fileSizeHigh);
+
         //用于获取盘信息的api
         [DllImport("kernel32.dll", CharSet = CharSet.Auto)]
-        static extern bool GetDiskFreeSpace([MarshalAs(UnmanagedType.LPTStr)] string rootPathName, ref uint sectorsPerCluster, ref uint bytesPerSector, ref uint numberOfFreeClusters, ref uint totalNumbeOfClusters);
+        static extern bool GetDiskFreeSpace(
+            [MarshalAs(UnmanagedType.LPTStr)] string rootPathName,
+            ref uint sectorsPerCluster,
+            ref uint bytesPerSector,
+            ref uint numberOfFreeClusters,
+            ref uint totalNumbeOfClusters
+        );
     }
 }

@@ -1,7 +1,6 @@
 ﻿using System;
 using System.ComponentModel;
 using System.Windows.Forms;
-
 using Vision.Frm;
 using Vision.Projects;
 using Vision.Stations;
@@ -68,7 +67,8 @@ namespace Vision.Tools
 
         private void comboBox1_SelectedIndexChanged(object sender, EventArgs e)
         {
-            if (!_init) return;
+            if (!_init)
+                return;
             if (comboBox1.SelectedIndex != -1)
             {
                 string imageToolName = comboBox1.Text;

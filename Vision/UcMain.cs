@@ -2,7 +2,6 @@
 using System.ComponentModel;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-
 using Vision.Core;
 using Vision.Projects;
 using Vision.Stations;
@@ -29,8 +28,8 @@ namespace Vision
         private UcWindowShow _ucWindow;
         private UcProject _ucProject;
         private UcSet _ucSet;
-        private bool _cycle;             //检测循环
-        private bool _logCycle = true;   //log循环flag
+        private bool _cycle; //检测循环
+        private bool _logCycle = true; //log循环flag
 
         /// <summary>
         /// 关闭窗体时调用
@@ -46,7 +45,7 @@ namespace Vision
             {
                 ProjectManager.Instance.CloseProject();
             }
-            if(ProjectManager.Instance.Plc.IsOpened)
+            if (ProjectManager.Instance.Plc.IsOpened)
             {
                 ProjectManager.Instance.Plc.ClosePLC();
             }
@@ -75,18 +74,20 @@ namespace Vision
                 while (_logCycle)
                 {
                     var s = LogUI.GetLog();
-                    listBox1.BeginInvoke(new Action(() =>
-                    {
-                        if (s != null)
+                    listBox1.BeginInvoke(
+                        new Action(() =>
                         {
-                            if (listBox1.Items.Count > 200)
+                            if (s != null)
                             {
-                                listBox1.Items.RemoveAt(0);
+                                if (listBox1.Items.Count > 200)
+                                {
+                                    listBox1.Items.RemoveAt(0);
+                                }
+                                listBox1.Items.Add(s);
+                                listBox1.TopIndex = listBox1.Items.Count - 1;
                             }
-                            listBox1.Items.Add(s);
-                            listBox1.TopIndex = listBox1.Items.Count - 1;
-                        }
-                    }));
+                        })
+                    );
                     await Task.Delay(100);
                 }
             });

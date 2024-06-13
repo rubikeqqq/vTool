@@ -19,9 +19,14 @@ namespace Vision.Core
         /// <param name="rotatedY">转动后的坐标y</param>
         /// <returns></returns>
         public static bool Math_Transfer(
-           double rotationX, double rotationY, double rotationAngle,
-           double cirX, double cirY,
-           out double rotatedX, out double rotatedY)
+            double rotationX,
+            double rotationY,
+            double rotationAngle,
+            double cirX,
+            double cirY,
+            out double rotatedX,
+            out double rotatedY
+        )
         {
             /*
                 (rx0, ry0)为旋转中心， ( x, y)为被旋转的点， (x0,y0)旋转后的点
@@ -29,8 +34,14 @@ namespace Vision.Core
                 y0= cos (a) * (y-ry0) + sin (a) * (x-rx0) +ry0
             */
 
-            rotatedX = Math.Cos(rotationAngle) * (rotationX - cirX) - Math.Sin(rotationAngle) * (rotationY - cirY) + cirX;
-            rotatedY = Math.Cos(rotationAngle) * (rotationY - cirY) + Math.Sin(rotationAngle) * (rotationX - cirX) + cirY;
+            rotatedX =
+                Math.Cos(rotationAngle) * (rotationX - cirX)
+                - Math.Sin(rotationAngle) * (rotationY - cirY)
+                + cirX;
+            rotatedY =
+                Math.Cos(rotationAngle) * (rotationY - cirY)
+                + Math.Sin(rotationAngle) * (rotationX - cirX)
+                + cirY;
             rotatedX = Math.Round(rotatedX, 3);
             rotatedY = Math.Round(rotatedY, 3);
             return true;

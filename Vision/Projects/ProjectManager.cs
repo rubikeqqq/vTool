@@ -5,7 +5,6 @@ using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-
 using Vision.Core;
 using Vision.Frm;
 using Vision.Hardware;
@@ -15,15 +14,13 @@ using Vision.Tools.ToolImpls;
 
 namespace Vision.Projects
 {
-    public class ProjectManager
+    public class ProjectManager:SingleTon<ProjectManager>
     {
-        private static ProjectManager _instance;
         private Project _project;
-        private static object _lock = new object();
         private bool _imageThreadFlag;
         private MXPlc _plc;
 
-        private ProjectManager()
+        public ProjectManager()
         {
             if(!Directory.Exists(ProjectDir))
             {
@@ -61,24 +58,6 @@ namespace Vision.Projects
         /// </summary>
         public event EventHandler<TreeEventArgs> TreeChangedEvent;
 
-        public static ProjectManager Instance
-        {
-            get
-            {
-                if(_instance == null)
-                {
-                    lock(_lock)
-                    {
-                        if(_instance == null)
-                        {
-                            _instance = new ProjectManager();
-                        }
-                    }
-                }
-                return _instance;
-            }
-        }
-
         /// <summary>
         /// 项目已经加载
         /// </summary>
@@ -105,7 +84,8 @@ namespace Vision.Projects
         /// <summary>
         /// 项目文件路径
         /// </summary>
-        public static string ProjectPath => Path.Combine(Application.StartupPath,"Project","proj.vpr");
+        public static string ProjectPath =>
+            Path.Combine(Application.StartupPath,"Project","proj.vpr");
 
         /// <summary>
         /// 项目文件夹
@@ -120,12 +100,13 @@ namespace Vision.Projects
         #region 【项目加载保存】
 
         /// <summary>
-        /// 保存project 
+        /// 保存project
         /// </summary>
         /// <exception cref="Exception">如果保存出现错误 返回exception</exception>
         public bool SaveProject()
         {
-            if(!IsLoaded) return false;
+            if(!IsLoaded)
+                return false;
             try
             {
                 //项目保存前置事
@@ -248,7 +229,8 @@ namespace Vision.Projects
         /// </summary>
         public void CloseProject()
         {
-            if(!IsLoaded) return;
+            if(!IsLoaded)
+                return;
             foreach(var station in _project.StationList)
             {
                 station.StationDisplayChangedEvent -= Station_ShowDisplayChangedEvent;
@@ -298,8 +280,10 @@ namespace Vision.Projects
         /// <returns></returns>
         public bool AddStation()
         {
-            if(!IsLoaded) return false;
-            if(_project == null) return false;
+            if(!IsLoaded)
+                return false;
+            if(_project == null)
+                return false;
 
             if(!_project.AddStation())
             {
@@ -308,7 +292,8 @@ namespace Vision.Projects
             try
             {
                 //因为不知道station的名称 但是可以确定是最后一个添加的
-                _project[_project.StationList.Count - 1].StationDisplayChangedEvent += Station_ShowDisplayChangedEvent;
+                _project[_project.StationList.Count - 1].StationDisplayChangedEvent +=
+                    Station_ShowDisplayChangedEvent;
                 UpdateTreeNode();
                 SaveProject();
                 return true;
@@ -326,11 +311,19 @@ namespace Vision.Projects
         /// <param name="station"></param>
         public void DeleteStation(Station station)
         {
-            if(!IsLoaded) return;
-            if(_project == null) return;
+            if(!IsLoaded)
+                return;
+            if(_project == null)
+                return;
 
-            if(MessageBox.Show("是否确定删除此工位，此过程可能导致程序无法正常运行","重要提示",
-                   MessageBoxButtons.YesNo,MessageBoxIcon.Warning) == DialogResult.No)
+            if(
+                MessageBox.Show(
+                    "是否确定删除此工位，此过程可能导致程序无法正常运行",
+                    "重要提示",
+                    MessageBoxButtons.YesNo,
+                    MessageBoxIcon.Warning
+                ) == DialogResult.No
+            )
                 return;
 
             if(_project.DeleteStation(station))
@@ -346,8 +339,10 @@ namespace Vision.Projects
         /// <param name="station"></param>
         public void RenameStation(Station station)
         {
-            if(!IsLoaded) return;
-            if(_project == null) return;
+            if(!IsLoaded)
+                return;
+            if(_project == null)
+                return;
             FrmRename frm = new FrmRename();
             frm.OldName = station.StationName;
             if(frm.ShowDialog() == DialogResult.OK)
@@ -367,9 +362,11 @@ namespace Vision.Projects
         /// <param name="station"></param>
         public void UpStation(Station station)
         {
-            if(!IsLoaded) return;
+            if(!IsLoaded)
+                return;
             var index = _project.StationList.FindIndex(x => x.StationName == station.StationName);
-            if(index <= 0) return;
+            if(index <= 0)
+                return;
             _project.StationList.RemoveAt(index);
             _project.StationList.Insert(index - 1,station);
             UpdateTreeNode();
@@ -382,9 +379,11 @@ namespace Vision.Projects
         /// <param name="station"></param>
         public void DownStation(Station station)
         {
-            if(!IsLoaded) return;
+            if(!IsLoaded)
+                return;
             var index = _project.StationList.FindIndex(x => x.StationName == station.StationName);
-            if(index >= _project.StationList.Count - 1) return;
+            if(index >= _project.StationList.Count - 1)
+                return;
             _project.StationList.RemoveAt(index);
             _project.StationList.Insert(index + 1,station);
             UpdateTreeNode();
@@ -398,8 +397,10 @@ namespace Vision.Projects
         /// <returns></returns>
         public Station CopyStation(Station station)
         {
-            if(!IsLoaded) return null;
-            if(_project == null) return null;
+            if(!IsLoaded)
+                return null;
+            if(_project == null)
+                return null;
             return _project.CopyStation(station);
         }
 
@@ -409,8 +410,10 @@ namespace Vision.Projects
         /// <param name="station"></param>
         public void PasteStation(Station station)
         {
-            if(!IsLoaded) return;
-            if(_project == null) return;
+            if(!IsLoaded)
+                return;
+            if(_project == null)
+                return;
             _project.PasteStation(station);
 
             //加载station的数据
@@ -434,13 +437,14 @@ namespace Vision.Projects
         }
 
         /// <summary>
-        /// 添加工具 
+        /// 添加工具
         /// </summary>
         /// <param name="station"></param>
         /// <param name="tool"></param>
         public void AddTool(Station station,ToolBase tool)
         {
-            if(!IsLoaded) return;
+            if(!IsLoaded)
+                return;
             station.AddTool(tool);
             UpdateTreeNode();
             SaveProject();
@@ -454,7 +458,8 @@ namespace Vision.Projects
         /// <returns></returns>
         public void DeleteTool(Station station,ToolBase tool)
         {
-            if(!IsLoaded) return;
+            if(!IsLoaded)
+                return;
             station.DeleteTool(tool);
             UpdateTreeNode();
             SaveProject();
@@ -466,7 +471,8 @@ namespace Vision.Projects
         /// <param name="station"></param>
         public void DeleteAllTool(Station station)
         {
-            if(!IsLoaded) return;
+            if(!IsLoaded)
+                return;
             station.RemoveAllTool();
             UpdateTreeNode();
             SaveProject();
@@ -479,7 +485,8 @@ namespace Vision.Projects
         /// <param name="tool"></param>
         public void RenameTool(Station station,ToolBase tool)
         {
-            if(!IsLoaded) return;
+            if(!IsLoaded)
+                return;
             FrmRename frm = new FrmRename();
             frm.OldName = tool.ToolName;
             if(frm.ShowDialog() == DialogResult.OK)
@@ -498,9 +505,11 @@ namespace Vision.Projects
         /// <param name="tool"></param>
         public void UpTool(Station station,ToolBase tool)
         {
-            if(!IsLoaded) return;
+            if(!IsLoaded)
+                return;
             var index = station.ToolList.FindIndex(x => x.ToolName == tool.ToolName);
-            if(index <= 0) return;
+            if(index <= 0)
+                return;
             station.ToolList.RemoveAt(index);
             station.ToolList.Insert(index - 1,tool);
             UpdateTreeNode();
@@ -514,9 +523,11 @@ namespace Vision.Projects
         /// <param name="tool"></param>
         public void DownTool(Station station,ToolBase tool)
         {
-            if(!IsLoaded) return;
+            if(!IsLoaded)
+                return;
             var index = station.ToolList.FindIndex(x => x.ToolName == tool.ToolName);
-            if(index >= station.ToolList.Count - 1) return;
+            if(index >= station.ToolList.Count - 1)
+                return;
             station.ToolList.RemoveAt(index);
             station.ToolList.Insert(index + 1,tool);
             UpdateTreeNode();
@@ -662,7 +673,10 @@ namespace Vision.Projects
                             foreach(var date in dates)
                             {
                                 //每天文件夹路径 -- 最终判断路径
-                                if((now - Directory.GetCreationTime(date)).TotalDays >= Config.ImageConfig.DeleteDayTime)
+                                if(
+                                    (now - Directory.GetCreationTime(date)).TotalDays
+                                    >= Config.ImageConfig.DeleteDayTime
+                                )
                                 {
                                     Directory.Delete(date,true);
                                 }
@@ -714,6 +728,5 @@ namespace Vision.Projects
             LogNet.Log(e);
             LogUI.AddLog(e);
         }
-
     }
 }

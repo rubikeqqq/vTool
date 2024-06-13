@@ -1,11 +1,9 @@
 ﻿using System;
 using System.IO;
 using System.Windows.Forms;
-
 using Cognex.VisionPro;
 using Cognex.VisionPro.CalibFix;
 using Cognex.VisionPro.ID;
-
 using Vision.Core;
 using Vision.Projects;
 using Vision.Stations;
@@ -118,7 +116,8 @@ namespace Vision.Frm
                     {
                         _acqTool = tb.Tools["CogAcqFifoTool1"] as CogAcqFifoTool;
                         _idTool = tb.Tools["CogIDTool1"] as CogIDTool;
-                        _nPointTool = tb.Tools["CogCalibNPointToNPointTool1"] as CogCalibNPointToNPointTool;
+                        _nPointTool =
+                            tb.Tools["CogCalibNPointToNPointTool1"] as CogCalibNPointToNPointTool;
                         return true;
                     }
                     catch
@@ -147,11 +146,15 @@ namespace Vision.Frm
                     }
                     for (int i = 0; i < _centerDataList.CenterList.Count; i++)
                     {
-                        dgv.Rows.Add(i + 1, _centerDataList.CenterList[i].ImageX, _centerDataList.CenterList[i].ImageY,
-                       _centerDataList.CenterList[i].RobotX, _centerDataList.CenterList[i].RobotY);
+                        dgv.Rows.Add(
+                            i + 1,
+                            _centerDataList.CenterList[i].ImageX,
+                            _centerDataList.CenterList[i].ImageY,
+                            _centerDataList.CenterList[i].RobotX,
+                            _centerDataList.CenterList[i].RobotY
+                        );
                         _index++;
                     }
-
                 }
                 catch (Exception ex)
                 {
@@ -217,9 +220,16 @@ namespace Vision.Frm
                     double x2 = Convert.ToDouble(cell3.ToString().Trim());
                     double y2 = Convert.ToDouble(cell4.ToString().Trim());
 
-
                     _nPointTool.Calibration.AddPointPair(x1, y1, x2, y2);
-                    _centerDataList.Add(new CenterData() { ImageX = x1, ImageY = y1, RobotX = x2, RobotY = y2 });
+                    _centerDataList.Add(
+                        new CenterData()
+                        {
+                            ImageX = x1,
+                            ImageY = y1,
+                            RobotX = x2,
+                            RobotY = y2
+                        }
+                    );
                 }
                 return true;
             }
@@ -393,7 +403,10 @@ namespace Vision.Frm
                             //查找设置的标准id
                             foreach (CogIDResult res in _idTool.Results)
                             {
-                                if (res.DecodedData.DecodedString == _idResult.DecodedData.DecodedString)
+                                if (
+                                    res.DecodedData.DecodedString
+                                    == _idResult.DecodedData.DecodedString
+                                )
                                 {
                                     var x = Math.Round(res.CenterX, 3);
                                     var y = Math.Round(res.CenterY, 3);
@@ -448,20 +461,20 @@ namespace Vision.Frm
 
             double min = 9999;
 
-
             int index = 0;
             //解析码的数据
 
             for (int i = 0; i < idTool.Results.Count; i++)
             {
-                double temp = Math.Pow((idTool.Results[i].CenterX - cX), 2) + Math.Pow((idTool.Results[i].CenterY - cY), 2);
+                double temp =
+                    Math.Pow((idTool.Results[i].CenterX - cX), 2)
+                    + Math.Pow((idTool.Results[i].CenterY - cY), 2);
                 double dis = Math.Sqrt(temp);
                 if (dis < min)
                 {
                     min = dis;
                     index = i;
                 }
-
             }
 
             _idResult = idTool.Results[index];

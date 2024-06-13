@@ -2,11 +2,9 @@
 using System.IO;
 using System.Threading;
 using System.Windows.Forms;
-
 using Cognex.VisionPro;
 using Cognex.VisionPro.CalibFix;
 using Cognex.VisionPro.ID;
-
 using Vision.Core;
 using Vision.Projects;
 using Vision.Stations;
@@ -20,13 +18,13 @@ namespace Vision.Frm
         {
             InitializeComponent();
             _station = station;
-            _path = Path.Combine(ProjectManager.ProjectDir, station.StationName, "CenterCalib.xml"); 
+            _path = Path.Combine(ProjectManager.ProjectDir, station.StationName, "CenterCalib.xml");
             _centerTool = tool;
             LoadData();
             this.WindowState = FormWindowState.Maximized;
             this.BringToFront();
         }
-                
+
         private ICogImage _image;
         private int _index = 0;
 
@@ -95,10 +93,16 @@ namespace Vision.Frm
                     var y = _fitCircleTool.Result.GetY(0);
 
                     //将图像坐标转换成实际坐标
-                    var cogtranform2DLinear = _nPointTool.Calibration.GetComputedUncalibratedFromCalibratedTransform();
-                    cogtranform2DLinear.InvertBase().MapPoint(x, y, out var currentRx, out var currentRy);
+                    var cogtranform2DLinear =
+                        _nPointTool.Calibration.GetComputedUncalibratedFromCalibratedTransform();
+                    cogtranform2DLinear
+                        .InvertBase()
+                        .MapPoint(x, y, out var currentRx, out var currentRy);
 
-                    _station.DataConfig.CalibConfig.CenterPoint = new PointD(Math.Round(currentRx,3), Math.Round(currentRy,3));
+                    _station.DataConfig.CalibConfig.CenterPoint = new PointD(
+                        Math.Round(currentRx, 3),
+                        Math.Round(currentRy, 3)
+                    );
                     Log("旋转标定成功");
                 }
                 Log("标定完成！");
@@ -122,7 +126,6 @@ namespace Vision.Frm
                 Log("请先停止连续相机取图");
                 return false;
             }
-
 
             try
             {
@@ -172,8 +175,13 @@ namespace Vision.Frm
                 //有数据
                 for (int i = 0; i < _centerListData.CenterList.Count; i++)
                 {
-                    dgv.Rows.Add(i + 1, _centerListData.CenterList[i].ImageX, _centerListData.CenterList[i].ImageY,
-                        _centerListData.CenterList[i].RobotX, _centerListData.CenterList[i].RobotY);
+                    dgv.Rows.Add(
+                        i + 1,
+                        _centerListData.CenterList[i].ImageX,
+                        _centerListData.CenterList[i].ImageY,
+                        _centerListData.CenterList[i].RobotX,
+                        _centerListData.CenterList[i].RobotY
+                    );
                     _index++;
                 }
             }
@@ -194,8 +202,11 @@ namespace Vision.Frm
                 if (_centerTool != null)
                 {
                     _acqTool = _centerTool.ToolBlock.Tools["CogAcqFifoTool1"] as CogAcqFifoTool;
-                    _fitCircleTool = _centerTool.ToolBlock.Tools["CogFitCircleTool1"] as CogFitCircleTool;
-                    _nPointTool = _centerTool.ToolBlock.Tools["CogCalibNPointToNPointTool1"] as CogCalibNPointToNPointTool;
+                    _fitCircleTool =
+                        _centerTool.ToolBlock.Tools["CogFitCircleTool1"] as CogFitCircleTool;
+                    _nPointTool =
+                        _centerTool.ToolBlock.Tools["CogCalibNPointToNPointTool1"]
+                        as CogCalibNPointToNPointTool;
                     _idTool = _centerTool.ToolBlock.Tools["CogIDTool1"] as CogIDTool;
 
                     return true;
@@ -251,7 +262,6 @@ namespace Vision.Frm
                     var c3 = dgv.Rows[i].Cells[3].Value;
                     var c4 = dgv.Rows[i].Cells[4].Value;
 
-
                     if (c1 == null || c2 == null || c3 == null || c4 == null)
                     {
                         Log("9点标定的点位不正确，请检查");
@@ -264,7 +274,15 @@ namespace Vision.Frm
                     double rY = double.Parse(c4.ToString().Trim());
 
                     _nPointTool.Calibration.AddPointPair(imageX, imageY, rX, rY);
-                    _centerListData.Add(new CenterData() { ImageX = imageX, ImageY = imageY, RobotX = rX, RobotY = rY });
+                    _centerListData.Add(
+                        new CenterData()
+                        {
+                            ImageX = imageX,
+                            ImageY = imageY,
+                            RobotX = rX,
+                            RobotY = rY
+                        }
+                    );
                 }
 
                 //=============================传入旋转标定的数据===============================
@@ -365,7 +383,7 @@ namespace Vision.Frm
         }
 
         /// <summary>
-        /// 运行一次 
+        /// 运行一次
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
@@ -381,7 +399,6 @@ namespace Vision.Frm
                     _idTool.InputImage = _image;
 
                     _idTool.Run();
-
 
                     if (_idTool.RunStatus.Result == CogToolResultConstants.Accept)
                     {
@@ -401,7 +418,10 @@ namespace Vision.Frm
                             //查找设置的标准id
                             foreach (CogIDResult res in _idTool.Results)
                             {
-                                if (res.DecodedData.DecodedString == _idResult.DecodedData.DecodedString)
+                                if (
+                                    res.DecodedData.DecodedString
+                                    == _idResult.DecodedData.DecodedString
+                                )
                                 {
                                     var x = Math.Round(res.CenterX, 3);
                                     var y = Math.Round(res.CenterY, 3);
@@ -455,20 +475,20 @@ namespace Vision.Frm
 
             double min = 9999;
 
-
             int index = 0;
             //解析码的数据
 
             for (int i = 0; i < idTool.Results.Count; i++)
             {
-                double temp = Math.Pow((idTool.Results[i].CenterX - cX), 2) + Math.Pow((idTool.Results[i].CenterY - cY), 2);
+                double temp =
+                    Math.Pow((idTool.Results[i].CenterX - cX), 2)
+                    + Math.Pow((idTool.Results[i].CenterY - cY), 2);
                 double dis = Math.Sqrt(temp);
                 if (dis < min)
                 {
                     min = dis;
                     index = i;
                 }
-
             }
 
             _idResult = idTool.Results[index];
@@ -571,7 +591,6 @@ namespace Vision.Frm
             //        }
             //    }
             //}
-
         }
 
         /// <summary>
@@ -598,5 +617,4 @@ namespace Vision.Frm
             Log("标定数据保存成功");
         }
     }
-
 }

@@ -8,7 +8,7 @@ namespace Vision.Core
 
         public int Index { get; set; }
 
-        public ToolNameAttribute(string name,int index)
+        public ToolNameAttribute(string name, int index)
         {
             Name = name;
             Index = index;
@@ -21,7 +21,7 @@ namespace Vision.Core
 
         public int Index { get; set; }
 
-        public GroupInfoAttribute(string name,int index)
+        public GroupInfoAttribute(string name, int index)
         {
             Name = name;
             Index = index;

@@ -7,9 +7,7 @@ namespace Vision.Core
     /// </summary>
     public class ImageConfig
     {
-        public ImageConfig()
-        {
-        }
+        public ImageConfig() { }
 
         /// <summary>
         /// 保存图像NG的文件夹
@@ -48,9 +46,9 @@ namespace Vision.Core
 
         public bool Load(string path)
         {
-            if (!File.Exists(path)) return false;
+            if (!File.Exists(path))
+                return false;
             string section = nameof(ImageConfig);
-
 
             SaveImageDir = IniHelper.ReadString(section, nameof(SaveImageDir), default, path);
             IsSaveNGImage = IniHelper.ReadBoolean(section, nameof(IsSaveNGImage), default, path);
@@ -64,9 +62,9 @@ namespace Vision.Core
 
         public bool Save(string path)
         {
-            if (!File.Exists(path)) return false;
+            if (!File.Exists(path))
+                return false;
             string section = nameof(ImageConfig);
-
 
             IniHelper.WriteString(section, nameof(SaveImageDir), SaveImageDir, path);
             IniHelper.WriteBoolean(section, nameof(IsSaveNGImage), IsSaveNGImage, path);
@@ -99,15 +97,13 @@ namespace Vision.Core
         /// </summary>
         public string OnlineAddress { get; set; } = "D5001";
 
-        public SystemConfig()
-        {
-        }
+        public SystemConfig() { }
 
         public bool Load(string path)
         {
-            if (!File.Exists(path)) return false;
+            if (!File.Exists(path))
+                return false;
             string section = nameof(SystemConfig);
-
 
             AutoRun = IniHelper.ReadBoolean(section, nameof(AutoRun), default, path);
             HeartAddress = IniHelper.ReadString(section, nameof(HeartAddress), default, path);
@@ -117,9 +113,9 @@ namespace Vision.Core
 
         public bool Save(string path)
         {
-            if (!File.Exists(path)) return false;
+            if (!File.Exists(path))
+                return false;
             string section = nameof(SystemConfig);
-
 
             IniHelper.WriteBoolean(section, nameof(AutoRun), AutoRun, path);
             IniHelper.WriteString(section, nameof(HeartAddress), HeartAddress, path);
@@ -138,9 +134,9 @@ namespace Vision.Core
 
         public bool Load(string path)
         {
-            if (!File.Exists(path)) return false;
+            if (!File.Exists(path))
+                return false;
             string section = nameof(PLCConfig);
-
 
             IP = IniHelper.ReadString(section, nameof(IP), default, path);
             Port = IniHelper.ReadString(section, nameof(Port), default, path);
@@ -149,9 +145,9 @@ namespace Vision.Core
 
         public bool Save(string path)
         {
-            if (!File.Exists(path)) return false;
+            if (!File.Exists(path))
+                return false;
             string section = nameof(PLCConfig);
-
 
             IniHelper.WriteString(section, nameof(IP), IP, path);
             IniHelper.WriteString(section, nameof(Port), Port, path);
@@ -172,7 +168,7 @@ namespace Vision.Core
             var b1 = ImageConfig.Load(path);
             var b2 = SystemConfig.Load(path);
             var b3 = PLCConfig.Load(path);
-            return b1 & b2 & b3 ;
+            return b1 & b2 & b3;
         }
 
         public static bool SaveConfig(string path)
@@ -180,7 +176,7 @@ namespace Vision.Core
             var b1 = ImageConfig.Save(path);
             var b2 = SystemConfig.Save(path);
             var b3 = PLCConfig.Save(path);
-            return b1 & b2 & b3 ;
+            return b1 & b2 & b3;
         }
     }
 }

@@ -1,6 +1,5 @@
 ﻿using System.Drawing;
 using System.Windows.Forms;
-
 using Vision.Core;
 using Vision.Projects;
 using Vision.Stations;
@@ -25,7 +24,6 @@ namespace Vision.Frm
 
         private void InitTools()
         {
-
             this.tvTools.Nodes.Clear();
 
             _rootNode = new TreeNode()
@@ -62,7 +60,9 @@ namespace Vision.Frm
                     if (CurrentNode != null && CurrentNode.Parent != null)
                     {
                         this.tvTools.SelectedNode = CurrentNode;
-                        this.tbDescription.Text = "工具描述：\r\n    " + ToolFactory.Instance.GetToolDescription(CurrentNode.Text);
+                        this.tbDescription.Text =
+                            "工具描述：\r\n    "
+                            + ToolFactory.Instance.GetToolDescription(CurrentNode.Text);
                     }
                 }
                 catch (System.Exception ex)

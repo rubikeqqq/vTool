@@ -3,9 +3,7 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Windows.Forms;
-
 using Cognex.VisionPro;
-
 using Vision.Core;
 using Vision.Projects;
 using Vision.Stations;
@@ -13,22 +11,28 @@ using Vision.Tools.Interfaces;
 
 namespace Vision.Tools.ToolImpls
 {
+    [Serializable]
     [GroupInfo("图像工具", 0)]
-    [ToolName("相机采集",0)]
+    [ToolName("相机采集", 0)]
     [Description("通过相机进行采集的康耐视工具")]
     public class ImageAcqTool : ToolBase, IImageOut, IVpp
     {
+        [NonSerialized]
         private Station _station;
 
+        [field:NonSerialized]
         public ICogImage ImageOut { get; private set; }
 
         /// <summary>
         /// 采集工具
         /// </summary>
+        [field: NonSerialized]
         public CogAcqFifoTool AcqFifoTool { get; set; }
 
-        public bool IsLoaded { get;private set; }
+        [field: NonSerialized]
+        public bool IsLoaded { get; private set; }
 
+        [field: NonSerialized]
         public UcAcqTool UI { get; set; }
 
         public override UserControl GetToolControl(Station station)
@@ -43,18 +47,22 @@ namespace Vision.Tools.ToolImpls
         }
 
         #region vpp相关
-        
+
         public void LoadVpp()
         {
-            if(!IsLoaded)
+            if (!IsLoaded)
             {
                 try
                 {
-                    var toolPath = Path.Combine(ProjectManager.ProjectDir, _station.StationName, $"{ToolName}.vpp");
+                    var toolPath = Path.Combine(
+                        ProjectManager.ProjectDir,
+                        _station.StationName,
+                        $"{ToolName}.vpp"
+                    );
                     AcqFifoTool = CogSerializer.LoadObjectFromFile(toolPath) as CogAcqFifoTool;
                     IsLoaded = true;
                 }
-                catch(Exception ex)
+                catch (Exception ex)
                 {
                     throw new Exception($"相机加载失败！" + ex.Message);
                 }
@@ -63,14 +71,18 @@ namespace Vision.Tools.ToolImpls
 
         public void SaveVpp()
         {
-            if(IsLoaded)
+            if (IsLoaded)
             {
                 try
                 {
-                    var toolPath = Path.Combine(ProjectManager.ProjectDir, _station.StationName, $"{ToolName}.vpp");
-                    CogSerializer.SaveObjectToFile(AcqFifoTool,toolPath);
+                    var toolPath = Path.Combine(
+                        ProjectManager.ProjectDir,
+                        _station.StationName,
+                        $"{ToolName}.vpp"
+                    );
+                    CogSerializer.SaveObjectToFile(AcqFifoTool, toolPath);
                 }
-                catch(Exception ex)
+                catch (Exception ex)
                 {
                     throw new Exception($"相机保存失败！" + ex.Message);
                 }
@@ -79,9 +91,13 @@ namespace Vision.Tools.ToolImpls
 
         public void CreateVpp()
         {
-            if(!IsLoaded)
+            if (!IsLoaded)
             {
-                var toolPath = Path.Combine(ProjectManager.ProjectDir, _station.StationName, $"{ToolName}.vpp");
+                var toolPath = Path.Combine(
+                    ProjectManager.ProjectDir,
+                    _station.StationName,
+                    $"{ToolName}.vpp"
+                );
                 if (string.IsNullOrEmpty(toolPath))
                 {
                     throw new Exception("相机的路径不存在");
@@ -97,7 +113,11 @@ namespace Vision.Tools.ToolImpls
             {
                 try
                 {
-                    var toolPath = Path.Combine(ProjectManager.ProjectDir, _station.StationName, $"{ToolName}.vpp");
+                    var toolPath = Path.Combine(
+                        ProjectManager.ProjectDir,
+                        _station.StationName,
+                        $"{ToolName}.vpp"
+                    );
                     if (File.Exists(toolPath))
                     {
                         File.Delete(toolPath);
@@ -117,7 +137,8 @@ namespace Vision.Tools.ToolImpls
         public override void Run()
         {
             RunTime = TimeSpan.Zero;
-            if (!Enable) return;
+            if (!Enable)
+                return;
             if (AcqFifoTool == null)
                 throw new Exception("AcqFifoTool为null");
             Stopwatch sw = Stopwatch.StartNew();
@@ -142,8 +163,11 @@ namespace Vision.Tools.ToolImpls
         public override void Close()
         {
             base.Close();
-            if(AcqFifoTool != null && AcqFifoTool.Operator != null &&
-               AcqFifoTool.Operator.FrameGrabber != null)
+            if (
+                AcqFifoTool != null
+                && AcqFifoTool.Operator != null
+                && AcqFifoTool.Operator.FrameGrabber != null
+            )
             {
                 AcqFifoTool.Operator.FrameGrabber.Disconnect(true);
                 AcqFifoTool.Dispose();

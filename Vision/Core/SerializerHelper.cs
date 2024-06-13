@@ -6,7 +6,6 @@ using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
 using System.Xml;
 using System.Xml.Serialization;
-
 using Newtonsoft.Json;
 
 namespace Vision.Core
@@ -49,7 +48,14 @@ namespace Vision.Core
             {
                 BinaryFormatter formatter = new BinaryFormatter();
                 T value;
-                using (Stream destream = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.None))
+                using (
+                    Stream destream = new FileStream(
+                        filePath,
+                        FileMode.Open,
+                        FileAccess.Read,
+                        FileShare.None
+                    )
+                )
                 {
                     value = (T)formatter.Deserialize(destream);
                 }
@@ -70,7 +76,8 @@ namespace Vision.Core
         /// <returns>二进制文件 如果对象实体为Null,则结果返回Null</returns>
         public static byte[] GetBytes<T>(T item)
         {
-            if (item == null) return null;
+            if (item == null)
+                return null;
             try
             {
                 using (MemoryStream serializationStream = new MemoryStream())
@@ -97,7 +104,8 @@ namespace Vision.Core
         /// <returns>对象实体</returns>
         public static T GetObject<T>(byte[] binData)
         {
-            if (binData == null) return default(T);
+            if (binData == null)
+                return default(T);
             try
             {
                 BinaryFormatter formatter = new BinaryFormatter();
@@ -128,11 +136,14 @@ namespace Vision.Core
             try
             {
                 BinaryFormatter formatter = new BinaryFormatter();
-                using (Stream stream = new FileStream
-                    (filePath, 
-                    FileMode.OpenOrCreate, 
-                    FileAccess.Write, 
-                    FileShare.None))
+                using (
+                    Stream stream = new FileStream(
+                        filePath,
+                        FileMode.OpenOrCreate,
+                        FileAccess.Write,
+                        FileShare.None
+                    )
+                )
                 {
                     formatter.Serialize(stream, type);
                 }
@@ -388,7 +399,13 @@ namespace Vision.Core
             {
                 string str = JsonConvert.SerializeObject(t);
                 byte[] bytes = Encoding.UTF8.GetBytes(str);
-                using (FileStream fs = new FileStream(filePath, FileMode.OpenOrCreate, FileAccess.Write))
+                using (
+                    FileStream fs = new FileStream(
+                        filePath,
+                        FileMode.OpenOrCreate,
+                        FileAccess.Write
+                    )
+                )
                 {
                     fs.Write(bytes, 0, bytes.Length);
                 }
@@ -411,14 +428,15 @@ namespace Vision.Core
         /// <returns></returns>
         public static List<T> Clone<T>(object List)
         {
-            using(Stream objectStream = new MemoryStream())
+            using (Stream objectStream = new MemoryStream())
             {
                 IFormatter formatter = new BinaryFormatter();
-                formatter.Serialize(objectStream,List);
-                objectStream.Seek(0,SeekOrigin.Begin);
+                formatter.Serialize(objectStream, List);
+                objectStream.Seek(0, SeekOrigin.Begin);
                 return formatter.Deserialize(objectStream) as List<T>;
             }
         }
+
         /// <summary>
         /// 深度拷贝对象
         /// </summary>
@@ -426,11 +444,11 @@ namespace Vision.Core
         /// <returns></returns>
         public static T Clone<T>(T obj)
         {
-            using(Stream objectStream = new MemoryStream())
+            using (Stream objectStream = new MemoryStream())
             {
                 IFormatter formatter = new BinaryFormatter();
-                formatter.Serialize(objectStream,obj);
-                objectStream.Seek(0,SeekOrigin.Begin);
+                formatter.Serialize(objectStream, obj);
+                objectStream.Seek(0, SeekOrigin.Begin);
                 return (T)formatter.Deserialize(objectStream);
             }
         }

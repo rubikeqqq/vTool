@@ -2,7 +2,6 @@
 using System.ComponentModel;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-
 using Vision.Core;
 using Vision.Stations;
 using Vision.Tools.ToolImpls;
@@ -23,7 +22,7 @@ namespace Vision.Tools
 
         private UcDebug _ucDebug;
 
-        public ToolBase Tool { get;set; }
+        public ToolBase Tool { get; set; }
 
         public Station Station { get; set; }
 
@@ -65,19 +64,20 @@ namespace Vision.Tools
                 while (true)
                 {
                     var s = LogUI.GetToolLog();
-                    listBox1.BeginInvoke(new Action(() =>
-                    {
-                        if (s != null)
+                    listBox1.BeginInvoke(
+                        new Action(() =>
                         {
-                            if (listBox1.Items.Count > 100)
+                            if (s != null)
                             {
-                                listBox1.Items.Remove(0);
+                                if (listBox1.Items.Count > 100)
+                                {
+                                    listBox1.Items.Remove(0);
+                                }
+                                listBox1.Items.Add(s);
+                                listBox1.SelectedIndex = listBox1.Items.Count - 1;
                             }
-                            listBox1.Items.Add(s);
-                            listBox1.SelectedIndex = listBox1.Items.Count - 1;
-                        }
-
-                    }));
+                        })
+                    );
                     await Task.Delay(100);
                 }
             });
