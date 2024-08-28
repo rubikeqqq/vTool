@@ -152,28 +152,32 @@ namespace Vision.Projects
                     }
                     break;
                 case 5:
-                    if (_projectData.StationList.Count > 6)
-                    {
-                        row = 1;
-                        col = 0;
-                    }
-                    else
-                    {
-                        row = 1;
-                        col = 0;
-                    }
+                    //if (_projectData.StationList.Count > 6)
+                    //{
+                    //    row = 1;
+                    //    col = 0;
+                    //}
+                    //else
+                    //{
+                    //    row = 1;
+                    //    col = 0;
+                    //}
+                    row = 1;
+                    col = 0;
                     break;
                 case 6:
-                    if (_projectData.StationList.Count > 6)
-                    {
-                        row = 1;
-                        col = 1;
-                    }
-                    else
-                    {
-                        row = 1;
-                        col = 1;
-                    }
+                    //if (_projectData.StationList.Count > 6)
+                    //{
+                    //    row = 1;
+                    //    col = 1;
+                    //}
+                    //else
+                    //{
+                    //    row = 1;
+                    //    col = 1;
+                    //}
+                    row = 1;
+                    col = 1;
                     break;
                 case 7:
                     row = 1;
