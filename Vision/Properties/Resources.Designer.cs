@@ -63,9 +63,29 @@ namespace Vision.Properties {
         /// <summary>
         ///   查找 System.Drawing.Bitmap 类型的本地化资源。
         /// </summary>
+        internal static System.Drawing.Bitmap basicsetting {
+            get {
+                object obj = ResourceManager.GetObject("basicsetting", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   查找 System.Drawing.Bitmap 类型的本地化资源。
+        /// </summary>
         internal static System.Drawing.Bitmap close_circle {
             get {
                 object obj = ResourceManager.GetObject("close-circle", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   查找 System.Drawing.Bitmap 类型的本地化资源。
+        /// </summary>
+        internal static System.Drawing.Bitmap Debug {
+            get {
+                object obj = ResourceManager.GetObject("Debug", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -123,6 +143,16 @@ namespace Vision.Properties {
         /// <summary>
         ///   查找 System.Drawing.Bitmap 类型的本地化资源。
         /// </summary>
+        internal static System.Drawing.Bitmap Job {
+            get {
+                object obj = ResourceManager.GetObject("Job", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   查找 System.Drawing.Bitmap 类型的本地化资源。
+        /// </summary>
         internal static System.Drawing.Bitmap PLC信息管理 {
             get {
                 object obj = ResourceManager.GetObject("PLC信息管理", resourceCulture);
@@ -156,6 +186,16 @@ namespace Vision.Properties {
         internal static System.Drawing.Bitmap stop {
             get {
                 object obj = ResourceManager.GetObject("stop", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   查找 System.Drawing.Bitmap 类型的本地化资源。
+        /// </summary>
+        internal static System.Drawing.Bitmap WhileTool {
+            get {
+                object obj = ResourceManager.GetObject("WhileTool", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -216,6 +256,16 @@ namespace Vision.Properties {
         internal static System.Drawing.Bitmap 停止 {
             get {
                 object obj = ResourceManager.GetObject("停止", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   查找 System.Drawing.Bitmap 类型的本地化资源。
+        /// </summary>
+        internal static System.Drawing.Bitmap 停止1 {
+            get {
+                object obj = ResourceManager.GetObject("停止1", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -366,6 +416,16 @@ namespace Vision.Properties {
         internal static System.Drawing.Bitmap 暂停__1_ {
             get {
                 object obj = ResourceManager.GetObject("暂停 (1)", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   查找 System.Drawing.Bitmap 类型的本地化资源。
+        /// </summary>
+        internal static System.Drawing.Bitmap 添加__2_ {
+            get {
+                object obj = ResourceManager.GetObject("添加 (2)", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }

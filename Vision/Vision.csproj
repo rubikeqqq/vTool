@@ -5,7 +5,7 @@
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{EEF84B6E-AD88-408F-927B-C73CB408753C}</ProjectGuid>
-    <OutputType>Library</OutputType>
+    <OutputType>WinExe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Vision</RootNamespace>
     <AssemblyName>Vision</AssemblyName>
@@ -30,6 +30,12 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup>
+    <StartupObject />
+  </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationIcon>motor.ico</ApplicationIcon>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Cognex.VisionPro, Version=69.3.0.0, Culture=neutral, PublicKeyToken=ef0f902af9dee505, processorArchitecture=AMD64">
@@ -347,6 +353,7 @@
     </Compile>
     <Compile Include="Hardware\IPlc.cs" />
     <Compile Include="Hardware\MxPlc.cs" />
+    <Compile Include="Program.cs" />
     <Compile Include="Projects\StationToolData.cs" />
     <Compile Include="Projects\UcSet.cs">
       <SubType>UserControl</SubType>
@@ -398,11 +405,11 @@
     <Compile Include="Tools\UcNineCalibTool.Designer.cs">
       <DependentUpon>UcNineCalibTool.cs</DependentUpon>
     </Compile>
-    <Compile Include="UcMain.cs">
-      <SubType>UserControl</SubType>
+    <Compile Include="FormMain.cs">
+      <SubType>Form</SubType>
     </Compile>
-    <Compile Include="UcMain.Designer.cs">
-      <DependentUpon>UcMain.cs</DependentUpon>
+    <Compile Include="FormMain.Designer.cs">
+      <DependentUpon>FormMain.cs</DependentUpon>
     </Compile>
     <Compile Include="Frm\FrmNPointCalib.cs">
       <SubType>Form</SubType>
@@ -547,8 +554,8 @@
     <EmbeddedResource Include="Tools\UcNineCalibTool.resx">
       <DependentUpon>UcNineCalibTool.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="UcMain.resx">
-      <DependentUpon>UcMain.cs</DependentUpon>
+    <EmbeddedResource Include="FormMain.resx">
+      <DependentUpon>FormMain.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Frm\FrmNPointCalib.resx">
       <DependentUpon>FrmNPointCalib.cs</DependentUpon>
@@ -701,6 +708,15 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\PLC信息管理.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="motor.ico" />
+    <None Include="Resources\停止1.png" />
+    <None Include="Resources\Job.png" />
+    <None Include="Resources\Debug.png" />
+    <None Include="Resources\basicsetting.png" />
+    <None Include="Resources\WhileTool.png" />
+    <None Include="Resources\添加 %282%29.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

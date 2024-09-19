@@ -121,23 +121,32 @@
   <data name="循环-06" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\循环-06.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="停止采集" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\停止采集.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  <data name="Enable" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Enable.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="stop" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\stop.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
+  <data name="停止采集" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\停止采集.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="添加 (2)" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\添加 (2).png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
   <data name="暂停 (1)" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\暂停 (1).png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="下一个" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\下一个.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  <data name="Disable" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Disable.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="PLC信息管理" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\PLC信息管理.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  <data name="basicsetting" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\basicsetting.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="Exit2" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\Exit2.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="WhileTool" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\WhileTool.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="保存" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\保存.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
@@ -178,9 +187,6 @@
   <data name="打开" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\打开.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="默认" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\默认.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
   <data name="禁用1" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\禁用1.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
@@ -196,11 +202,20 @@
   <data name="新建 " type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\新建 .png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
+  <data name="icongongju" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\icongongju.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
   <data name="新建设备" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\新建设备.ico;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="save-as" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\save-as.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="PLC信息管理" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\PLC信息管理.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="下一个" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\下一个.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="循环重复" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\循环重复.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
@@ -214,22 +229,25 @@
   <data name="保存2" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\保存2.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
+  <data name="Job" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Job.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
   <data name="xiangji" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\xiangji.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="循环-06 (1)" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\循环-06 (1).png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="icongongju" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\icongongju.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  <data name="默认" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\默认.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Debug" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Debug.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="暂停" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\暂停.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="Disable" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\Disable.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="Enable" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\Enable.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  <data name="停止1" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\停止1.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
 </root>

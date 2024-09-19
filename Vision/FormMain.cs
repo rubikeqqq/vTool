@@ -9,9 +9,9 @@ using Vision.Stations;
 namespace Vision
 {
     [ToolboxItem(false)]
-    public partial class UcMain : UserControl
+    public partial class FormMain : Form
     {
-        public UcMain()
+        public FormMain()
         {
             InitializeComponent();
             _ucWindow = new UcWindowShow(ProjectManager.Instance.Project);
@@ -23,6 +23,7 @@ namespace Vision
                 Run();
             }
             ProjectManager.Instance.UcStationChangedEvent += Instance_UcStationChangedEvent;
+            this.WindowState = FormWindowState.Maximized;
         }
 
         private UcWindowShow _ucWindow;
@@ -30,27 +31,6 @@ namespace Vision
         private UcSet _ucSet;
         private bool _cycle; //检测循环
         private bool _logCycle = true; //log循环flag
-
-        /// <summary>
-        /// 关闭窗体时调用
-        /// </summary>
-        public void Close()
-        {
-            _logCycle = false;
-            if (_cycle)
-            {
-                Stop();
-            }
-            if (ProjectManager.Instance.IsLoaded)
-            {
-                ProjectManager.Instance.CloseProject();
-            }
-            if (ProjectManager.Instance.Plc.IsOpened)
-            {
-                ProjectManager.Instance.Plc.ClosePLC();
-            }
-            ProjectManager.Instance.UcStationChangedEvent -= Instance_UcStationChangedEvent;
-        }
 
         /// <summary>
         /// 初始化
@@ -135,24 +115,24 @@ namespace Vision
             var item = e.ClickedItem;
             switch (item.Text)
             {
-                case "视觉":
+                case "视觉调试":
                     if (_cycle)
                     {
                         Stop();
                     }
                     AddControl(_ucProject);
                     break;
-                case "设置":
+                case "设置界面":
                     if (_cycle)
                     {
                         Stop();
                     }
                     AddControl(_ucSet);
                     break;
-                case "运行":
+                case "运行界面":
                     Run();
                     break;
-                case "停止":
+                case "停止运行":
                     Stop();
                     break;
             }
@@ -170,6 +150,24 @@ namespace Vision
         {
             Init();
             ShowLog();
+        }
+
+        private void UcMain_FormClosing( object sender , FormClosingEventArgs e )
+        {
+            _logCycle = false;
+            if( _cycle )
+            {
+                Stop( );
+            }
+            if( ProjectManager.Instance.IsLoaded )
+            {
+                ProjectManager.Instance.CloseProject( );
+            }
+            if( ProjectManager.Instance.Plc.IsOpened )
+            {
+                ProjectManager.Instance.Plc.ClosePLC( );
+            }
+            ProjectManager.Instance.UcStationChangedEvent -= Instance_UcStationChangedEvent;
         }
     }
 }
